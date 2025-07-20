@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "github-remote": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://api.githubcopilot.com/mcp/"]
+    },
+    "cloudflare-bindings": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://bindings.mcp.cloudflare.com/sse"]
+    },
+    "cloudflare-observability": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://observability.mcp.cloudflare.com/sse"]
+    },
+    "cloudflare-builds": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://builds.mcp.cloudflare.com/sse"]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/mnt/c/claude code/工程進度網頁"]
+    },
+    "puppeteer": {
+      "command": "npx", 
+      "args": ["-y", "puppeteer-mcp-server"]
+    }
+  }
+}

@@ -1,0 +1,45 @@
+name = "construction-progress"
+main = "src/index.js"
+compatibility_date = "2024-01-15"
+
+# 生產環境配置
+[env.production]
+name = "construction-progress-prod"
+route = "progress.yes-ceramics.com/*"
+
+# 開發環境配置 
+[env.development]
+name = "construction-progress-dev"
+
+# D1 資料庫配置
+[[d1_databases]]
+binding = "DB"
+database_name = "construction_progress"
+database_id = "" # 需要在建立資料庫後填入
+
+# KV 命名空間配置
+[[kv_namespaces]]
+binding = "PROJECTS"
+id = "" # 需要在建立命名空間後填入
+preview_id = ""
+
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "" # 需要在建立命名空間後填入
+preview_id = ""
+
+# 環境變數
+[vars]
+ENVIRONMENT = "production"
+FXIAOKE_APP_ID = "FSAID_1320691"
+FXIAOKE_BASE_URL = "https://open.fxiaoke.com"
+
+# 機密變數 (需要用 wrangler secret put 設定)
+# FXIAOKE_APP_SECRET
+# JWT_SECRET
+# EMAIL_API_KEY
+
+# 靜態資源配置
+[assets]
+directory = "./frontend"
+binding = "ASSETS"

@@ -1,0 +1,37 @@
+{
+  "name": "construction-progress-management",
+  "version": "1.0.0",
+  "description": "興安西工程進度管理系統 - 多租戶建築工程管理平台",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:prod": "wrangler deploy --env production",
+    "db:create": "wrangler d1 create construction_progress",
+    "db:migrate": "wrangler d1 migrations apply construction_progress",
+    "kv:create": "npm run kv:create:projects && npm run kv:create:sessions",
+    "kv:create:projects": "wrangler kv:namespace create PROJECTS",
+    "kv:create:sessions": "wrangler kv:namespace create SESSIONS",
+    "pages:deploy": "wrangler pages deploy dist",
+    "build": "npm run build:frontend && npm run build:workers",
+    "build:frontend": "mkdir -p dist && cp -r frontend/* dist/",
+    "build:workers": "echo 'Workers build complete'",
+    "test": "echo 'Tests will be added later'"
+  },
+  "keywords": [
+    "construction",
+    "progress",
+    "management",
+    "cloudflare",
+    "workers",
+    "multi-tenant"
+  ],
+  "author": "Construction Management Team",
+  "license": "MIT",
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20241230.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.91.0"
+  }
+}
