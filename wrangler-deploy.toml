@@ -1,0 +1,38 @@
+name = "construction-progress"
+main = "src/index.js"
+compatibility_date = "2024-01-15"
+
+[env.production]
+name = "construction-progress-prod"
+route = "progress.yes-ceramics.com/*"
+
+[env.development]
+name = "construction-progress-dev"
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "construction_progress"
+database_id = "" # Will be filled after creating database
+
+# KV Namespaces
+[[kv_namespaces]]
+binding = "PROJECTS"
+id = "" # Will be filled after creating namespace
+preview_id = ""
+
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "" # Will be filled after creating namespace
+preview_id = ""
+
+# Environment Variables
+[vars]
+ENVIRONMENT = "production"
+FXIAOKE_APP_ID = "FSAID_1320691"
+FXIAOKE_BASE_URL = "https://open.fxiaoke.com"
+
+# Secrets (set via: wrangler secret put SECRET_NAME)
+# FXIAOKE_APP_SECRET
+# JWT_SECRET
+# EMAIL_API_KEY

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI 原型預覽</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .prototype-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .prototype-title {
+            color: #2196F3;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        .viewport-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .viewport-frame {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .viewport-frame h3 {
+            background: #2196F3;
+            color: white;
+            margin: 0;
+            padding: 10px;
+            font-size: 14px;
+        }
+        .mobile-frame {
+            width: 390px;
+            height: 844px;
+        }
+        .desktop-frame {
+            width: 800px;
+            height: 600px;
+        }
+        .iframe-container {
+            width: 100%;
+            height: calc(100% - 40px);
+        }
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            transform-origin: top left;
+        }
+        .desktop-frame .iframe-container iframe {
+            transform: scale(0.417);
+            width: 240%;
+            height: 240%;
+        }
+        .info-section {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .screenshot-instructions {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .screenshot-instructions h3 {
+            color: #f57c00;
+            margin-top: 0;
+        }
+        .screenshot-instructions ol {
+            margin-left: 20px;
+        }
+        .screenshot-instructions li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>工程進度網頁 - UI 原型預覽</h1>
+        
+        <div class="info-section">
+            <h3>📋 項目資訊</h3>
+            <p>這個預覽頁面包含了三個主要的 UI 原型：</p>
+            <ul>
+                <li><strong>主要維修單列表頁面</strong> - 顯示維修單列表和狀態</li>
+                <li><strong>權限管理後台</strong> - 管理員用戶和權限控制</li>
+                <li><strong>登入頁面</strong> - 用戶身份驗證界面</li>
+            </ul>
+        </div>
+
+        <div class="prototype-section">
+            <h2 class="prototype-title">1. 主要維修單列表頁面</h2>
+            <div class="viewport-container">
+                <div class="viewport-frame mobile-frame">
+                    <h3>📱 手機版 (390x844)</h3>
+                    <div class="iframe-container">
+                        <iframe src="ui-prototype.html"></iframe>
+                    </div>
+                </div>
+                <div class="viewport-frame desktop-frame">
+                    <h3>💻 桌面版 (1920x1080 縮放)</h3>
+                    <div class="iframe-container">
+                        <iframe src="ui-prototype.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="prototype-section">
+            <h2 class="prototype-title">2. 權限管理後台</h2>
+            <div class="viewport-container">
+                <div class="viewport-frame mobile-frame">
+                    <h3>📱 手機版 (390x844)</h3>
+                    <div class="iframe-container">
+                        <iframe src="admin-ui-prototype.html"></iframe>
+                    </div>
+                </div>
+                <div class="viewport-frame desktop-frame">
+                    <h3>💻 桌面版 (1920x1080 縮放)</h3>
+                    <div class="iframe-container">
+                        <iframe src="admin-ui-prototype.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="prototype-section">
+            <h2 class="prototype-title">3. 登入頁面</h2>
+            <div class="viewport-container">
+                <div class="viewport-frame mobile-frame">
+                    <h3>📱 手機版 (390x844)</h3>
+                    <div class="iframe-container">
+                        <iframe src="login-ui-prototype.html"></iframe>
+                    </div>
+                </div>
+                <div class="viewport-frame desktop-frame">
+                    <h3>💻 桌面版 (1920x1080 縮放)</h3>
+                    <div class="iframe-container">
+                        <iframe src="login-ui-prototype.html"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="screenshot-instructions">
+            <h3>📸 手動截圖指南</h3>
+            <p>由於系統環境限制，建議您使用瀏覽器手動截圖。以下是建議的步驟：</p>
+            <ol>
+                <li>在瀏覽器中開啟此預覽頁面</li>
+                <li>使用瀏覽器的開發者工具（F12）切換到移動設備模式</li>
+                <li>對於手機版截圖：
+                    <ul>
+                        <li>設定視窗大小為 390x844 (iPhone 12 Pro)</li>
+                        <li>直接開啟對應的 HTML 文件進行截圖</li>
+                    </ul>
+                </li>
+                <li>對於桌面版截圖：
+                    <ul>
+                        <li>設定視窗大小為 1920x1080</li>
+                        <li>直接開啟對應的 HTML 文件進行截圖</li>
+                    </ul>
+                </li>
+                <li>使用瀏覽器的截圖功能或系統截圖工具保存圖片</li>
+            </ol>
+            
+            <h4>🔗 快速鏈接</h4>
+            <ul>
+                <li><a href="ui-prototype.html" target="_blank">主要維修單列表頁面</a></li>
+                <li><a href="admin-ui-prototype.html" target="_blank">權限管理後台</a></li>
+                <li><a href="login-ui-prototype.html" target="_blank">登入頁面</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

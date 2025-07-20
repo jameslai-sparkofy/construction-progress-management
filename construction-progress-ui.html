@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>施工進度可視化 - 勝興-興安西-2023</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .progress-circle {
+            text-align: center;
+            position: relative;
+        }
+
+        .circle {
+            width: 120px;
+            height: 120px;
+            border: 8px solid #ecf0f1;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            position: relative;
+            animation: rotate 2s linear infinite;
+        }
+
+        .circle::after {
+            content: '83%';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            83% { transform: rotate(298deg); }
+            100% { transform: rotate(298deg); }
+        }
+
+        .stats-list {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 0;
+        }
+
+        .status-icon {
+            font-size: 1.2em;
+            width: 20px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            background: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .building-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: #ecf0f1;
+            border: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: #bdc3c7;
+        }
+
+        .legend {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .grid-container {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .construction-grid {
+            min-width: 500px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .construction-grid th,
+        .construction-grid td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+            position: relative;
+        }
+
+        .construction-grid th {
+            background: #34495e;
+            color: white;
+            font-weight: 600;
+        }
+
+        .construction-grid td {
+            width: 80px;
+            height: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .construction-grid td:hover {
+            background: #f1c40f;
+            transform: scale(1.1);
+        }
+
+        .floor-label {
+            background: #7f8c8d !important;
+            color: white !important;
+            font-weight: 600;
+        }
+
+        .status-completed { color: #27ae60; font-size: 1.5em; }
+        .status-finished { color: #3498db; font-size: 1.5em; }
+        .status-ready { color: #f39c12; font-size: 1.5em; }
+        .status-blocked { color: #e74c3c; font-size: 1.5em; }
+        .status-repair { color: #8e44ad; font-size: 1.5em; }
+        .status-pending { color: #95a5a6; font-size: 1.5em; }
+
+        .info-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            z-index: 1000;
+            min-width: 300px;
+            display: none;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #e74c3c;
+        }
+
+        /* 手機版樣式 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .stats-section {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .circle {
+                width: 100px;
+                height: 100px;
+            }
+
+            .stats-list {
+                margin-top: 20px;
+            }
+
+            .building-tabs {
+                justify-content: center;
+            }
+
+            .tab {
+                padding: 10px 16px;
+                font-size: 0.9em;
+            }
+
+            .legend {
+                justify-content: center;
+                font-size: 0.8em;
+            }
+
+            .construction-grid th,
+            .construction-grid td {
+                padding: 8px 4px;
+                font-size: 0.9em;
+            }
+
+            .construction-grid td {
+                width: 60px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 施工進度 - 勝興-興安西-2023</h1>
+            
+            <div class="stats-section">
+                <div class="progress-circle">
+                    <div class="circle"></div>
+                    <div style="font-size: 0.9em; color: #7f8c8d;">
+                        總戶數：340戶 | 總坪數：2309坪
+                    </div>
+                </div>
+                
+                <div class="stats-list">
+                    <div class="stat-item">
+                        <span class="status-icon status-blocked">✗</span>
+                        <span>無法施作：4</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="status-icon status-finished">○</span>
+                        <span>已完工：8</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="status-icon status-repair">▲</span>
+                        <span>需維修：12</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="status-icon status-completed">●</span>
+                        <span>維修完成：50</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="status-icon status-ready">✓</span>
+                        <span>可施作：10</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="status-icon status-pending">─</span>
+                        <span>待處理：256</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-bar">
+                ○ 已完工程 56% (1230坪/2309坪)
+            </div>
+
+            <div class="building-tabs">
+                <button class="tab active" onclick="switchBuilding('A')">A棟</button>
+                <button class="tab" onclick="switchBuilding('B')">B棟</button>
+                <button class="tab" onclick="switchBuilding('C')">C棟</button>
+            </div>
+
+            <div class="legend">
+                <strong>圖例：</strong>
+                <span class="legend-item"><span class="status-blocked">✗</span> 無法施作</span>
+                <span class="legend-item"><span class="status-ready">✓</span> 可施作</span>
+                <span class="legend-item"><span class="status-finished">○</span> 已完工</span>
+                <span class="legend-item"><span class="status-repair">▲</span> 需維修</span>
+                <span class="legend-item"><span class="status-completed">●</span> 維修完成</span>
+                <span class="legend-item"><span class="status-pending">─</span> 待處理</span>
+            </div>
+        </div>
+
+        <div class="grid-container">
+            <table class="construction-grid" id="constructionGrid">
+                <thead>
+                    <tr>
+                        <th>樓層/戶別</th>
+                        <th>A1</th>
+                        <th>A2</th>
+                        <th>A3</th>
+                        <th>A4</th>
+                        <th>A5</th>
+                        <th>A6</th>
+                    </tr>
+                </thead>
+                <tbody id="gridBody">
+                    <!-- 動態生成內容 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 詳情彈窗 -->
+    <div class="overlay" id="overlay" onclick="closeInfo()"></div>
+    <div class="info-panel" id="infoPanel">
+        <button class="close-btn" onclick="closeInfo()">×</button>
+        <h3 id="unitTitle">戶別詳情</h3>
+        <div id="unitDetails">
+            <!-- 詳情內容 -->
+        </div>
+        <div style="margin-top: 20px;">
+            <select id="statusSelect" onchange="updateStatus()">
+                <option value="pending">待處理</option>
+                <option value="ready">可施作</option>
+                <option value="finished">已完工</option>
+                <option value="repair">需維修</option>
+                <option value="completed">維修完成</option>
+                <option value="blocked">無法施作</option>
+            </select>
+            <button onclick="saveStatus()" style="margin-left: 10px; padding: 5px 15px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">保存</button>
+        </div>
+    </div>
+
+    <script>
+        // 模擬數據
+        const buildingData = {
+            'A': {
+                floors: [16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+                units: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6'],
+                data: {}
+            },
+            'B': {
+                floors: [14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+                units: ['B1', 'B2', 'B3', 'B4'],
+                data: {}
+            },
+            'C': {
+                floors: [12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+                units: ['C1', 'C2', 'C3', 'C4', 'C5'],
+                data: {}
+            }
+        };
+
+        const statusSymbols = {
+            'completed': '●',
+            'finished': '○',
+            'ready': '✓',
+            'blocked': '✗',
+            'repair': '▲',
+            'pending': '─'
+        };
+
+        let currentBuilding = 'A';
+        let selectedUnit = null;
+
+        // 初始化數據
+        function initializeData() {
+            Object.keys(buildingData).forEach(building => {
+                const floors = buildingData[building].floors;
+                const units = buildingData[building].units;
+                
+                floors.forEach(floor => {
+                    units.forEach(unit => {
+                        // 隨機生成狀態
+                        const statuses = ['completed', 'finished', 'ready', 'blocked', 'repair', 'pending'];
+                        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+                        
+                        buildingData[building].data[`${floor}-${unit}`] = {
+                            floor: floor,
+                            unit: unit,
+                            status: randomStatus,
+                            lastUpdate: new Date().toISOString(),
+                            notes: `${building}棟${floor}樓${unit}戶`
+                        };
+                    });
+                });
+            });
+
+            // 設置示例數據（對應圖片）
+            if (buildingData['A'].data['14-A1']) {
+                buildingData['A'].data['14-A1'].status = 'completed';
+                buildingData['A'].data['14-A2'].status = 'completed';
+                buildingData['A'].data['14-A3'].status = 'completed';
+                buildingData['A'].data['14-A4'].status = 'completed';
+                buildingData['A'].data['13-A1'].status = 'finished';
+                buildingData['A'].data['13-A2'].status = 'ready';
+                buildingData['A'].data['13-A3'].status = 'finished';
+                buildingData['A'].data['13-A4'].status = 'finished';
+                buildingData['A'].data['12-A1'].status = 'completed';
+                buildingData['A'].data['12-A2'].status = 'completed';
+                buildingData['A'].data['12-A3'].status = 'blocked';
+                buildingData['A'].data['12-A4'].status = 'completed';
+                buildingData['A'].data['11-A1'].status = 'pending';
+                buildingData['A'].data['11-A2'].status = 'blocked';
+                buildingData['A'].data['11-A3'].status = 'repair';
+                buildingData['A'].data['11-A4'].status = 'completed';
+            }
+        }
+
+        // 切換棟別
+        function switchBuilding(building) {
+            currentBuilding = building;
+            
+            // 更新Tab樣式
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // 更新表格
+            updateGrid();
+        }
+
+        // 更新網格
+        function updateGrid() {
+            const building = buildingData[currentBuilding];
+            const gridBody = document.getElementById('gridBody');
+            const thead = document.querySelector('.construction-grid thead tr');
+            
+            // 更新表頭
+            thead.innerHTML = '<th>樓層/戶別</th>';
+            building.units.forEach(unit => {
+                thead.innerHTML += `<th>${unit}</th>`;
+            });
+            
+            // 更新表格內容
+            gridBody.innerHTML = '';
+            
+            building.floors.forEach(floor => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td class="floor-label">${floor}</td>`;
+                
+                building.units.forEach(unit => {
+                    const key = `${floor}-${unit}`;
+                    const unitData = building.data[key];
+                    const status = unitData ? unitData.status : 'pending';
+                    const symbol = statusSymbols[status];
+                    
+                    row.innerHTML += `
+                        <td class="status-${status}" onclick="showUnitInfo('${key}')">
+                            ${symbol}
+                        </td>
+                    `;
+                });
+                
+                gridBody.appendChild(row);
+            });
+        }
+
+        // 顯示單元詳情
+        function showUnitInfo(key) {
+            const building = buildingData[currentBuilding];
+            const unitData = building.data[key];
+            
+            if (!unitData) return;
+            
+            selectedUnit = key;
+            
+            document.getElementById('unitTitle').textContent = 
+                `${currentBuilding}棟 ${unitData.floor}樓 ${unitData.unit}戶`;
+            
+            document.getElementById('unitDetails').innerHTML = `
+                <p><strong>當前狀態：</strong>${getStatusName(unitData.status)}</p>
+                <p><strong>最後更新：</strong>${new Date(unitData.lastUpdate).toLocaleString()}</p>
+                <p><strong>備註：</strong>${unitData.notes}</p>
+            `;
+            
+            document.getElementById('statusSelect').value = unitData.status;
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('infoPanel').style.display = 'block';
+        }
+
+        // 關閉詳情
+        function closeInfo() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('infoPanel').style.display = 'none';
+            selectedUnit = null;
+        }
+
+        // 獲取狀態名稱
+        function getStatusName(status) {
+            const names = {
+                'completed': '維修完成',
+                'finished': '已完工',
+                'ready': '可施作',
+                'blocked': '無法施作',
+                'repair': '需維修',
+                'pending': '待處理'
+            };
+            return names[status] || '未知';
+        }
+
+        // 保存狀態
+        function saveStatus() {
+            if (!selectedUnit) return;
+            
+            const newStatus = document.getElementById('statusSelect').value;
+            const building = buildingData[currentBuilding];
+            
+            if (building.data[selectedUnit]) {
+                building.data[selectedUnit].status = newStatus;
+                building.data[selectedUnit].lastUpdate = new Date().toISOString();
+                
+                // 更新網格顯示
+                updateGrid();
+                
+                // 關閉詳情面板
+                closeInfo();
+                
+                alert('狀態已更新！');
+            }
+        }
+
+        // 頁面載入時初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeData();
+            updateGrid();
+        });
+    </script>
+</body>
+</html>

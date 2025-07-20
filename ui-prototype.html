@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工程進度管理系統 - UI原型</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .card-shadow {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-normal {
+            background: #d4f4dd;
+            color: #1e7e34;
+        }
+        .status-invalid {
+            background: #ffe4e6;
+            color: #dc3545;
+        }
+        /* 響應式導航 */
+        @media (max-width: 768px) {
+            .mobile-menu {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 75%;
+                height: 100vh;
+                background: white;
+                transition: left 0.3s ease;
+                z-index: 1000;
+            }
+            .mobile-menu.active {
+                left: 0;
+            }
+            .menu-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: none;
+                z-index: 999;
+            }
+            .menu-overlay.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 手機版導航 -->
+    <nav class="bg-white shadow-sm lg:hidden">
+        <div class="px-4 py-3 flex justify-between items-center">
+            <button onclick="toggleMenu()" class="text-gray-600">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            <h1 class="font-semibold text-lg">興安西工程</h1>
+            <button class="text-gray-600">
+                <i class="fas fa-user-circle text-xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 側邊選單 -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="p-4 bg-blue-600 text-white">
+            <h2 class="text-xl font-bold">興安西工程</h2>
+            <p class="text-sm opacity-80">工程進度管理系統</p>
+        </div>
+        <div class="p-4">
+            <a href="#" class="block py-3 text-gray-700 hover:bg-gray-100 rounded">
+                <i class="fas fa-clipboard-list mr-3"></i>維修單列表
+            </a>
+            <a href="#" class="block py-3 text-gray-700 hover:bg-gray-100 rounded">
+                <i class="fas fa-chart-bar mr-3"></i>統計報表
+            </a>
+            <a href="#" class="block py-3 text-gray-700 hover:bg-gray-100 rounded">
+                <i class="fas fa-users-cog mr-3"></i>權限管理
+            </a>
+            <a href="#" class="block py-3 text-gray-700 hover:bg-gray-100 rounded">
+                <i class="fas fa-cog mr-3"></i>系統設定
+            </a>
+            <hr class="my-4">
+            <a href="#" class="block py-3 text-red-600 hover:bg-gray-100 rounded">
+                <i class="fas fa-sign-out-alt mr-3"></i>登出
+            </a>
+        </div>
+    </div>
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+
+    <!-- 電腦版導航 -->
+    <nav class="bg-white shadow-sm hidden lg:block">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <h1 class="text-xl font-bold text-blue-600">興安西工程</h1>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-700 hover:text-blue-600 px-3 py-2">維修單</a>
+                        <a href="#" class="text-gray-700 hover:text-blue-600 px-3 py-2">統計</a>
+                        <a href="#" class="text-gray-700 hover:text-blue-600 px-3 py-2">管理</a>
+                        <a href="#" class="text-gray-700 hover:text-blue-600 px-3 py-2">設定</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">陳管理員</span>
+                    <button class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-user-circle text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容 -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- 搜尋列 -->
+        <div class="mb-6">
+            <div class="bg-white rounded-lg shadow-sm p-4">
+                <div class="flex flex-col lg:flex-row gap-4">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <input type="text" placeholder="搜尋維修單編號、負責人..." 
+                                class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                            <i class="fas fa-filter mr-2"></i>篩選
+                        </button>
+                        <button class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition hidden lg:inline-flex">
+                            <i class="fas fa-download mr-2"></i>匯出
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 統計卡片 -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+                <div class="text-gray-600 text-sm">總維修單</div>
+                <div class="text-2xl font-bold text-gray-800">42</div>
+                <div class="text-xs text-green-600 mt-1">
+                    <i class="fas fa-arrow-up"></i> 12% 本月
+                </div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+                <div class="text-gray-600 text-sm">進行中</div>
+                <div class="text-2xl font-bold text-blue-600">15</div>
+                <div class="text-xs text-gray-500 mt-1">35.7%</div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+                <div class="text-gray-600 text-sm">已完成</div>
+                <div class="text-2xl font-bold text-green-600">25</div>
+                <div class="text-xs text-gray-500 mt-1">59.5%</div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+                <div class="text-gray-600 text-sm">總金額</div>
+                <div class="text-2xl font-bold text-gray-800">¥328K</div>
+                <div class="text-xs text-gray-500 mt-1">本月</div>
+            </div>
+        </div>
+
+        <!-- 手機版：卡片列表 -->
+        <div class="lg:hidden space-y-4">
+            <!-- 卡片1 -->
+            <div class="bg-white rounded-lg shadow-sm p-4">
+                <div class="flex justify-between items-start mb-3">
+                    <h3 class="font-semibold text-lg">2025-07-15-06</h3>
+                    <span class="status-badge status-normal">正常</span>
+                </div>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">負責人</span>
+                        <span class="font-medium">陳智琛</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">位置</span>
+                        <span class="font-medium">B棟 B1戶 4樓</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">金額</span>
+                        <span class="font-medium text-blue-600">¥67,640</span>
+                    </div>
+                </div>
+                <div class="mt-4 flex gap-2">
+                    <button onclick="showDetail()" class="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        查看詳情
+                    </button>
+                    <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 卡片2 -->
+            <div class="bg-white rounded-lg shadow-sm p-4">
+                <div class="flex justify-between items-start mb-3">
+                    <h3 class="font-semibold text-lg">2025-07-15-05</h3>
+                    <span class="status-badge status-normal">正常</span>
+                </div>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">負責人</span>
+                        <span class="font-medium">陳智琛</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">位置</span>
+                        <span class="font-medium">B棟 B5戶 12樓</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">金額</span>
+                        <span class="font-medium text-blue-600">¥21,600</span>
+                    </div>
+                </div>
+                <div class="mt-4 flex gap-2">
+                    <button class="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        查看詳情
+                    </button>
+                    <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 電腦版：表格 -->
+        <div class="hidden lg:block bg-white rounded-lg shadow-sm overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">編號</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">狀態</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">負責人</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">棟別</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">戶別</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">樓層</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">金額</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">創建時間</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">2025-07-15-06</td>
+                        <td class="px-6 py-4 whitespace-nowrap"><span class="status-badge status-normal">正常</span></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">陳智琛</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">B</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">B1</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">4</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">¥67,640</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2025-07-15</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <button onclick="showDetail()" class="text-blue-600 hover:text-blue-900 mr-3">查看</button>
+                            <button class="text-green-600 hover:text-green-900">編輯</button>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">2025-07-15-05</td>
+                        <td class="px-6 py-4 whitespace-nowrap"><span class="status-badge status-normal">正常</span></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">陳智琛</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">B</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">B5</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">12</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">¥21,600</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2025-07-15</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <button class="text-blue-600 hover:text-blue-900 mr-3">查看</button>
+                            <button class="text-green-600 hover:text-green-900">編輯</button>
+                        </td>
+                    </tr>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">2025-07-08-04</td>
+                        <td class="px-6 py-4 whitespace-nowrap"><span class="status-badge status-invalid">作廢</span></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">賴俊穎</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">C</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">C6</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">8</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">¥1,500</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2025-07-08</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <button class="text-blue-600 hover:text-blue-900 mr-3">查看</button>
+                            <button class="text-gray-400" disabled>編輯</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分頁 -->
+        <div class="mt-6 flex justify-center lg:justify-between items-center">
+            <div class="hidden lg:block text-sm text-gray-700">
+                顯示 1 到 10 筆，共 42 筆
+            </div>
+            <div class="flex space-x-1">
+                <button class="px-3 py-1 rounded border hover:bg-gray-100">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="px-3 py-1 rounded bg-blue-600 text-white">1</button>
+                <button class="px-3 py-1 rounded border hover:bg-gray-100">2</button>
+                <button class="px-3 py-1 rounded border hover:bg-gray-100">3</button>
+                <button class="px-3 py-1 rounded border hover:bg-gray-100">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- 詳情頁面（模擬） -->
+    <div id="detailPage" class="hidden fixed inset-0 bg-white z-50 overflow-y-auto">
+        <!-- 手機版詳情頁 -->
+        <div class="lg:hidden">
+            <div class="sticky top-0 bg-white border-b px-4 py-3 flex items-center">
+                <button onclick="hideDetail()" class="mr-4">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <h2 class="text-lg font-semibold">維修單詳情</h2>
+            </div>
+            
+            <div class="p-4 space-y-4">
+                <!-- 基本資訊 -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="font-semibold mb-3">基本資訊</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">編號</span>
+                            <span class="font-medium">2025-07-15-06</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">狀態</span>
+                            <span class="status-badge status-normal">正常</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">負責人</span>
+                            <span class="font-medium">陳智琛</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">創建時間</span>
+                            <span class="font-medium">2025-07-15 14:30</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 工程資訊 -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="font-semibold mb-3">工程資訊</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">棟別</span>
+                            <span class="font-medium">B</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">戶別</span>
+                            <span class="font-medium">B1</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">樓層</span>
+                            <span class="font-medium">4</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">工班</span>
+                            <span class="font-medium">王大誠</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 金額資訊 -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="font-semibold mb-3">金額資訊</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">維修金額</span>
+                            <span class="font-medium text-blue-600">¥67,640</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">請款金額</span>
+                            <span class="font-medium">¥67,640</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">面積</span>
+                            <span class="font-medium">22.1坪</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 維修狀況 -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="font-semibold mb-3">維修狀況</h3>
+                    <p class="text-sm text-gray-700">客廳臥一、臥二更換22.1坪(Y5003阿米特)</p>
+                </div>
+
+                <!-- 照片 -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="font-semibold mb-3">照片 (3張)</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="bg-gray-300 rounded aspect-square flex items-center justify-center">
+                            <i class="fas fa-image text-gray-500 text-2xl"></i>
+                        </div>
+                        <div class="bg-gray-300 rounded aspect-square flex items-center justify-center">
+                            <i class="fas fa-image text-gray-500 text-2xl"></i>
+                        </div>
+                        <div class="bg-gray-300 rounded aspect-square flex items-center justify-center">
+                            <i class="fas fa-image text-gray-500 text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作按鈕 -->
+                <div class="flex gap-3 pt-4">
+                    <button class="flex-1 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-edit mr-2"></i>編輯
+                    </button>
+                    <button class="flex-1 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                        <i class="fas fa-share-alt mr-2"></i>分享
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 電腦版詳情頁 -->
+        <div class="hidden lg:block container mx-auto p-6">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold">維修單詳情</h2>
+                    <button onclick="hideDetail()" class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <!-- 左側 -->
+                    <div class="space-y-6">
+                        <!-- 基本資訊 -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">基本資訊</h3>
+                            <dl class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <dt class="text-sm text-gray-600">編號</dt>
+                                    <dd class="font-medium">2025-07-15-06</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm text-gray-600">狀態</dt>
+                                    <dd><span class="status-badge status-normal">正常</span></dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm text-gray-600">負責人</dt>
+                                    <dd class="font-medium">陳智琛</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm text-gray-600">創建時間</dt>
+                                    <dd class="font-medium">2025-07-15 14:30</dd>
+                                </div>
+                            </dl>
+                        </div>
+
+                        <!-- 工程資訊 -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">工程資訊</h3>
+                            <dl class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <dt class="text-sm text-gray-600">棟別</dt>
+                                    <dd class="font-medium">B</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm text-gray-600">戶別</dt>
+                                    <dd class="font-medium">B1</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm text-gray-600">樓層</dt>
+                                    <dd class="font-medium">4</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm text-gray-600">工班</dt>
+                                    <dd class="font-medium">王大誠</dd>
+                                </div>
+                            </dl>
+                        </div>
+
+                        <!-- 金額資訊 -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">金額資訊</h3>
+                            <dl class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <dt class="text-sm text-gray-600">維修金額</dt>
+                                    <dd class="font-medium text-blue-600 text-lg">¥67,640</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm text-gray-600">請款金額</dt>
+                                    <dd class="font-medium">¥67,640</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm text-gray-600">面積</dt>
+                                    <dd class="font-medium">22.1坪</dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <!-- 右側 -->
+                    <div class="space-y-6">
+                        <!-- 維修狀況 -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">維修狀況</h3>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <p class="text-gray-700">客廳臥一、臥二更換22.1坪(Y5003阿米特)</p>
+                            </div>
+                        </div>
+
+                        <!-- 照片 -->
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">照片 (3張)</h3>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="bg-gray-300 rounded-lg aspect-square flex items-center justify-center cursor-pointer hover:opacity-80">
+                                    <i class="fas fa-image text-gray-500 text-3xl"></i>
+                                </div>
+                                <div class="bg-gray-300 rounded-lg aspect-square flex items-center justify-center cursor-pointer hover:opacity-80">
+                                    <i class="fas fa-image text-gray-500 text-3xl"></i>
+                                </div>
+                                <div class="bg-gray-300 rounded-lg aspect-square flex items-center justify-center cursor-pointer hover:opacity-80">
+                                    <i class="fas fa-image text-gray-500 text-3xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 操作按鈕 -->
+                        <div class="flex gap-4 pt-6">
+                            <button class="flex-1 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                <i class="fas fa-edit mr-2"></i>編輯
+                            </button>
+                            <button class="flex-1 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                                <i class="fas fa-share-alt mr-2"></i>分享
+                            </button>
+                            <button class="flex-1 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+                                <i class="fas fa-print mr-2"></i>列印
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // 切換手機選單
+        function toggleMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('menuOverlay');
+            menu.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // 顯示詳情頁
+        function showDetail() {
+            document.getElementById('detailPage').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 隱藏詳情頁
+        function hideDetail() {
+            document.getElementById('detailPage').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // 模擬響應式調整
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 1024) {
+                // 關閉手機選單
+                document.getElementById('mobileMenu').classList.remove('active');
+                document.getElementById('menuOverlay').classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

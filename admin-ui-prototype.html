@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>權限管理後台 - 興安西工程</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .permission-select {
+            min-width: 100px;
+        }
+        .tab-active {
+            border-bottom: 2px solid #2563eb;
+            color: #2563eb;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 導航 -->
+    <nav class="bg-white shadow-sm">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <h1 class="text-xl font-bold text-blue-600">興安西工程 - 管理後台</h1>
+                    <div class="hidden lg:flex space-x-4">
+                        <a href="#" class="text-gray-700 hover:text-blue-600 px-3 py-2">維修單</a>
+                        <a href="#" class="text-blue-600 px-3 py-2 font-medium">權限管理</a>
+                        <a href="#" class="text-gray-700 hover:text-blue-600 px-3 py-2">用戶管理</a>
+                        <a href="#" class="text-gray-700 hover:text-blue-600 px-3 py-2">統計報表</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm text-gray-600">陳管理員</span>
+                    <button class="text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-user-circle text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要內容 -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- 頁面標題 -->
+        <div class="mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">欄位權限配置</h2>
+            <p class="text-gray-600 mt-1">設定不同角色對各欄位的查看和編輯權限</p>
+        </div>
+
+        <!-- 頁籤 -->
+        <div class="bg-white rounded-lg shadow-sm mb-6">
+            <div class="border-b">
+                <div class="flex overflow-x-auto">
+                    <button class="px-6 py-3 text-sm font-medium tab-active whitespace-nowrap">
+                        權限配置
+                    </button>
+                    <button class="px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-800 whitespace-nowrap">
+                        用戶管理
+                    </button>
+                    <button class="px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-800 whitespace-nowrap">
+                        操作記錄
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 權限配置表格 -->
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+            <!-- 手機版提示 -->
+            <div class="lg:hidden p-4 bg-yellow-50 border-b border-yellow-200">
+                <p class="text-sm text-yellow-800">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    建議使用電腦版進行權限配置，以獲得最佳體驗
+                </p>
+            </div>
+
+            <!-- 表格 -->
+            <div class="overflow-x-auto">
+                <table class="w-full min-w-[800px]">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">
+                                欄位名稱
+                            </th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center justify-center">
+                                    <i class="fas fa-hard-hat mr-2"></i>工班
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center justify-center">
+                                    <i class="fas fa-user-tie mr-2"></i>業主
+                                </div>
+                            </th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <div class="flex items-center justify-center">
+                                    <i class="fas fa-user-shield mr-2"></i>管理員
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <!-- 基本資訊組 -->
+                        <tr class="bg-gray-50">
+                            <td colspan="4" class="px-6 py-2 text-sm font-semibold text-gray-700">
+                                基本資訊
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                <div>
+                                    <div class="font-medium">維修單編號</div>
+                                    <div class="text-xs text-gray-500">name</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm">
+                                    <option value="view" selected>只讀</option>
+                                    <option value="edit">可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm">
+                                    <option value="view" selected>只讀</option>
+                                    <option value="edit">可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm" disabled>
+                                    <option value="view" selected>只讀</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                <div>
+                                    <div class="font-medium">生命狀態</div>
+                                    <div class="text-xs text-gray-500">life_status</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm">
+                                    <option value="view" selected>只讀</option>
+                                    <option value="edit">可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm">
+                                    <option value="view" selected>只讀</option>
+                                    <option value="edit">可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm">
+                                    <option value="view">只讀</option>
+                                    <option value="edit" selected>可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                        </tr>
+
+                        <!-- 工程資訊組 -->
+                        <tr class="bg-gray-50">
+                            <td colspan="4" class="px-6 py-2 text-sm font-semibold text-gray-700">
+                                工程資訊
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                <div>
+                                    <div class="font-medium">維修狀況</div>
+                                    <div class="text-xs text-gray-500">field_JmGkC__c</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm bg-blue-50 border-blue-300">
+                                    <option value="view">只讀</option>
+                                    <option value="edit" selected>可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm">
+                                    <option value="view" selected>只讀</option>
+                                    <option value="edit">可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm">
+                                    <option value="view">只讀</option>
+                                    <option value="edit" selected>可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                        </tr>
+
+                        <!-- 金額資訊組 -->
+                        <tr class="bg-gray-50">
+                            <td colspan="4" class="px-6 py-2 text-sm font-semibold text-gray-700">
+                                金額資訊
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                <div>
+                                    <div class="font-medium">維修金額</div>
+                                    <div class="text-xs text-gray-500">field_gKt1C__c</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm bg-red-50 border-red-300">
+                                    <option value="view">只讀</option>
+                                    <option value="edit">可編輯</option>
+                                    <option value="hide" selected>隱藏</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm">
+                                    <option value="view" selected>只讀</option>
+                                    <option value="edit">可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm">
+                                    <option value="view">只讀</option>
+                                    <option value="edit" selected>可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                <div>
+                                    <div class="font-medium">請款金額</div>
+                                    <div class="text-xs text-gray-500">field_eTwh1__c</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm bg-red-50 border-red-300">
+                                    <option value="view">只讀</option>
+                                    <option value="edit">可編輯</option>
+                                    <option value="hide" selected>隱藏</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm">
+                                    <option value="view" selected>只讀</option>
+                                    <option value="edit">可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm">
+                                    <option value="view">只讀</option>
+                                    <option value="edit" selected>可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                        </tr>
+
+                        <!-- 多媒體資料組 -->
+                        <tr class="bg-gray-50">
+                            <td colspan="4" class="px-6 py-2 text-sm font-semibold text-gray-700">
+                                多媒體資料
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                <div>
+                                    <div class="font-medium">照片</div>
+                                    <div class="text-xs text-gray-500">field_xZj3E__c</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm bg-blue-50 border-blue-300">
+                                    <option value="view">只讀</option>
+                                    <option value="edit" selected>可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm">
+                                    <option value="view" selected>只讀</option>
+                                    <option value="edit">可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm">
+                                    <option value="view">只讀</option>
+                                    <option value="edit" selected>可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                <div>
+                                    <div class="font-medium">簽名</div>
+                                    <div class="text-xs text-gray-500">field_iSwte__c</div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm">
+                                    <option value="view" selected>只讀</option>
+                                    <option value="edit">可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm bg-blue-50 border-blue-300">
+                                    <option value="view">只讀</option>
+                                    <option value="edit" selected>可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <select class="permission-select px-3 py-1 border rounded-md text-sm">
+                                    <option value="view">只讀</option>
+                                    <option value="edit" selected>可編輯</option>
+                                    <option value="hide">隱藏</option>
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 操作按鈕 -->
+            <div class="p-6 bg-gray-50 flex justify-between items-center">
+                <button class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-undo mr-2"></i>重置為默認
+                </button>
+                <div class="space-x-3">
+                    <button class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition">
+                        取消
+                    </button>
+                    <button class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        <i class="fas fa-save mr-2"></i>保存配置
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 權限說明 -->
+        <div class="mt-6 bg-blue-50 rounded-lg p-4">
+            <h4 class="font-semibold text-blue-900 mb-2">權限說明</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div class="flex items-start">
+                    <div class="w-4 h-4 bg-gray-300 rounded mt-1 mr-3"></div>
+                    <div>
+                        <div class="font-medium text-gray-900">隱藏</div>
+                        <div class="text-gray-600">完全不顯示該欄位</div>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="w-4 h-4 bg-yellow-300 rounded mt-1 mr-3"></div>
+                    <div>
+                        <div class="font-medium text-gray-900">只讀</div>
+                        <div class="text-gray-600">只能查看，不能編輯</div>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <div class="w-4 h-4 bg-blue-400 rounded mt-1 mr-3"></div>
+                    <div>
+                        <div class="font-medium text-gray-900">可編輯</div>
+                        <div class="text-gray-600">可以查看和編輯</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // 監聽權限更改
+        document.querySelectorAll('select').forEach(select => {
+            select.addEventListener('change', function() {
+                // 根據選擇的值改變背景色
+                if (this.value === 'hide') {
+                    this.className = 'permission-select px-3 py-1 border rounded-md text-sm bg-red-50 border-red-300';
+                } else if (this.value === 'edit') {
+                    this.className = 'permission-select px-3 py-1 border rounded-md text-sm bg-blue-50 border-blue-300';
+                } else {
+                    this.className = 'permission-select px-3 py-1 border rounded-md text-sm';
+                }
+                
+                // 顯示未保存提示
+                if (!document.querySelector('.unsaved-notice')) {
+                    const notice = document.createElement('div');
+                    notice.className = 'unsaved-notice fixed bottom-4 right-4 bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-lg';
+                    notice.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>有未保存的更改';
+                    document.body.appendChild(notice);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

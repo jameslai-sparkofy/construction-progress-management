@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "github-wsl": {
+      "command": "node",
+      "args": ["/mnt/c/claude code/工程進度網頁/node_modules/@modelcontextprotocol/server-github/dist/index.js"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_TOKEN"
+      },
+      "cwd": "/mnt/c/claude code/工程進度網頁"
+    },
+    "filesystem-wsl": {
+      "command": "node",
+      "args": ["/mnt/c/claude code/工程進度網頁/node_modules/@modelcontextprotocol/server-filesystem/dist/index.js", "/mnt/c/claude code/工程進度網頁"],
+      "cwd": "/mnt/c/claude code/工程進度網頁"
+    },
+    "puppeteer-wsl": {
+      "command": "node", 
+      "args": ["/mnt/c/claude code/工程進度網頁/node_modules/puppeteer-mcp-server/dist/index.js"],
+      "cwd": "/mnt/c/claude code/工程進度網頁"
+    }
+  }
+}

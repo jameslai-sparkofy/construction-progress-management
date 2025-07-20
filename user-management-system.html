@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用戶管理系統 - 施工進度管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: #F5F5F5;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #E0E0E0;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 1.6em;
+            margin-bottom: 20px;
+        }
+
+        .user-info {
+            background: #E3F2FD;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            border-left: 4px solid #1976D2;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: #E0E0E0;
+            border: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .tab.active {
+            background: #1976D2;
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: #BDBDBD;
+        }
+
+        .tab-content {
+            background: white;
+            border-radius: 0 8px 8px 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #E0E0E0;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #1976D2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1565C0;
+        }
+
+        .btn-success {
+            background: #388E3C;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #2E7D32;
+        }
+
+        .btn-danger {
+            background: #D32F2F;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #C62828;
+        }
+
+        .btn-secondary {
+            background: #757575;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #616161;
+        }
+
+        .btn-small {
+            padding: 5px 12px;
+            font-size: 0.8em;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .user-table th,
+        .user-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #E0E0E0;
+        }
+
+        .user-table th {
+            background: #F5F5F5;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .user-table tr:hover {
+            background: #F8F9FA;
+        }
+
+        .user-table .actions-cell {
+            text-align: center;
+        }
+
+        .user-table .actions-cell button {
+            margin: 0 2px;
+        }
+
+        .role-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 500;
+        }
+
+        .role-admin {
+            background: #E3F2FD;
+            color: #1976D2;
+        }
+
+        .role-contractor-leader {
+            background: #E8F5E8;
+            color: #2E7D32;
+        }
+
+        .role-contractor-member {
+            background: #FFF3E0;
+            color: #F57C00;
+        }
+
+        .role-owner {
+            background: #F3E5F5;
+            color: #7B1FA2;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            min-width: 400px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #E0E0E0;
+        }
+
+        .close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #E0E0E0;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #E0E0E0;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: #999;
+        }
+
+        .role-demo {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #E0E0E0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .role-demo label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.85em;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .role-demo select {
+            width: 100%;
+            padding: 5px;
+            font-size: 0.85em;
+            border: 1px solid #E0E0E0;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .user-table {
+                font-size: 0.85em;
+            }
+
+            .user-table th,
+            .user-table td {
+                padding: 8px;
+            }
+
+            .modal-content {
+                min-width: 300px;
+                padding: 20px;
+            }
+
+            .role-demo {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>👥 用戶管理系統</h1>
+            
+            <div class="user-info" id="userInfo">
+                <!-- 動態顯示用戶信息 -->
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('progress')">📊 施工進度</button>
+            <button class="tab" onclick="switchTab('users')" id="usersTab">👥 用戶管理</button>
+            <button class="tab" onclick="switchTab('members')" id="membersTab" style="display: none;">👷 成員管理</button>
+        </div>
+
+        <!-- 施工進度Tab -->
+        <div class="tab-content active" id="progressTab">
+            <h3>施工進度管理</h3>
+            <p>這裡顯示施工進度網格...</p>
+        </div>
+
+        <!-- 用戶管理Tab (管理員) -->
+        <div class="tab-content" id="usersTab">
+            <div class="actions">
+                <button class="btn btn-primary" onclick="openCreateModal('contractor_leader')">
+                    ➕ 創建工班主要負責人
+                </button>
+                <button class="btn btn-success" onclick="openCreateModal('owner')">
+                    ➕ 創建業主
+                </button>
+            </div>
+
+            <input type="text" class="search-box" placeholder="搜索用戶..." onkeyup="searchUsers(this.value)">
+
+            <table class="user-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>電話</th>
+                        <th>角色</th>
+                        <th>工班</th>
+                        <th>創建時間</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <!-- 動態生成用戶列表 -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 成員管理Tab (工班主要負責人) -->
+        <div class="tab-content" id="membersTab">
+            <div class="actions">
+                <button class="btn btn-primary" onclick="openCreateModal('contractor_member')">
+                    ➕ 創建工班成員
+                </button>
+            </div>
+
+            <input type="text" class="search-box" placeholder="搜索成員..." onkeyup="searchMembers(this.value)">
+
+            <table class="user-table" id="membersTable">
+                <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>電話</th>
+                        <th>加入時間</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="membersTableBody">
+                    <!-- 動態生成成員列表 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 創建用戶Modal -->
+    <div class="modal" id="createUserModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">創建用戶</h3>
+                <button class="close" onclick="closeModal('createUserModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>姓名：</label>
+                <input type="text" id="userName" placeholder="請輸入姓名">
+            </div>
+            <div class="form-group">
+                <label>電話：</label>
+                <input type="tel" id="userPhone" placeholder="請輸入電話號碼">
+            </div>
+            <div class="form-group" id="contractorSelectGroup">
+                <label>工班選擇：</label>
+                <select id="contractorSelect">
+                    <option value="">請選擇工班</option>
+                </select>
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="closeModal('createUserModal')">取消</button>
+                <button class="btn btn-primary" onclick="createUser()">創建</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 編輯用戶Modal -->
+    <div class="modal" id="editUserModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>編輯用戶</h3>
+                <button class="close" onclick="closeModal('editUserModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>姓名：</label>
+                <input type="text" id="editUserName">
+            </div>
+            <div class="form-group">
+                <label>電話：</label>
+                <input type="tel" id="editUserPhone">
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="closeModal('editUserModal')">取消</button>
+                <button class="btn btn-primary" onclick="saveUser()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 角色演示切換器 -->
+    <div class="role-demo">
+        <label>演示角色切換：</label>
+        <select id="roleSelect" onchange="switchRole()">
+            <option value="admin">管理員</option>
+            <option value="contractor_leader">工班主要負責人</option>
+            <option value="contractor_member">工班成員</option>
+            <option value="owner">業主</option>
+        </select>
+    </div>
+
+    <script>
+        // 模擬用戶數據
+        let users = [
+            {
+                id: "user001",
+                name: "張三",
+                phone: "17600000001",
+                role: "contractor_leader",
+                contractor_id: "contractor_A",
+                contractor_name: "ABC工程行",
+                created_at: "2025-01-15T10:00:00Z",
+                created_by: "admin001",
+                is_active: true
+            },
+            {
+                id: "user002",
+                name: "李四",
+                phone: "17600000002",
+                role: "contractor_member",
+                contractor_id: "contractor_A",
+                contractor_name: "ABC工程行",
+                created_at: "2025-01-15T11:00:00Z",
+                created_by: "user001",
+                is_active: true
+            },
+            {
+                id: "user003",
+                name: "王五",
+                phone: "17600000003",
+                role: "contractor_member",
+                contractor_id: "contractor_A",
+                contractor_name: "ABC工程行",
+                created_at: "2025-01-16T09:00:00Z",
+                created_by: "user001",
+                is_active: true
+            },
+            {
+                id: "user004",
+                name: "趙六",
+                phone: "17600000004",
+                role: "contractor_leader",
+                contractor_id: "contractor_B",
+                contractor_name: "XYZ建設",
+                created_at: "2025-01-14T14:00:00Z",
+                created_by: "admin001",
+                is_active: true
+            },
+            {
+                id: "user005",
+                name: "陳七",
+                phone: "17700000001",
+                role: "owner",
+                contractor_id: null,
+                contractor_name: null,
+                created_at: "2025-01-13T16:00:00Z",
+                created_by: "admin001",
+                is_active: true
+            }
+        ];
+
+        // 工班數據
+        const contractors = [
+            { id: "contractor_A", name: "ABC工程行" },
+            { id: "contractor_B", name: "XYZ建設" },
+            { id: "contractor_C", name: "DEF營造" },
+            { id: "contractor_D", name: "GHI工程" }
+        ];
+
+        // 當前用戶和編輯中的用戶
+        let currentUser = { role: "admin", name: "系統管理員" };
+        let editingUser = null;
+        let createUserType = null;
+
+        // 切換角色
+        function switchRole() {
+            const roleSelect = document.getElementById('roleSelect');
+            const role = roleSelect.value;
+            
+            if (role === 'admin') {
+                currentUser = { role: "admin", name: "系統管理員" };
+            } else if (role === 'contractor_leader') {
+                currentUser = { 
+                    role: "contractor_leader", 
+                    name: "張三",
+                    contractor_id: "contractor_A",
+                    contractor_name: "ABC工程行"
+                };
+            } else if (role === 'contractor_member') {
+                currentUser = { 
+                    role: "contractor_member", 
+                    name: "李四",
+                    contractor_id: "contractor_A",
+                    contractor_name: "ABC工程行"
+                };
+            } else if (role === 'owner') {
+                currentUser = { role: "owner", name: "陳七" };
+            }
+            
+            updateUserInfo();
+            updateTabVisibility();
+            updateUserTable();
+            updateMemberTable();
+        }
+
+        // 更新用戶信息
+        function updateUserInfo() {
+            const userInfo = document.getElementById('userInfo');
+            let info = `登入身份：${currentUser.name}`;
+            
+            if (currentUser.contractor_name) {
+                info += ` (${currentUser.contractor_name})`;
+            }
+            
+            userInfo.textContent = info;
+        }
+
+        // 更新Tab顯示
+        function updateTabVisibility() {
+            const usersTab = document.getElementById('usersTab');
+            const membersTab = document.getElementById('membersTab');
+            
+            if (currentUser.role === 'admin') {
+                usersTab.style.display = 'block';
+                membersTab.style.display = 'none';
+            } else if (currentUser.role === 'contractor_leader') {
+                usersTab.style.display = 'none';
+                membersTab.style.display = 'block';
+            } else {
+                usersTab.style.display = 'none';
+                membersTab.style.display = 'none';
+            }
+        }
+
+        // 切換Tab
+        function switchTab(tabName) {
+            // 隱藏所有Tab內容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 移除所有Tab的active類
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 顯示選中的Tab
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // 獲取角色顯示名稱
+        function getRoleName(role) {
+            const roleNames = {
+                'admin': '管理員',
+                'contractor_leader': '工班主要負責人',
+                'contractor_member': '工班成員',
+                'owner': '業主'
+            };
+            return roleNames[role] || role;
+        }
+
+        // 獲取角色CSS類
+        function getRoleClass(role) {
+            return 'role-' + role.replace('_', '-');
+        }
+
+        // 更新用戶表格
+        function updateUserTable() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+            
+            const filteredUsers = users.filter(user => user.is_active);
+            
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><h3>暫無用戶</h3></td></tr>';
+                return;
+            }
+            
+            filteredUsers.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.name}</td>
+                    <td>${user.phone}</td>
+                    <td><span class="role-badge ${getRoleClass(user.role)}">${getRoleName(user.role)}</span></td>
+                    <td>${user.contractor_name || '-'}</td>
+                    <td>${new Date(user.created_at).toLocaleDateString()}</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-small" onclick="editUser('${user.id}')">編輯</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteUser('${user.id}')">刪除</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 更新成員表格
+        function updateMemberTable() {
+            const tbody = document.getElementById('membersTableBody');
+            tbody.innerHTML = '';
+            
+            if (currentUser.role !== 'contractor_leader') {
+                return;
+            }
+            
+            const members = users.filter(user => 
+                user.is_active && 
+                user.contractor_id === currentUser.contractor_id && 
+                user.role === 'contractor_member'
+            );
+            
+            if (members.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><h3>暫無成員</h3><p>點擊「創建工班成員」開始添加</p></td></tr>';
+                return;
+            }
+            
+            members.forEach(member => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${member.name}</td>
+                    <td>${member.phone}</td>
+                    <td>${new Date(member.created_at).toLocaleDateString()}</td>
+                    <td class="actions-cell">
+                        <button class="btn btn-secondary btn-small" onclick="editUser('${member.id}')">編輯</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteUser('${member.id}')">刪除</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 搜索用戶
+        function searchUsers(query) {
+            const rows = document.querySelectorAll('#usersTableBody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(query.toLowerCase()) ? '' : 'none';
+            });
+        }
+
+        // 搜索成員
+        function searchMembers(query) {
+            const rows = document.querySelectorAll('#membersTableBody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(query.toLowerCase()) ? '' : 'none';
+            });
+        }
+
+        // 打開創建用戶Modal
+        function openCreateModal(type) {
+            createUserType = type;
+            const modal = document.getElementById('createUserModal');
+            const title = document.getElementById('modalTitle');
+            const contractorGroup = document.getElementById('contractorSelectGroup');
+            const contractorSelect = document.getElementById('contractorSelect');
+            
+            // 清空表單
+            document.getElementById('userName').value = '';
+            document.getElementById('userPhone').value = '';
+            
+            // 設置標題和顯示選項
+            if (type === 'contractor_leader') {
+                title.textContent = '創建工班主要負責人';
+                contractorGroup.style.display = 'block';
+                
+                // 填充工班選項
+                contractorSelect.innerHTML = '<option value="">請選擇工班</option>';
+                contractors.forEach(contractor => {
+                    const option = document.createElement('option');
+                    option.value = contractor.id;
+                    option.textContent = contractor.name;
+                    contractorSelect.appendChild(option);
+                });
+            } else if (type === 'contractor_member') {
+                title.textContent = '創建工班成員';
+                contractorGroup.style.display = 'none';
+            } else if (type === 'owner') {
+                title.textContent = '創建業主';
+                contractorGroup.style.display = 'none';
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        // 關閉Modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // 創建用戶
+        function createUser() {
+            const name = document.getElementById('userName').value;
+            const phone = document.getElementById('userPhone').value;
+            
+            if (!name || !phone) {
+                alert('請填寫完整信息');
+                return;
+            }
+            
+            let contractorId = null;
+            let contractorName = null;
+            
+            if (createUserType === 'contractor_leader') {
+                contractorId = document.getElementById('contractorSelect').value;
+                if (!contractorId) {
+                    alert('請選擇工班');
+                    return;
+                }
+                contractorName = contractors.find(c => c.id === contractorId).name;
+            } else if (createUserType === 'contractor_member') {
+                contractorId = currentUser.contractor_id;
+                contractorName = currentUser.contractor_name;
+            }
+            
+            const newUser = {
+                id: 'user' + (users.length + 1).toString().padStart(3, '0'),
+                name: name,
+                phone: phone,
+                role: createUserType,
+                contractor_id: contractorId,
+                contractor_name: contractorName,
+                created_at: new Date().toISOString(),
+                created_by: 'current_user',
+                is_active: true
+            };
+            
+            users.push(newUser);
+            
+            alert(`已創建${getRoleName(createUserType)}：${name} (${phone})`);
+            closeModal('createUserModal');
+            updateUserTable();
+            updateMemberTable();
+        }
+
+        // 編輯用戶
+        function editUser(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+            
+            editingUser = user;
+            document.getElementById('editUserName').value = user.name;
+            document.getElementById('editUserPhone').value = user.phone;
+            document.getElementById('editUserModal').style.display = 'block';
+        }
+
+        // 保存用戶
+        function saveUser() {
+            if (!editingUser) return;
+            
+            const name = document.getElementById('editUserName').value;
+            const phone = document.getElementById('editUserPhone').value;
+            
+            if (!name || !phone) {
+                alert('請填寫完整信息');
+                return;
+            }
+            
+            editingUser.name = name;
+            editingUser.phone = phone;
+            
+            alert('用戶信息已更新');
+            closeModal('editUserModal');
+            updateUserTable();
+            updateMemberTable();
+        }
+
+        // 刪除用戶
+        function deleteUser(userId) {
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+            
+            if (confirm(`確定要刪除用戶「${user.name}」嗎？`)) {
+                user.is_active = false;
+                alert('用戶已刪除');
+                updateUserTable();
+                updateMemberTable();
+            }
+        }
+
+        // 頁面載入時初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUserInfo();
+            updateTabVisibility();
+            updateUserTable();
+            updateMemberTable();
+        });
+    </script>
+</body>
+</html>

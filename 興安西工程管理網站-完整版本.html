@@ -1,0 +1,2215 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>勝興-興安西-2024 工程進度管理系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: #F5F5F5;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* 登入頁面 */
+        .login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .login-box {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-logo {
+            text-align: center;
+            font-size: 1.5em;
+            color: #1976D2;
+            margin-bottom: 30px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input, .form-group select {
+            padding: 12px;
+            border: 2px solid #E0E0E0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #1976D2;
+        }
+
+        .login-btn {
+            background: #1976D2;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .login-btn:hover {
+            background: #1565C0;
+        }
+
+        .login-error {
+            color: #f44336;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .password-hint {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+        /* 用戶切換器 */
+        .user-switcher {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            border: 2px solid #1976D2;
+        }
+
+        .user-switcher h4 {
+            margin-bottom: 10px;
+            color: #1976D2;
+            font-size: 0.9em;
+        }
+
+        .user-switcher select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #E0E0E0;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        /* 頂部導航列 */
+        .navbar {
+            background: #1976D2;
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h1 {
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-role {
+            padding: 4px 12px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            background: white;
+            color: #1976D2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* 主要內容容器 */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 統計卡片區域 */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #E0E0E0;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #1976D2;
+            margin-bottom: 5px;
+        }
+
+        .stat-subtitle {
+            color: #999;
+            font-size: 0.85em;
+        }
+
+        /* 主要標籤區域 */
+        .tab-navigation {
+            background: white;
+            border-radius: 12px 12px 0 0;
+            padding: 0;
+            margin-bottom: 0;
+            border: 1px solid #E0E0E0;
+            border-bottom: none;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-radius: 12px 12px 0 0;
+            overflow: hidden;
+        }
+
+        .tab {
+            padding: 16px 32px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 500;
+            transition: all 0.3s;
+            color: #666;
+            position: relative;
+        }
+
+        .tab:hover {
+            background: #F5F5F5;
+        }
+
+        .tab.active {
+            background: #1976D2;
+            color: white;
+        }
+
+        .tab.hidden {
+            display: none;
+        }
+
+        /* Tab內容區域 */
+        .tab-content {
+            background: white;
+            border: 1px solid #E0E0E0;
+            border-top: none;
+            padding: 30px;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* 建築選擇區域 */
+        .building-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .building-btn {
+            padding: 10px 24px;
+            border: 2px solid #E0E0E0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .building-btn:hover {
+            border-color: #1976D2;
+            background: #F0F8FF;
+        }
+
+        .building-btn.active {
+            background: #1976D2;
+            color: white;
+            border-color: #1976D2;
+        }
+
+        .building-info {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+
+        /* 圖例 */
+        .legend {
+            background: #F5F5F5;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 0.9em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid #DDD;
+        }
+
+        /* 施工進度網格 */
+        .progress-grid-container {
+            background: #FAFAFA;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #E0E0E0;
+            overflow-x: auto;
+        }
+
+        .progress-grid {
+            min-width: 600px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .progress-grid th,
+        .progress-grid td {
+            border: 1px solid #E0E0E0;
+            padding: 12px;
+            text-align: center;
+            position: relative;
+        }
+
+        .progress-grid th {
+            background: #F5F5F5;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: #333;
+        }
+
+        .progress-grid .floor-cell {
+            background: #E8F5E8;
+            font-weight: 600;
+            color: #2E7D32;
+        }
+
+        .progress-grid td {
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .progress-grid td:hover {
+            background: #F0F8FF;
+        }
+
+        /* 進度狀態樣式 */
+        .status-completed {
+            background: #C8E6C9 !important;
+            color: #1B5E20;
+            font-weight: 600;
+        }
+
+        .status-in-progress {
+            background: #FFF3E0 !important;
+            color: #E65100;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: white;
+            color: #999;
+        }
+
+        .status-issue {
+            background: #FFEBEE !important;
+            color: #C62828;
+            font-weight: 600;
+        }
+
+        /* 維修單列表 */
+        .repair-order-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .repair-order-item {
+            background: white;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .repair-order-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .repair-order-info {
+            flex: 1;
+        }
+
+        .repair-order-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .repair-order-details {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .repair-order-meta {
+            font-size: 0.8em;
+            color: #999;
+            display: flex;
+            gap: 20px;
+        }
+
+        .repair-order-status {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .status-normal {
+            background: #E8F5E8;
+            color: #2E7D32;
+        }
+
+        .status-invalid {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+
+        /* 跟進記錄 */
+        .followup-record-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .followup-record-item {
+            background: white;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+
+        .followup-record-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .followup-record-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .followup-record-title {
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .followup-record-meta {
+            font-size: 0.8em;
+            color: #999;
+            display: flex;
+            gap: 15px;
+        }
+
+        .followup-record-content {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .external-badge {
+            background: #E3F2FD;
+            color: #1976D2;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 500;
+        }
+
+        .importance-badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 500;
+        }
+
+        .importance-high {
+            background: #FFEBEE;
+            color: #C62828;
+        }
+
+        .importance-normal {
+            background: #F5F5F5;
+            color: #666;
+        }
+
+        /* 工班管理 */
+        .contractor-management {
+            display: grid;
+            gap: 20px;
+        }
+
+        .contractor-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #1976D2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1565C0;
+        }
+
+        .btn-secondary {
+            background: #757575;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #616161;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+
+        .btn:disabled {
+            background: #CCCCCC;
+            cursor: not-allowed;
+        }
+
+        .contractor-card {
+            background: white;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.2s;
+        }
+
+        .contractor-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .contractor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .contractor-name {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #1976D2;
+        }
+
+        .contractor-type {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            background: #E3F2FD;
+            color: #1976D2;
+        }
+
+        .contractor-details {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .contractor-buildings {
+            margin-top: 10px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .building-tag {
+            padding: 3px 10px;
+            background: #E8F5E8;
+            color: #2E7D32;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+
+        .contractor-actions-inline {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.8em;
+        }
+
+        /* 成員列表 */
+        .member-list {
+            margin-top: 15px;
+            border-top: 1px solid #E0E0E0;
+            padding-top: 15px;
+        }
+
+        .member-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: #F8F9FA;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .member-info {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .member-role-badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            font-weight: 500;
+        }
+
+        .role-leader {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .role-member {
+            background: #E8F5E8;
+            color: #2E7D32;
+        }
+
+        /* 模態框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .modal-form {
+            display: grid;
+            gap: 20px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 10px;
+            }
+
+            .stats-section {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                padding: 12px 20px;
+                font-size: 0.9em;
+            }
+
+            .repair-order-item,
+            .followup-record-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .contractor-actions {
+                flex-direction: column;
+            }
+
+            .user-switcher {
+                position: static;
+                margin-bottom: 20px;
+            }
+
+            .building-selector {
+                justify-content: center;
+            }
+
+            .progress-grid-container {
+                padding: 10px;
+            }
+        }
+
+        /* 隱藏類 */
+        .hidden {
+            display: none !important;
+        }
+
+        /* 施工輸入彈窗 */
+        .construction-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .construction-modal.active {
+            display: flex;
+        }
+
+        .construction-modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .construction-modal-header {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #1976D2;
+        }
+
+        .construction-info {
+            background: #F5F5F5;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .construction-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- 登入頁面 -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <div class="login-logo">
+                🏗️ 工程進度管理系統
+            </div>
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="phone">手機號碼</label>
+                    <input type="tel" id="phone" name="phone" placeholder="請輸入手機號碼" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密碼</label>
+                    <input type="password" id="password" name="password" placeholder="請輸入密碼" required>
+                </div>
+                <div class="password-hint">
+                    預設密碼為手機號碼後3碼
+                </div>
+                <button type="submit" class="login-btn">登入</button>
+                <div class="login-error" id="loginError"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 用戶切換器 -->
+    <div class="user-switcher" id="userSwitcher">
+        <h4>測試用戶切換</h4>
+        <select id="userSelect">
+            <option value="">請選擇用戶</option>
+            <optgroup label="系統管理">
+                <option value="admin">系統管理員 (0900000000)</option>
+            </optgroup>
+            <optgroup label="業主">
+                <option value="owner1">業主代表1 (0911111111)</option>
+                <option value="owner2">業主代表2 (0922222222)</option>
+            </optgroup>
+            <optgroup label="工班負責人">
+                <option value="contractor1">王大誠 (0912345678)</option>
+                <option value="contractor2">築愛家負責人 (0921234567)</option>
+                <option value="contractor3">塔塔家負責人 (0987654321)</option>
+            </optgroup>
+            <optgroup label="一般成員">
+                <option value="member1">王小明 (0912345679)</option>
+                <option value="member2">陳小華 (0921234568)</option>
+                <option value="member3">李小美 (0987654322)</option>
+            </optgroup>
+        </select>
+    </div>
+
+    <!-- 主要內容 -->
+    <div class="main-content" id="mainContent">
+        <!-- 頂部導航列 -->
+        <nav class="navbar">
+            <div class="navbar-content">
+                <h1>
+                    🏗️ 勝興-興安西-2024 工程進度管理系統
+                </h1>
+                <div class="user-info">
+                    <span class="user-role" id="userRole">系統管理員</span>
+                    <span id="userName">系統管理員</span>
+                    <div class="user-avatar" id="userAvatar">系</div>
+                    <button class="logout-btn" onclick="logout()">登出</button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="main-container">
+            <!-- 統計卡片 -->
+            <div class="stats-section">
+                <div class="stat-card">
+                    <h3>🏢 總建築數</h3>
+                    <div class="stat-value">3</div>
+                    <div class="stat-subtitle">A棟、B棟、C棟</div>
+                </div>
+                <div class="stat-card">
+                    <h3>📝 維修單數</h3>
+                    <div class="stat-value">3</div>
+                    <div class="stat-subtitle">進行中工程</div>
+                </div>
+                <div class="stat-card">
+                    <h3>👷 工班數量</h3>
+                    <div class="stat-value">3</div>
+                    <div class="stat-subtitle">個承包團隊</div>
+                </div>
+                <div class="stat-card">
+                    <h3>📊 整體進度</h3>
+                    <div class="stat-value">72%</div>
+                    <div class="stat-subtitle">預計2024年底完工</div>
+                </div>
+            </div>
+
+            <!-- 主要標籤導航 -->
+            <div class="tab-navigation">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('progress')">📊 施工進度</button>
+                    <button class="tab" onclick="switchTab('repairs')" id="repairsTab">📝 維修單</button>
+                    <button class="tab" onclick="switchTab('followups')">📑 跟進記錄</button>
+                    <button class="tab" onclick="switchTab('contractors')" id="contractorsTab">👷 工班管理</button>
+                    <button class="tab" onclick="switchTab('settings')" id="settingsTab">⚙️ 設定</button>
+                </div>
+            </div>
+
+            <!-- Tab內容區域 -->
+            <div class="tab-content">
+                <!-- 施工進度 -->
+                <div class="tab-panel active" id="progress-panel">
+                    <!-- 建築選擇器 -->
+                    <div class="building-selector">
+                        <button class="building-btn" onclick="switchBuilding('A')" id="buildingA">
+                            <span>A棟</span>
+                            <span class="building-info" id="buildingAInfo"></span>
+                        </button>
+                        <button class="building-btn active" onclick="switchBuilding('B')" id="buildingB">
+                            <span>B棟</span>
+                            <span class="building-info" id="buildingBInfo"></span>
+                        </button>
+                        <button class="building-btn" onclick="switchBuilding('C')" id="buildingC">
+                            <span>C棟</span>
+                            <span class="building-info" id="buildingCInfo"></span>
+                        </button>
+                    </div>
+
+                    <!-- 圖例 -->
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #C8E6C9;"></div>
+                            <span>已完成</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #FFF3E0;"></div>
+                            <span>施工中</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: white;"></div>
+                            <span>待施工</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #FFEBEE;"></div>
+                            <span>有問題</span>
+                        </div>
+                    </div>
+
+                    <!-- 施工進度網格 -->
+                    <div class="progress-grid-container">
+                        <table class="progress-grid" id="progressGrid">
+                            <!-- 動態生成 -->
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 維修單 -->
+                <div class="tab-panel" id="repairs-panel">
+                    <div class="repair-order-list" id="repairOrderList">
+                        <!-- 維修單將由JavaScript動態生成 -->
+                    </div>
+                </div>
+
+                <!-- 跟進記錄 -->
+                <div class="tab-panel" id="followups-panel">
+                    <div class="followup-record-list" id="followupRecordList">
+                        <!-- 跟進記錄將由JavaScript動態生成 -->
+                    </div>
+                </div>
+
+                <!-- 工班管理 -->
+                <div class="tab-panel" id="contractors-panel">
+                    <div class="contractor-actions">
+                        <button class="btn btn-primary" onclick="addContractor()" id="addContractorBtn">新增工班</button>
+                        <button class="btn btn-primary" onclick="addMember()" id="addMemberBtn">新增成員</button>
+                        <button class="btn btn-secondary" onclick="exportContractors()" id="exportContractorsBtn">匯出資料</button>
+                    </div>
+                    <div class="contractor-management" id="contractorManagement">
+                        <!-- 工班管理將由JavaScript動態生成 -->
+                    </div>
+                </div>
+
+                <!-- 設定 -->
+                <div class="tab-panel" id="settings-panel">
+                    <h3>系統設定</h3>
+                    <p>此處顯示系統設定選項</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 工班編輯模態框 -->
+    <div class="modal" id="contractorModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="contractorModalTitle">新增工班</h3>
+                <button class="modal-close" onclick="closeContractorModal()">&times;</button>
+            </div>
+            <form class="modal-form" id="contractorForm">
+                <div class="form-group">
+                    <label for="contractorName">工班名稱</label>
+                    <input type="text" id="contractorName" required>
+                </div>
+                <div class="form-group">
+                    <label for="contractorPhone">聯絡電話</label>
+                    <input type="tel" id="contractorPhone" required>
+                </div>
+                <div class="form-group">
+                    <label for="contractorType">工班類型</label>
+                    <select id="contractorType" required>
+                        <option value="">請選擇</option>
+                        <option value="individual">個人承包</option>
+                        <option value="company">公司承包</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="contractorBuildings">負責建築</label>
+                    <select id="contractorBuildings" multiple>
+                        <option value="A棟">A棟</option>
+                        <option value="B棟">B棟</option>
+                        <option value="C棟">C棟</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="contractorFloors">負責樓層</label>
+                    <input type="text" id="contractorFloors" placeholder="例如：2F-15F">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeContractorModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">儲存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 成員編輯模態框 -->
+    <div class="modal" id="memberModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="memberModalTitle">新增成員</h3>
+                <button class="modal-close" onclick="closeMemberModal()">&times;</button>
+            </div>
+            <form class="modal-form" id="memberForm">
+                <div class="form-group">
+                    <label for="memberName">姓名</label>
+                    <input type="text" id="memberName" required>
+                </div>
+                <div class="form-group">
+                    <label for="memberPhone">手機號碼</label>
+                    <input type="tel" id="memberPhone" required>
+                </div>
+                <div class="form-group">
+                    <label for="memberShortName">簡稱</label>
+                    <input type="text" id="memberShortName" placeholder="預設為姓名最後一字" maxlength="1">
+                </div>
+                <div class="form-group">
+                    <label for="memberPassword">密碼</label>
+                    <input type="text" id="memberPassword" placeholder="預設為手機後3碼">
+                </div>
+                <div class="form-group">
+                    <label for="memberEmail">Email (選填)</label>
+                    <input type="email" id="memberEmail" placeholder="用於找回密碼或通知">
+                </div>
+                <div class="form-group">
+                    <label for="memberRole">角色</label>
+                    <select id="memberRole" required>
+                        <option value="">請選擇</option>
+                        <option value="leader">工班負責人</option>
+                        <option value="member">一般成員</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="memberContractor">所屬工班</label>
+                    <select id="memberContractor" required>
+                        <option value="">請選擇</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeMemberModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">儲存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 施工輸入彈窗 -->
+    <div class="construction-modal" id="constructionModal">
+        <div class="construction-modal-content">
+            <div class="construction-modal-header">
+                輸入施工資訊
+            </div>
+            <div class="construction-info" id="constructionInfo">
+                <!-- 動態顯示施工位置資訊 -->
+            </div>
+            <form class="construction-form" id="constructionForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="constructionArea">鋪設坪數</label>
+                        <input type="number" id="constructionArea" step="0.1" placeholder="請輸入坪數" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="constructionDate">施工日期</label>
+                        <input type="date" id="constructionDate" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="constructionContractor">施工師傅</label>
+                    <input type="text" id="constructionContractor" readonly style="background: #F5F5F5;">
+                    <small style="color: #666;">系統將自動填入負責該區域的工班人員</small>
+                </div>
+                <div class="form-group">
+                    <label for="constructionNote">備註 (選填)</label>
+                    <textarea id="constructionNote" rows="3" placeholder="請輸入備註內容"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeConstructionModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">確認提交</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 用戶數據 - 包含多層級結構
+        const users = {
+            // 管理層
+            '0900000000': { name: '系統管理員', role: 'admin', avatar: '系', password: '000', email: 'admin@example.com' },
+            '0911111111': { name: '業主代表1', role: 'owner', avatar: '業', password: '111', email: 'owner1@example.com' },
+            '0922222222': { name: '業主代表2', role: 'owner', avatar: '業', password: '222', email: 'owner2@example.com' },
+            
+            // 工班負責人
+            '0912345678': { name: '王大誠', shortName: '誠', role: 'contractor_leader', avatar: '王', password: '678', buildings: ['B棟'], contractor: '王大誠', email: 'wang@example.com' },
+            '0921234567': { name: '築愛家負責人', shortName: '築', role: 'contractor_leader', avatar: '築', password: '567', buildings: ['A棟'], contractor: '築愛家有限公司', email: 'jiuai@example.com' },
+            '0987654321': { name: '塔塔家負責人', shortName: '塔', role: 'contractor_leader', avatar: '塔', password: '321', buildings: ['C棟'], contractor: '塔塔家建材有限公司', email: 'tata@example.com' },
+            
+            // 一般成員
+            '0912345679': { name: '王小明', shortName: '明', role: 'member', avatar: '明', password: '679', buildings: ['B棟'], contractor: '王大誠', email: 'ming@example.com' },
+            '0921234568': { name: '陳小華', shortName: '華', role: 'member', avatar: '華', password: '568', buildings: ['A棟'], contractor: '築愛家有限公司', email: 'hua@example.com' },
+            '0987654322': { name: '李小美', shortName: '美', role: 'member', avatar: '美', password: '322', buildings: ['C棟'], contractor: '塔塔家建材有限公司', email: 'mei@example.com' }
+        };
+
+        // 真實維修單數據
+        const repairOrders = [
+            {
+                id: "2025-07-15-06",
+                name: "2025-07-15-06",
+                date: "2025/7/15",
+                building: "B棟",
+                floor: "4F",
+                unit: "B1",
+                contractor: "王大誠",
+                description: "客廳臥一、臥二更換22.1坪(Y5003阿米特)",
+                status: "正常",
+                opportunity: "勝興-興安西-2024"
+            },
+            {
+                id: "2025-07-15-05",
+                name: "2025-07-15-05",
+                date: "2025/7/15",
+                building: "B棟",
+                floor: "12F",
+                unit: "B5",
+                contractor: "王大誠",
+                description: "客廳更換8.3坪(Y5003阿米特)",
+                status: "正常",
+                opportunity: "勝興-興安西-2024"
+            },
+            {
+                id: "2025-07-08-04",
+                name: "2025-07-08-04",
+                date: "2025/7/8",
+                building: "C棟",
+                floor: "8F",
+                unit: "C6",
+                contractor: "塔塔家建材有限公司",
+                description: "縮",
+                status: "作廢",
+                opportunity: "勝興-興安西-2024"
+            }
+        ];
+
+        // 真實跟進記錄數據
+        const followupRecords = [
+            {
+                id: "687907732a14650001438a66",
+                name: "2025-07-17-004212",
+                date: "2025/7/17",
+                time: "22:23:47",
+                creator: "賴俊穎",
+                type: "親自拜訪",
+                importance: "重要",
+                content: "TEST",
+                isExternal: true
+            },
+            {
+                id: "6864ff3fa1fbcd0001e8f893",
+                name: "2025-07-02-001743",
+                date: "2025/7/2",
+                time: "17:43:28",
+                creator: "陳智琛",
+                type: "親自拜訪",
+                importance: "重要",
+                content: "7/2，到興安西協調SPC維修事宜，1.12樓B5客廳多處刮傷及破損問題，費用部分，經詢廖董SPC每箱以多少計算?廖董回覆每箱1200，工錢部分，經詢明樑，拆加安裝(含打矽利康)以2人工計6000，經詢王大誠，同意此費用，故報價：8.3坪/0.68(坪/箱)X1.05=12.8箱(以13箱計) SPC板材:13X1200=15600 工資:6000 報價總額:21600 (事後，明樑建議，可再加成3000，保留被議價空間) 至於何時進場維修，小主任(岳澤)回覆:等跟下包確認好費用問題再進場",
+                isExternal: false
+            }
+        ];
+
+        // 工班數據 - 包含成員信息
+        let contractors = [
+            {
+                id: 1,
+                name: "王大誠",
+                shortName: "誠",
+                phone: "0912-345-678",
+                type: "individual",
+                buildings: ["B棟"],
+                floors: "4F-15F",
+                email: "wang@example.com",
+                members: [
+                    { id: 1, name: "王大誠", shortName: "誠", phone: "0912345678", role: "leader", email: "wang@example.com" },
+                    { id: 2, name: "王小明", shortName: "明", phone: "0912345679", role: "member", email: "ming@example.com" }
+                ]
+            },
+            {
+                id: 2,
+                name: "築愛家有限公司",
+                shortName: "築",
+                phone: "02-1234-5678",
+                type: "company",
+                buildings: ["A棟"],
+                floors: "8F, 10F-14F",
+                email: "jiuai@example.com",
+                members: [
+                    { id: 3, name: "築愛家負責人", shortName: "築", phone: "0921234567", role: "leader", email: "jiuai@example.com" },
+                    { id: 4, name: "陳小華", shortName: "華", phone: "0921234568", role: "member", email: "hua@example.com" }
+                ]
+            },
+            {
+                id: 3,
+                name: "塔塔家建材有限公司",
+                shortName: "塔",
+                phone: "02-8765-4321",
+                type: "company",
+                buildings: ["C棟"],
+                floors: "3F-15F",
+                email: "tata@example.com",
+                members: [
+                    { id: 5, name: "塔塔家負責人", shortName: "塔", phone: "0987654321", role: "leader", email: "tata@example.com" },
+                    { id: 6, name: "李小美", shortName: "美", phone: "0987654322", role: "member", email: "mei@example.com" }
+                ]
+            }
+        ];
+
+        // 施工細節數據儲存
+        const constructionDetails = {};
+
+        // 施工進度數據
+        const progressData = {
+            'A': {
+                name: 'A棟',
+                contractor: '築愛家',
+                floors: ['8F', '10F', '11F', '12F', '13F', '14F'],
+                units: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6'],
+                progress: {
+                    '14F': { 'A1': 'completed', 'A2': 'completed', 'A3': 'in-progress', 'A4': 'pending', 'A5': 'pending', 'A6': 'pending' },
+                    '13F': { 'A1': 'completed', 'A2': 'completed', 'A3': 'completed', 'A4': 'completed', 'A5': 'completed', 'A6': 'completed' },
+                    '12F': { 'A1': 'completed', 'A2': 'completed', 'A3': 'completed', 'A4': 'completed', 'A5': 'completed', 'A6': 'completed' },
+                    '11F': { 'A1': 'completed', 'A2': 'completed', 'A3': 'completed', 'A4': 'completed', 'A5': 'completed', 'A6': 'completed' },
+                    '10F': { 'A1': 'completed', 'A2': 'completed', 'A3': 'completed', 'A4': 'completed', 'A5': 'completed', 'A6': 'completed' },
+                    '8F': { 'A1': 'completed', 'A2': 'completed', 'A3': 'completed', 'A4': 'completed', 'A5': 'completed', 'A6': 'completed' }
+                }
+            },
+            'B': {
+                name: 'B棟',
+                contractor: '王大誠',
+                floors: ['15F', '14F', '13F', '12F', '11F', '10F', '9F', '8F', '7F', '6F', '5F', '4F', '3F', '2F'],
+                units: ['B1', 'B2', 'B3', 'B4', 'B5', 'B6'],
+                progress: {
+                    '15F': { 'B1': 'completed', 'B2': 'completed', 'B3': 'pending', 'B4': 'pending', 'B5': 'in-progress', 'B6': 'pending' },
+                    '14F': { 'B1': 'completed', 'B2': 'completed', 'B3': 'in-progress', 'B4': 'pending', 'B5': 'in-progress', 'B6': 'pending' },
+                    '13F': { 'B1': 'completed', 'B2': 'completed', 'B3': 'completed', 'B4': 'completed', 'B5': 'completed', 'B6': 'completed' },
+                    '12F': { 'B1': 'completed', 'B2': 'completed', 'B3': 'completed', 'B4': 'completed', 'B5': 'completed', 'B6': 'completed' },
+                    '11F': { 'B1': 'completed', 'B2': 'completed', 'B3': 'completed', 'B4': 'completed', 'B5': 'completed', 'B6': 'completed' },
+                    '10F': { 'B1': 'completed', 'B2': 'completed', 'B3': 'completed', 'B4': 'completed', 'B5': 'completed', 'B6': 'completed' },
+                    '9F': { 'B1': 'completed', 'B2': 'completed', 'B3': 'completed', 'B4': 'completed', 'B5': 'completed', 'B6': 'completed' },
+                    '8F': { 'B1': 'completed', 'B2': 'completed', 'B3': 'completed', 'B4': 'completed', 'B5': 'completed', 'B6': 'completed' },
+                    '7F': { 'B1': 'completed', 'B2': 'completed', 'B3': 'completed', 'B4': 'completed', 'B5': 'completed', 'B6': 'completed' },
+                    '6F': { 'B1': 'completed', 'B2': 'completed', 'B3': 'completed', 'B4': 'completed', 'B5': 'completed', 'B6': 'completed' },
+                    '5F': { 'B1': 'completed', 'B2': 'completed', 'B3': 'completed', 'B4': 'completed', 'B5': 'completed', 'B6': 'completed' },
+                    '4F': { 'B1': 'completed', 'B2': 'issue', 'B3': 'completed', 'B4': 'completed', 'B5': 'completed', 'B6': 'completed' },
+                    '3F': { 'B1': 'completed', 'B2': 'completed', 'B3': 'completed', 'B4': 'completed', 'B5': 'completed', 'B6': 'completed' },
+                    '2F': { 'B1': 'completed', 'B2': 'completed', 'B3': 'completed', 'B4': 'completed', 'B5': 'completed', 'B6': 'completed' }
+                }
+            },
+            'C': {
+                name: 'C棟',
+                contractor: '塔塔家',
+                floors: ['15F', '14F', '13F', '12F', '11F', '10F', '9F', '8F', '7F', '6F', '5F', '4F', '3F'],
+                units: ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7'],
+                progress: {
+                    '15F': { 'C1': 'pending', 'C2': 'pending', 'C3': 'pending', 'C4': 'pending', 'C5': 'pending', 'C6': 'pending', 'C7': 'pending' },
+                    '14F': { 'C1': 'pending', 'C2': 'pending', 'C3': 'pending', 'C4': 'pending', 'C5': 'pending', 'C6': 'pending', 'C7': 'pending' },
+                    '13F': { 'C1': 'pending', 'C2': 'pending', 'C3': 'pending', 'C4': 'pending', 'C5': 'pending', 'C6': 'pending', 'C7': 'pending' },
+                    '12F': { 'C1': 'pending', 'C2': 'pending', 'C3': 'pending', 'C4': 'pending', 'C5': 'pending', 'C6': 'pending', 'C7': 'pending' },
+                    '11F': { 'C1': 'pending', 'C2': 'pending', 'C3': 'pending', 'C4': 'pending', 'C5': 'pending', 'C6': 'pending', 'C7': 'pending' },
+                    '10F': { 'C1': 'pending', 'C2': 'pending', 'C3': 'pending', 'C4': 'pending', 'C5': 'pending', 'C6': 'pending', 'C7': 'pending' },
+                    '9F': { 'C1': 'in-progress', 'C2': 'in-progress', 'C3': 'pending', 'C4': 'pending', 'C5': 'pending', 'C6': 'in-progress', 'C7': 'in-progress' },
+                    '8F': { 'C1': 'completed', 'C2': 'completed', 'C3': 'completed', 'C4': 'completed', 'C5': 'completed', 'C6': 'completed', 'C7': 'completed' },
+                    '7F': { 'C1': 'completed', 'C2': 'completed', 'C3': 'completed', 'C4': 'completed', 'C5': 'completed', 'C6': 'completed', 'C7': 'completed' },
+                    '6F': { 'C1': 'completed', 'C2': 'completed', 'C3': 'completed', 'C4': 'completed', 'C5': 'completed', 'C6': 'completed', 'C7': 'completed' },
+                    '5F': { 'C1': 'completed', 'C2': 'completed', 'C3': 'completed', 'C4': 'completed', 'C5': 'completed', 'C6': 'completed', 'C7': 'completed' },
+                    '4F': { 'C1': 'completed', 'C2': 'completed', 'C3': 'completed', 'C4': 'completed', 'C5': 'completed', 'C6': 'completed', 'C7': 'completed' },
+                    '3F': { 'C1': 'completed', 'C2': 'completed', 'C3': 'completed', 'C4': 'completed', 'C5': 'completed', 'C6': 'completed', 'C7': 'completed' }
+                }
+            }
+        };
+
+        // 當前用戶和選中建築
+        let currentUser = null;
+        let currentBuilding = 'B';
+
+        // 登入功能
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+            
+            const user = users[phone];
+            if (user && user.password === password) {
+                currentUser = { phone, ...user };
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                updateUserInterface();
+                loadData();
+            } else {
+                document.getElementById('loginError').textContent = '手機號碼或密碼錯誤';
+            }
+        });
+
+        // 登出功能
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('phone').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginError').textContent = '';
+        }
+
+        // 更新用戶界面
+        function updateUserInterface() {
+            if (!currentUser) return;
+            
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userRole').textContent = getRoleText(currentUser.role);
+            document.getElementById('userAvatar').textContent = currentUser.avatar;
+            
+            // 根據角色隱藏/顯示功能
+            updatePermissions();
+        }
+
+        // 更新權限
+        function updatePermissions() {
+            const role = currentUser.role;
+            
+            // 標籤權限
+            const repairsTab = document.getElementById('repairsTab');
+            const contractorsTab = document.getElementById('contractorsTab');
+            const settingsTab = document.getElementById('settingsTab');
+            
+            // 按鈕權限
+            const addContractorBtn = document.getElementById('addContractorBtn');
+            const addMemberBtn = document.getElementById('addMemberBtn');
+            const exportBtn = document.getElementById('exportContractorsBtn');
+            
+            if (role === 'member') {
+                // 一般成員可以看施工進度、維修單和跟進記錄
+                repairsTab.style.display = 'block';
+                contractorsTab.style.display = 'none';
+                settingsTab.style.display = 'none';
+            } else if (role === 'owner') {
+                // 業主只能查看，不能管理工班
+                repairsTab.style.display = 'block';
+                contractorsTab.style.display = 'none';
+                settingsTab.style.display = 'none';
+            } else if (role === 'contractor_leader') {
+                // 工班負責人可以管理成員，但不能管理工班
+                repairsTab.style.display = 'block';
+                contractorsTab.style.display = 'block';
+                settingsTab.style.display = 'none';
+                
+                if (addContractorBtn) addContractorBtn.style.display = 'none';
+                if (addMemberBtn) addMemberBtn.style.display = 'block';
+                if (exportBtn) exportBtn.style.display = 'block';
+            } else if (role === 'admin') {
+                // 只有管理員有完整權限
+                repairsTab.style.display = 'block';
+                contractorsTab.style.display = 'block';
+                settingsTab.style.display = 'block';
+                
+                if (addContractorBtn) addContractorBtn.style.display = 'block';
+                if (addMemberBtn) addMemberBtn.style.display = 'block';
+                if (exportBtn) exportBtn.style.display = 'block';
+            }
+            
+            // 建築權限
+            updateBuildingPermissions();
+        }
+
+        // 更新建築權限
+        function updateBuildingPermissions() {
+            const buildingA = document.getElementById('buildingA');
+            const buildingB = document.getElementById('buildingB');
+            const buildingC = document.getElementById('buildingC');
+            
+            // 所有用戶都可以看到所有建築
+            buildingA.style.display = 'flex';
+            buildingB.style.display = 'flex';
+            buildingC.style.display = 'flex';
+            
+            // 更新建築工班名稱顯示
+            updateBuildingInfo();
+            
+            // 如果是工班人員，預設切換到自己負責的建築
+            if (currentUser.buildings && currentUser.buildings.length > 0) {
+                if (currentUser.buildings.includes('A棟')) currentBuilding = 'A';
+                else if (currentUser.buildings.includes('B棟')) currentBuilding = 'B';
+                else if (currentUser.buildings.includes('C棟')) currentBuilding = 'C';
+            }
+            
+            switchBuilding(currentBuilding);
+        }
+
+        // 更新建築資訊顯示
+        function updateBuildingInfo() {
+            const buildingAInfo = document.getElementById('buildingAInfo');
+            const buildingBInfo = document.getElementById('buildingBInfo');
+            const buildingCInfo = document.getElementById('buildingCInfo');
+            
+            // 建築對應的工班名稱
+            const buildingContractors = {
+                'A': '築愛家',
+                'B': '王大誠',
+                'C': '塔塔家'
+            };
+            
+            if (currentUser.role === 'admin') {
+                // 管理員可以看到所有工班名稱
+                buildingAInfo.textContent = `(${buildingContractors.A})`;
+                buildingBInfo.textContent = `(${buildingContractors.B})`;
+                buildingCInfo.textContent = `(${buildingContractors.C})`;
+            } else if (currentUser.role === 'contractor_leader' || currentUser.role === 'member') {
+                // 工班人員只能看到自己負責的建築工班名稱
+                const userBuildings = currentUser.buildings || [];
+                
+                buildingAInfo.textContent = userBuildings.includes('A棟') ? `(${buildingContractors.A})` : '';
+                buildingBInfo.textContent = userBuildings.includes('B棟') ? `(${buildingContractors.B})` : '';
+                buildingCInfo.textContent = userBuildings.includes('C棟') ? `(${buildingContractors.C})` : '';
+            } else {
+                // 業主看不到任何工班名稱
+                buildingAInfo.textContent = '';
+                buildingBInfo.textContent = '';
+                buildingCInfo.textContent = '';
+            }
+        }
+
+        // 用戶切換功能
+        document.getElementById('userSelect').addEventListener('change', function() {
+            const selectedUser = this.value;
+            if (!selectedUser) return;
+            
+            const userMap = {
+                'admin': '0900000000',
+                'owner1': '0911111111',
+                'owner2': '0922222222',
+                'contractor1': '0912345678',
+                'contractor2': '0921234567',
+                'contractor3': '0987654321',
+                'member1': '0912345679',
+                'member2': '0921234568',
+                'member3': '0987654322'
+            };
+            
+            const phone = userMap[selectedUser];
+            if (phone) {
+                currentUser = { phone, ...users[phone] };
+                updateUserInterface();
+                loadData();
+            }
+        });
+
+        // 標籤切換
+        function switchTab(tabName) {
+            // 隱藏所有標籤內容
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            
+            // 移除所有標籤的active狀態
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 顯示選中的標籤內容
+            document.getElementById(tabName + '-panel').classList.add('active');
+            
+            // 設定選中的標籤為active
+            event.target.classList.add('active');
+        }
+
+        // 建築切換
+        function switchBuilding(building) {
+            currentBuilding = building;
+            
+            // 更新建築按鈕狀態
+            document.querySelectorAll('.building-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById('building' + building).classList.add('active');
+            
+            // 更新進度網格
+            loadProgressGrid();
+        }
+
+        // 載入數據
+        function loadData() {
+            loadProgressGrid();
+            loadRepairOrders();
+            loadFollowupRecords();
+            loadContractors();
+        }
+
+        // 載入施工進度網格
+        function loadProgressGrid() {
+            const building = progressData[currentBuilding];
+            if (!building) return;
+            
+            const grid = document.getElementById('progressGrid');
+            
+            // 生成表頭
+            const headerRow = `
+                <thead>
+                    <tr>
+                        <th>樓層/戶別</th>
+                        ${building.units.map(unit => `<th>${unit}</th>`).join('')}
+                    </tr>
+                </thead>
+            `;
+            
+            // 生成表格內容
+            const bodyRows = building.floors.map(floor => {
+                const units = building.units.map(unit => {
+                    const status = building.progress[floor] ? building.progress[floor][unit] || 'pending' : 'pending';
+                    const key = `${currentBuilding}_${floor}_${unit}`;
+                    const details = constructionDetails[key];
+                    
+                    let statusText = '';
+                    let statusClass = '';
+                    
+                    // 檢查是否有施工記錄
+                    if (details && details.area) {
+                        // 有施工記錄
+                        const isOwnBuilding = !currentUser.buildings || currentUser.buildings.includes(currentBuilding + '棟');
+                        const canSeeDetails = currentUser.role === 'admin' || currentUser.role === 'owner' || isOwnBuilding;
+                        
+                        if (canSeeDetails) {
+                            // 可以看到詳細資訊：簡稱+坪數+打勾
+                            const contractorShortName = details.contractorShortName || details.contractor.slice(-1);
+                            statusText = `${contractorShortName}${details.area}✓`;
+                            statusClass = 'status-completed';
+                        } else {
+                            // 其他工班只能看到打勾
+                            statusText = '✓';
+                            statusClass = 'status-completed';
+                        }
+                    } else {
+                        // 沒有施工記錄，根據狀態顯示
+                        switch(status) {
+                            case 'completed':
+                                statusText = '✓';
+                                statusClass = 'status-completed';
+                                break;
+                            case 'in-progress':
+                                statusText = '施工中';
+                                statusClass = 'status-in-progress';
+                                break;
+                            case 'issue':
+                                statusText = '!';
+                                statusClass = 'status-issue';
+                                break;
+                            default:
+                                statusText = '—';
+                                statusClass = 'status-pending';
+                        }
+                    }
+                    
+                    return `<td class="${statusClass}" onclick="handleCellClick('${currentBuilding}', '${floor}', '${unit}')" style="cursor: pointer;">${statusText}</td>`;
+                }).join('');
+                
+                return `
+                    <tr>
+                        <td class="floor-cell">${floor}</td>
+                        ${units}
+                    </tr>
+                `;
+            }).join('');
+            
+            grid.innerHTML = headerRow + '<tbody>' + bodyRows + '</tbody>';
+        }
+
+        // 載入維修單
+        function loadRepairOrders() {
+            const container = document.getElementById('repairOrderList');
+            let filteredOrders = repairOrders;
+            
+            // 根據用戶角色篩選
+            if (currentUser.buildings) {
+                filteredOrders = repairOrders.filter(order => 
+                    currentUser.buildings.includes(order.building)
+                );
+            }
+            
+            container.innerHTML = filteredOrders.map(order => `
+                <div class="repair-order-item">
+                    <div class="repair-order-info">
+                        <div class="repair-order-title">
+                            ${order.name}
+                            <span class="building-tag">${order.building}</span>
+                        </div>
+                        <div class="repair-order-details">
+                            ${order.description}
+                        </div>
+                        <div class="repair-order-meta">
+                            <span>📅 ${order.date}</span>
+                            <span>🏢 ${order.building} ${order.floor} ${order.unit}戶</span>
+                            <span>👷 ${order.contractor}</span>
+                        </div>
+                    </div>
+                    <div class="repair-order-status ${order.status === '正常' ? 'status-normal' : 'status-invalid'}">
+                        ${order.status}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 載入跟進記錄
+        function loadFollowupRecords() {
+            const container = document.getElementById('followupRecordList');
+            
+            // 只顯示外部顯示的記錄
+            const externalRecords = followupRecords.filter(record => record.isExternal);
+            
+            container.innerHTML = externalRecords.map(record => `
+                <div class="followup-record-item">
+                    <div class="followup-record-header">
+                        <div class="followup-record-title">
+                            ${record.name}
+                            <span class="external-badge">外部顯示</span>
+                            <span class="importance-badge importance-${record.importance === '重要' ? 'high' : 'normal'}">
+                                ${record.importance}
+                            </span>
+                        </div>
+                        <div class="followup-record-meta">
+                            <span>📅 ${record.date} ${record.time}</span>
+                            <span>👤 ${record.creator}</span>
+                            <span>📝 ${record.type}</span>
+                        </div>
+                    </div>
+                    <div class="followup-record-content">
+                        ${record.content}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 載入工班
+        function loadContractors() {
+            const container = document.getElementById('contractorManagement');
+            let filteredContractors = contractors;
+            
+            // 根據用戶角色篩選
+            if (currentUser.role === 'contractor_leader') {
+                filteredContractors = contractors.filter(contractor => 
+                    contractor.name === currentUser.contractor
+                );
+            } else if (currentUser.role === 'member') {
+                filteredContractors = contractors.filter(contractor => 
+                    contractor.name === currentUser.contractor
+                );
+            }
+            
+            container.innerHTML = filteredContractors.map(contractor => `
+                <div class="contractor-card">
+                    <div class="contractor-header">
+                        <div class="contractor-name">${contractor.name}</div>
+                        <div class="contractor-type">${contractor.type === 'individual' ? '個人承包' : '公司承包'}</div>
+                    </div>
+                    <div class="contractor-details">
+                        <div>📞 ${contractor.phone}</div>
+                        <div>🏢 負責建築：${contractor.buildings.join(', ')}</div>
+                        <div>📍 施工範圍：${contractor.floors}</div>
+                        <div>✉️ ${contractor.email}</div>
+                        <div class="contractor-buildings">
+                            ${contractor.buildings.map(building => `<span class="building-tag">${building}</span>`).join('')}
+                        </div>
+                    </div>
+                    
+                    ${contractor.members ? `
+                        <div class="member-list">
+                            <h4>工班成員:</h4>
+                            ${contractor.members.map(member => `
+                                <div class="member-item">
+                                    <div class="member-info">
+                                        <span>${member.name}</span>
+                                        <span>${member.phone}</span>
+                                        <span class="member-role-badge ${member.role === 'leader' ? 'role-leader' : 'role-member'}">
+                                            ${member.role === 'leader' ? '負責人' : '成員'}
+                                        </span>
+                                    </div>
+                                    <div class="contractor-actions-inline">
+                                        <button class="btn btn-primary btn-small" onclick="editMember(${contractor.id}, ${member.id})" 
+                                                ${currentUser.role === 'member' ? 'disabled' : ''}>編輯</button>
+                                        <button class="btn btn-danger btn-small" onclick="deleteMember(${contractor.id}, ${member.id})" 
+                                                ${currentUser.role === 'member' || member.role === 'leader' ? 'disabled' : ''}>刪除</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="contractor-actions-inline">
+                        <button class="btn btn-primary btn-small" onclick="editContractor(${contractor.id})" 
+                                ${currentUser.role !== 'admin' ? 'disabled' : ''}>編輯工班</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteContractor(${contractor.id})" 
+                                ${currentUser.role !== 'admin' ? 'disabled' : ''}>刪除工班</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 工班管理功能
+        function addContractor() {
+            document.getElementById('contractorModalTitle').textContent = '新增工班';
+            document.getElementById('contractorForm').reset();
+            document.getElementById('contractorModal').classList.add('active');
+        }
+
+        function addMember() {
+            document.getElementById('memberModalTitle').textContent = '新增成員';
+            document.getElementById('memberForm').reset();
+            
+            // 更新工班選項
+            const memberContractor = document.getElementById('memberContractor');
+            let availableContractors = contractors;
+            
+            if (currentUser.role === 'contractor_leader') {
+                availableContractors = contractors.filter(c => c.name === currentUser.contractor);
+            }
+            
+            memberContractor.innerHTML = '<option value="">請選擇</option>' + 
+                availableContractors.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+            
+            document.getElementById('memberModal').classList.add('active');
+        }
+
+        function editContractor(id) {
+            const contractor = contractors.find(c => c.id === id);
+            if (!contractor) return;
+            
+            document.getElementById('contractorModalTitle').textContent = '編輯工班';
+            document.getElementById('contractorName').value = contractor.name;
+            document.getElementById('contractorPhone').value = contractor.phone;
+            document.getElementById('contractorType').value = contractor.type;
+            document.getElementById('contractorFloors').value = contractor.floors;
+            
+            // 設定選中的建築
+            Array.from(document.getElementById('contractorBuildings').options).forEach(option => {
+                option.selected = contractor.buildings.includes(option.value);
+            });
+            
+            document.getElementById('contractorModal').classList.add('active');
+        }
+
+        function editMember(contractorId, memberId) {
+            const contractor = contractors.find(c => c.id === contractorId);
+            const member = contractor?.members?.find(m => m.id === memberId);
+            if (!member) return;
+            
+            document.getElementById('memberModalTitle').textContent = '編輯成員';
+            document.getElementById('memberName').value = member.name;
+            document.getElementById('memberPhone').value = member.phone;
+            document.getElementById('memberPassword').value = users[member.phone]?.password || '';
+            document.getElementById('memberEmail').value = member.email;
+            document.getElementById('memberRole').value = member.role;
+            document.getElementById('memberContractor').value = contractor.name;
+            
+            document.getElementById('memberModal').classList.add('active');
+        }
+
+        function deleteContractor(id) {
+            if (confirm('確定要刪除此工班嗎？')) {
+                contractors = contractors.filter(c => c.id !== id);
+                loadContractors();
+            }
+        }
+
+        function deleteMember(contractorId, memberId) {
+            if (confirm('確定要刪除此成員嗎？')) {
+                const contractor = contractors.find(c => c.id === contractorId);
+                if (contractor && contractor.members) {
+                    contractor.members = contractor.members.filter(m => m.id !== memberId);
+                    loadContractors();
+                }
+            }
+        }
+
+        function closeContractorModal() {
+            document.getElementById('contractorModal').classList.remove('active');
+        }
+
+        function closeMemberModal() {
+            document.getElementById('memberModal').classList.remove('active');
+        }
+
+        function exportContractors() {
+            // 匯出工班和成員資料
+            let csv = '工班名稱,類型,電話,建築,樓層,成員姓名,成員電話,成員角色,成員Email\n';
+            
+            contractors.forEach(contractor => {
+                if (contractor.members && contractor.members.length > 0) {
+                    contractor.members.forEach(member => {
+                        csv += `${contractor.name},${contractor.type},${contractor.phone},${contractor.buildings.join(';')},${contractor.floors},${member.name},${member.phone},${member.role},${member.email}\n`;
+                    });
+                } else {
+                    csv += `${contractor.name},${contractor.type},${contractor.phone},${contractor.buildings.join(';')},${contractor.floors},,,,\n`;
+                }
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '工班資料.csv';
+            a.click();
+        }
+
+        // 成員表單提交
+        document.getElementById('memberForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('memberName').value;
+            const phone = document.getElementById('memberPhone').value;
+            const shortName = document.getElementById('memberShortName').value || name.slice(-1);
+            const password = document.getElementById('memberPassword').value || phone.slice(-3);
+            const email = document.getElementById('memberEmail').value;
+            const role = document.getElementById('memberRole').value;
+            const contractorName = document.getElementById('memberContractor').value;
+            
+            const contractor = contractors.find(c => c.name === contractorName);
+            if (!contractor) return;
+            
+            if (!contractor.members) contractor.members = [];
+            
+            const member = {
+                id: Date.now(),
+                name: name,
+                shortName: shortName,
+                phone: phone,
+                role: role,
+                email: email
+            };
+            
+            // 添加到用戶列表
+            users[phone] = {
+                name: name,
+                shortName: shortName,
+                role: role === 'leader' ? 'contractor_leader' : 'member',
+                avatar: shortName,
+                password: password,
+                buildings: contractor.buildings,
+                contractor: contractorName,
+                email: email
+            };
+            
+            contractor.members.push(member);
+            loadContractors();
+            closeMemberModal();
+        });
+
+        // 工班表單提交
+        document.getElementById('contractorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const buildings = Array.from(document.getElementById('contractorBuildings').selectedOptions)
+                .map(option => option.value);
+            
+            const contractor = {
+                id: Date.now(),
+                name: document.getElementById('contractorName').value,
+                phone: document.getElementById('contractorPhone').value,
+                type: document.getElementById('contractorType').value,
+                buildings: buildings,
+                floors: document.getElementById('contractorFloors').value,
+                email: `${document.getElementById('contractorName').value.toLowerCase()}@example.com`,
+                members: []
+            };
+            
+            contractors.push(contractor);
+            loadContractors();
+            closeContractorModal();
+        });
+
+        // 取得角色文字
+        function getRoleText(role) {
+            const roleMap = {
+                'admin': '系統管理員',
+                'owner': '業主',
+                'contractor_leader': '工班負責人',
+                'member': '一般成員'
+            };
+            return roleMap[role] || role;
+        }
+
+        // 儲存當前點擊的單元格資訊
+        let currentCell = null;
+
+        // 處理單元格點擊
+        function handleCellClick(building, floor, unit) {
+            // 檢查權限 - 業主只能查看不能編輯
+            if (currentUser.role === 'owner') {
+                // 顯示施工細節
+                showConstructionDetails(building, floor, unit);
+                return;
+            }
+
+            // 檢查是否負責該建築 - 同工班的成員都可以編輯
+            if (currentUser.role === 'contractor_leader' || currentUser.role === 'member') {
+                if (currentUser.buildings && !currentUser.buildings.includes(building + '棟')) {
+                    // 不同工班只能查看進度，不能看細節
+                    alert('您只能查看此建築的進度，無法編輯');
+                    return;
+                }
+            }
+
+            // 儲存當前單元格資訊
+            currentCell = { building, floor, unit };
+
+            // 顯示施工位置資訊
+            const info = document.getElementById('constructionInfo');
+            info.innerHTML = `
+                <div><strong>建築：</strong>${building}棟</div>
+                <div><strong>樓層：</strong>${floor}</div>
+                <div><strong>單位：</strong>${unit}戶</div>
+            `;
+
+            // 檢查是否已有施工記錄
+            const key = `${building}_${floor}_${unit}`;
+            const existingDetails = constructionDetails[key];
+
+            if (existingDetails) {
+                // 有記錄，載入現有資料
+                document.getElementById('constructionArea').value = existingDetails.area;
+                document.getElementById('constructionDate').value = existingDetails.date;
+                document.getElementById('constructionContractor').value = existingDetails.contractor;
+                document.getElementById('constructionNote').value = existingDetails.note || '';
+            } else {
+                // 無記錄，設定預設值
+                // 設定預設日期為今天
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('constructionDate').value = today;
+
+                // 自動填入施工師傅名稱
+                let contractorName = '';
+                if (currentUser.role === 'admin') {
+                    // 管理員根據建築找對應工班
+                    const contractor = contractors.find(c => c.buildings.includes(building + '棟'));
+                    contractorName = contractor ? contractor.name : '';
+                } else if (currentUser.role === 'contractor_leader' || currentUser.role === 'member') {
+                    // 工班負責人和成員都填入自己的名字
+                    contractorName = currentUser.name;
+                }
+                document.getElementById('constructionContractor').value = contractorName;
+
+                // 清空其他欄位
+                document.getElementById('constructionArea').value = '';
+                document.getElementById('constructionNote').value = '';
+            }
+
+            // 顯示彈窗
+            document.getElementById('constructionModal').classList.add('active');
+        }
+
+        // 關閉施工輸入彈窗
+        function closeConstructionModal() {
+            document.getElementById('constructionModal').classList.remove('active');
+            currentCell = null;
+        }
+
+        // 顯示施工細節（給業主看）
+        function showConstructionDetails(building, floor, unit) {
+            const key = `${building}_${floor}_${unit}`;
+            const details = constructionDetails[key];
+            
+            if (!details) {
+                alert('此位置尚無施工記錄');
+                return;
+            }
+            
+            const info = `
+施工細節：
+建築：${building}棟
+樓層：${floor}
+單位：${unit}戶
+鋪設坪數：${details.area} 坪
+施工日期：${details.date}
+施工師傅：${details.contractor}
+${details.note ? `備註：${details.note}` : ''}
+狀態：${details.status === 'completed' ? '已完成' : '施工中'}
+            `;
+            
+            alert(info);
+        }
+
+        // 施工表單提交
+        document.getElementById('constructionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!currentCell) return;
+
+            const area = document.getElementById('constructionArea').value;
+            const date = document.getElementById('constructionDate').value;
+            const contractor = document.getElementById('constructionContractor').value;
+            const note = document.getElementById('constructionNote').value;
+
+            // 準備施工記錄數據
+            const constructionData = {
+                building: currentCell.building,
+                floor: currentCell.floor,
+                unit: currentCell.unit,
+                area: parseFloat(area),
+                date: date,
+                contractor: contractor,
+                contractorShortName: currentUser.shortName || contractor.slice(-1),
+                note: note,
+                status: 'completed'
+            };
+
+            try {
+                // 這裡應該調用實際的API
+                // await updateConstructionRecord(constructionData);
+                
+                // 模擬API調用成功
+                console.log('施工記錄提交:', constructionData);
+                alert('施工記錄已成功提交！');
+
+                // 更新本地進度數據
+                const buildingData = progressData[currentCell.building];
+                if (!buildingData.progress[currentCell.floor]) {
+                    buildingData.progress[currentCell.floor] = {};
+                }
+                buildingData.progress[currentCell.floor][currentCell.unit] = 'completed';
+
+                // 儲存施工細節
+                const key = `${currentCell.building}_${currentCell.floor}_${currentCell.unit}`;
+                constructionDetails[key] = constructionData;
+
+                // 刷新進度網格
+                loadProgressGrid();
+
+                // 關閉彈窗
+                closeConstructionModal();
+            } catch (error) {
+                console.error('提交施工記錄失敗:', error);
+                alert('提交失敗，請稍後重試');
+            }
+        });
+
+        // 自動填入簡稱和密碼
+        function setupAutoFill() {
+            const memberNameInput = document.getElementById('memberName');
+            const memberPhoneInput = document.getElementById('memberPhone');
+            const memberShortNameInput = document.getElementById('memberShortName');
+            const memberPasswordInput = document.getElementById('memberPassword');
+
+            // 姓名輸入時自動填入簡稱
+            memberNameInput.addEventListener('input', function() {
+                const name = this.value.trim();
+                if (name) {
+                    memberShortNameInput.value = name.slice(-1);
+                }
+            });
+
+            // 手機號碼輸入時自動填入密碼
+            memberPhoneInput.addEventListener('input', function() {
+                const phone = this.value.trim();
+                if (phone.length >= 3) {
+                    memberPasswordInput.value = phone.slice(-3);
+                }
+            });
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 預設顯示登入頁面
+            document.getElementById('loginContainer').style.display = 'flex';
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('userSwitcher').style.display = 'block';
+            
+            // 設定自動填入功能
+            setupAutoFill();
+        });
+    </script>
+</body>
+</html>

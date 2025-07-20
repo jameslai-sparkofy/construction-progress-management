@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>簡化權限系統 - 施工進度管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: #F5F5F5;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #E0E0E0;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 1.6em;
+            margin-bottom: 20px;
+        }
+
+        .user-info {
+            background: #E3F2FD;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            border-left: 4px solid #1976D2;
+        }
+
+        .contractor-selector {
+            background: #F8F9FA;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #E0E0E0;
+        }
+
+        .contractor-selector h3 {
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1em;
+        }
+
+        .contractor-selector select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #E0E0E0;
+            border-radius: 6px;
+            font-size: 0.9em;
+            background: white;
+        }
+
+        .contractor-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #E8F5E8;
+            border-radius: 6px;
+            font-size: 0.85em;
+            color: #2E7D32;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #1976D2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1565C0;
+        }
+
+        .btn-success {
+            background: #388E3C;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #2E7D32;
+        }
+
+        .btn-secondary {
+            background: #757575;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #616161;
+        }
+
+        .building-tabs {
+            display: flex;
+            gap: 2px;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #E0E0E0;
+            border: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .tab.active {
+            background: #1976D2;
+            color: white;
+        }
+
+        .tab.readonly {
+            background: #FFF3E0;
+            color: #E65100;
+        }
+
+        .tab:hover:not(.active):not(.readonly) {
+            background: #BDBDBD;
+        }
+
+        .grid-container {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #E0E0E0;
+            overflow-x: auto;
+        }
+
+        .construction-grid {
+            min-width: 500px;
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 0.9em;
+        }
+
+        .construction-grid th,
+        .construction-grid td {
+            border: 1px solid #E0E0E0;
+            padding: 10px 8px;
+            text-align: center;
+            position: relative;
+        }
+
+        .construction-grid th {
+            background: #F5F5F5;
+            color: #333;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+
+        .construction-grid td {
+            width: 70px;
+            height: 45px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        .construction-grid td:hover {
+            background: #F0F8FF;
+        }
+
+        .construction-grid td.readonly {
+            background: #FFF8E1;
+            cursor: default;
+        }
+
+        .construction-grid td.readonly:hover {
+            background: #FFF3C4;
+        }
+
+        .construction-grid td.no-permission {
+            background: #FAFAFA;
+            cursor: not-allowed;
+            opacity: 0.3;
+        }
+
+        .floor-label {
+            background: #E0E0E0 !important;
+            color: #333 !important;
+            font-weight: 600;
+            cursor: default !important;
+        }
+
+        .floor-restricted {
+            background: #FFEBEE !important;
+            color: #C62828 !important;
+        }
+
+        /* 狀態顏色 */
+        .status-completed { color: #2E7D32; }
+        .status-finished { color: #1976D2; }
+        .status-ready { color: #F57C00; }
+        .status-blocked { color: #D32F2F; }
+        .status-repair { color: #7B1FA2; }
+        .status-pending { color: #616161; }
+
+        /* Modal樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            min-width: 400px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #E0E0E0;
+        }
+
+        .close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #E0E0E0;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .help-text {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .role-demo {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #E0E0E0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .role-demo label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.85em;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .role-demo select {
+            width: 100%;
+            padding: 5px;
+            font-size: 0.85em;
+            border: 1px solid #E0E0E0;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .user-actions {
+                flex-direction: column;
+            }
+
+            .building-tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                margin-bottom: 5px;
+            }
+
+            .role-demo {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 施工進度管理系統</h1>
+            
+            <div class="user-info" id="userInfo">
+                <!-- 動態顯示用戶信息 -->
+            </div>
+            
+            <!-- 工班選擇器 -->
+            <div class="contractor-selector" id="contractorSelector" style="display: none;">
+                <h3>選擇工班</h3>
+                <select id="contractorSelect" onchange="switchContractor()">
+                    <option value="">請選擇工班</option>
+                    <!-- 動態生成工班選項 -->
+                </select>
+                <div class="contractor-info" id="contractorInfo" style="display: none;">
+                    <!-- 顯示選中工班的負責區域 -->
+                </div>
+            </div>
+            
+            <div class="user-actions" id="userActions">
+                <!-- 動態顯示用戶可用操作 -->
+            </div>
+        </div>
+
+        <!-- 建築選擇和網格 -->
+        <div class="grid-container">
+            <div class="building-tabs" id="buildingTabs">
+                <button class="tab active" onclick="switchBuilding('A')">A棟</button>
+                <button class="tab" onclick="switchBuilding('B')">B棟</button>
+                <button class="tab" onclick="switchBuilding('C')">C棟</button>
+            </div>
+
+            <table class="construction-grid" id="constructionGrid">
+                <thead>
+                    <tr>
+                        <th>樓層/戶別</th>
+                        <th>A1</th>
+                        <th>A2</th>
+                        <th>A3</th>
+                        <th>A4</th>
+                        <th>A5</th>
+                        <th>A6</th>
+                    </tr>
+                </thead>
+                <tbody id="gridBody">
+                    <!-- 動態生成內容 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 創建用戶Modal -->
+    <div class="modal" id="createUserModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>創建用戶</h3>
+                <button class="close" onclick="closeModal('createUserModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>用戶類型：</label>
+                <select id="userType" onchange="updateUserForm()">
+                    <option value="contractor_leader">工班主要負責人</option>
+                    <option value="contractor_member">工班成員</option>
+                    <option value="owner">業主</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>姓名：</label>
+                <input type="text" id="userName" placeholder="請輸入姓名">
+            </div>
+            <div class="form-group">
+                <label>電話：</label>
+                <input type="tel" id="userPhone" placeholder="請輸入電話號碼">
+            </div>
+            <div id="contractorFields">
+                <div class="form-group">
+                    <label>工班選擇：</label>
+                    <select id="contractorGroupSelect">
+                        <option value="">請選擇工班</option>
+                        <!-- 動態生成工班選項 -->
+                    </select>
+                    <div class="help-text">選擇該用戶所屬的工班</div>
+                </div>
+            </div>
+            <div id="ownerFields" style="display: none;">
+                <div class="form-group">
+                    <label>業主權限：</label>
+                    <div class="help-text">業主可以查看和編輯整個案場的所有資料</div>
+                </div>
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="closeModal('createUserModal')">取消</button>
+                <button class="btn btn-primary" onclick="createUser()">創建</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 角色演示切換器 -->
+    <div class="role-demo">
+        <label>演示角色切換：</label>
+        <select id="roleSelect" onchange="switchRole()">
+            <option value="admin">管理員</option>
+            <option value="contractor_leader">工班主要負責人</option>
+            <option value="contractor_member">工班成員</option>
+            <option value="owner">業主</option>
+        </select>
+    </div>
+
+    <script>
+        // 案場數據（包含工班信息）
+        const siteData = {
+            site_id: "site123",
+            name: "勝興-興安西-2023",
+            contractors: [
+                {
+                    id: "contractor_A",
+                    name: "ABC工程行",
+                    leader_phone: "17600000001",
+                    members: ["17600000002", "17600000003"],
+                    assigned_areas: {
+                        buildings: ["A"],
+                        floors: "all"
+                    }
+                },
+                {
+                    id: "contractor_B", 
+                    name: "XYZ建設",
+                    leader_phone: "17600000004",
+                    members: ["17600000005"],
+                    assigned_areas: {
+                        buildings: ["B"],
+                        floors: "all"
+                    }
+                },
+                {
+                    id: "contractor_C",
+                    name: "DEF營造",
+                    leader_phone: "17600000006",
+                    members: ["17600000007"],
+                    assigned_areas: {
+                        buildings: ["C"],
+                        floors: [1,2,3,4,5]
+                    }
+                },
+                {
+                    id: "contractor_D",
+                    name: "GHI工程",
+                    leader_phone: "17600000008",
+                    members: ["17600000009"],
+                    assigned_areas: {
+                        buildings: ["C"],
+                        floors: [6,7,8,9,10,11,12,13,14,15,16]
+                    }
+                }
+            ],
+            owners: [
+                {
+                    id: "owner_001",
+                    name: "業主A",
+                    phone: "17700000001"
+                },
+                {
+                    id: "owner_002", 
+                    name: "業主B",
+                    phone: "17700000002"
+                }
+            ]
+        };
+
+        // 用戶權限配置
+        const userProfiles = {
+            admin: {
+                name: "系統管理員",
+                role: "admin",
+                permissions: { can_edit_all: true, can_view_all: true, can_create_users: true }
+            },
+            contractor_leader: {
+                name: "工班主要負責人",
+                role: "contractor_leader",
+                contractor_id: null, // 需要選擇工班
+                permissions: { can_edit_own: true, can_view_own: true, can_create_members: true }
+            },
+            contractor_member: {
+                name: "工班成員",
+                role: "contractor_member",
+                contractor_id: "contractor_A", // 預設工班A
+                permissions: { can_edit_own: true, can_view_own: true }
+            },
+            owner: {
+                name: "業主",
+                role: "owner",
+                permissions: { can_edit_all: true, can_view_all: true }
+            }
+        };
+
+        // 建築數據
+        const buildingData = {
+            'A': {
+                floors: [16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+                units: ['A1', 'A2', 'A3', 'A4', 'A5', 'A6'],
+                data: {}
+            },
+            'B': {
+                floors: [14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+                units: ['B1', 'B2', 'B3', 'B4'],
+                data: {}
+            },
+            'C': {
+                floors: [16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1],
+                units: ['C1', 'C2', 'C3', 'C4', 'C5'],
+                data: {}
+            }
+        };
+
+        const statusSymbols = {
+            'completed': '●',
+            'finished': '○',
+            'ready': '✓',
+            'blocked': '✗',
+            'repair': '▲',
+            'pending': '─'
+        };
+
+        let currentBuilding = 'A';
+        let currentUser = userProfiles.admin;
+        let selectedContractor = null;
+
+        // 權限檢查
+        function hasPermission(building, floor, action) {
+            if (currentUser.role === 'admin' || currentUser.role === 'owner') {
+                return 'edit'; // 管理員和業主可以編輯所有
+            }
+            
+            if (currentUser.role === 'contractor_leader' || currentUser.role === 'contractor_member') {
+                if (!selectedContractor) return 'none';
+                
+                const contractor = siteData.contractors.find(c => c.id === selectedContractor);
+                if (!contractor) return 'none';
+                
+                // 檢查建築
+                if (!contractor.assigned_areas.buildings.includes(building)) {
+                    return 'none';
+                }
+                
+                // 檢查樓層
+                if (contractor.assigned_areas.floors !== 'all' && 
+                    !contractor.assigned_areas.floors.includes(floor)) {
+                    return 'none';
+                }
+                
+                return 'edit';
+            }
+            
+            return 'none';
+        }
+
+        // 切換角色
+        function switchRole() {
+            const roleSelect = document.getElementById('roleSelect');
+            currentUser = userProfiles[roleSelect.value];
+            selectedContractor = null;
+            updateUserInfo();
+            updateUserActions();
+            updateContractorSelector();
+            updateGrid();
+        }
+
+        // 切換工班
+        function switchContractor() {
+            const contractorSelect = document.getElementById('contractorSelect');
+            selectedContractor = contractorSelect.value;
+            updateContractorInfo();
+            updateGrid();
+        }
+
+        // 更新用戶信息
+        function updateUserInfo() {
+            const userInfo = document.getElementById('userInfo');
+            let info = `登入身份：${currentUser.name}`;
+            
+            if (selectedContractor) {
+                const contractor = siteData.contractors.find(c => c.id === selectedContractor);
+                if (contractor) {
+                    info += ` - ${contractor.name}`;
+                    const buildings = contractor.assigned_areas.buildings.join('、');
+                    const floors = contractor.assigned_areas.floors === 'all' ? '全部樓層' : `${contractor.assigned_areas.floors.join(',')}樓`;
+                    info += ` | 負責區域：${buildings}棟 (${floors})`;
+                }
+            } else if (currentUser.role === 'owner') {
+                info += ` | 權限：查看和編輯所有資料`;
+            }
+            
+            userInfo.textContent = info;
+        }
+
+        // 更新用戶操作
+        function updateUserActions() {
+            const userActions = document.getElementById('userActions');
+            userActions.innerHTML = '';
+            
+            if (currentUser.permissions.can_create_users) {
+                userActions.innerHTML += '<button class="btn btn-primary" onclick="openCreateModal(\'contractor_leader\')">創建工班主要負責人</button>';
+                userActions.innerHTML += '<button class="btn btn-success" onclick="openCreateModal(\'owner\')">創建業主</button>';
+            }
+            
+            if (currentUser.permissions.can_create_members) {
+                userActions.innerHTML += '<button class="btn btn-secondary" onclick="openCreateModal(\'contractor_member\')">創建工班成員</button>';
+            }
+        }
+
+        // 更新工班選擇器
+        function updateContractorSelector() {
+            const contractorSelector = document.getElementById('contractorSelector');
+            const contractorSelect = document.getElementById('contractorSelect');
+            
+            if (currentUser.role === 'contractor_leader') {
+                contractorSelector.style.display = 'block';
+                
+                // 生成工班選項
+                contractorSelect.innerHTML = '<option value="">請選擇工班</option>';
+                siteData.contractors.forEach(contractor => {
+                    const option = document.createElement('option');
+                    option.value = contractor.id;
+                    option.textContent = contractor.name;
+                    contractorSelect.appendChild(option);
+                });
+            } else {
+                contractorSelector.style.display = 'none';
+            }
+        }
+
+        // 更新工班信息
+        function updateContractorInfo() {
+            const contractorInfo = document.getElementById('contractorInfo');
+            
+            if (selectedContractor) {
+                const contractor = siteData.contractors.find(c => c.id === selectedContractor);
+                if (contractor) {
+                    const buildings = contractor.assigned_areas.buildings.join('、');
+                    const floors = contractor.assigned_areas.floors === 'all' ? '全部樓層' : `${contractor.assigned_areas.floors.join(',')}樓`;
+                    contractorInfo.innerHTML = `負責區域：${buildings}棟 (${floors})`;
+                    contractorInfo.style.display = 'block';
+                }
+            } else {
+                contractorInfo.style.display = 'none';
+            }
+        }
+
+        // 切換建築
+        function switchBuilding(building) {
+            currentBuilding = building;
+            updateBuildingTabs();
+            updateGrid();
+        }
+
+        // 更新建築標籤
+        function updateBuildingTabs() {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active', 'readonly');
+            });
+            
+            const permission = hasPermission(currentBuilding, 1, 'view');
+            const activeTab = document.querySelector(`.tab[onclick*="${currentBuilding}"]`);
+            
+            if (permission === 'edit') {
+                activeTab.classList.add('active');
+            } else if (permission === 'readonly') {
+                activeTab.classList.add('readonly');
+            }
+        }
+
+        // 更新網格
+        function updateGrid() {
+            const building = buildingData[currentBuilding];
+            const gridBody = document.getElementById('gridBody');
+            const thead = document.querySelector('.construction-grid thead tr');
+            
+            thead.innerHTML = '<th>樓層/戶別</th>';
+            building.units.forEach(unit => {
+                thead.innerHTML += `<th>${unit}</th>`;
+            });
+            
+            gridBody.innerHTML = '';
+            
+            building.floors.forEach(floor => {
+                const row = document.createElement('tr');
+                
+                const floorPermission = hasPermission(currentBuilding, floor, 'view');
+                let floorClass = 'floor-label';
+                if (floorPermission === 'none') {
+                    floorClass += ' floor-restricted';
+                }
+                
+                row.innerHTML = `<td class="${floorClass}">${floor}</td>`;
+                
+                building.units.forEach(unit => {
+                    const key = `${floor}-${unit}`;
+                    const unitData = building.data[key] || { status: 'pending' };
+                    const symbol = statusSymbols[unitData.status];
+                    
+                    const permission = hasPermission(currentBuilding, floor, 'view');
+                    
+                    let cellClass = `status-${unitData.status}`;
+                    let onclick = '';
+                    
+                    if (permission === 'edit') {
+                        onclick = `onclick="showUnitInfo('${key}')"`;
+                    } else if (permission === 'readonly') {
+                        cellClass += ' readonly';
+                        onclick = `onclick="showReadonlyInfo('${key}')"`;
+                    } else {
+                        cellClass += ' no-permission';
+                    }
+                    
+                    row.innerHTML += `<td class="${cellClass}" ${onclick}>${symbol}</td>`;
+                });
+                
+                gridBody.appendChild(row);
+            });
+        }
+
+        // 顯示單元詳情
+        function showUnitInfo(key) {
+            alert(`可編輯單元：${key}`);
+        }
+
+        // 顯示唯讀信息
+        function showReadonlyInfo(key) {
+            alert(`唯讀單元：${key} (僅可查看)`);
+        }
+
+        // 打開創建用戶Modal
+        function openCreateModal(type) {
+            document.getElementById('userType').value = type;
+            updateUserForm();
+            updateContractorOptions();
+            document.getElementById('createUserModal').style.display = 'block';
+        }
+
+        // 關閉Modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // 更新用戶表單
+        function updateUserForm() {
+            const userType = document.getElementById('userType').value;
+            const contractorFields = document.getElementById('contractorFields');
+            const ownerFields = document.getElementById('ownerFields');
+            
+            if (userType === 'owner') {
+                contractorFields.style.display = 'none';
+                ownerFields.style.display = 'block';
+            } else {
+                contractorFields.style.display = 'block';
+                ownerFields.style.display = 'none';
+            }
+        }
+
+        // 更新工班選項
+        function updateContractorOptions() {
+            const contractorGroupSelect = document.getElementById('contractorGroupSelect');
+            contractorGroupSelect.innerHTML = '<option value="">請選擇工班</option>';
+            
+            siteData.contractors.forEach(contractor => {
+                const option = document.createElement('option');
+                option.value = contractor.id;
+                option.textContent = contractor.name;
+                contractorGroupSelect.appendChild(option);
+            });
+        }
+
+        // 創建用戶
+        function createUser() {
+            const userType = document.getElementById('userType').value;
+            const userName = document.getElementById('userName').value;
+            const userPhone = document.getElementById('userPhone').value;
+            
+            if (!userName || !userPhone) {
+                alert('請填寫完整信息');
+                return;
+            }
+            
+            if (userType !== 'owner') {
+                const contractorId = document.getElementById('contractorGroupSelect').value;
+                if (!contractorId) {
+                    alert('請選擇工班');
+                    return;
+                }
+                
+                const contractor = siteData.contractors.find(c => c.id === contractorId);
+                alert(`已創建${userType === 'contractor_leader' ? '工班主要負責人' : '工班成員'}：${userName} (${userPhone})\n工班：${contractor.name}`);
+            } else {
+                alert(`已創建業主：${userName} (${userPhone})\n權限：查看和編輯所有資料`);
+            }
+            
+            closeModal('createUserModal');
+        }
+
+        // 初始化數據
+        function initializeData() {
+            Object.keys(buildingData).forEach(building => {
+                const floors = buildingData[building].floors;
+                const units = buildingData[building].units;
+                
+                floors.forEach(floor => {
+                    units.forEach(unit => {
+                        const statuses = ['completed', 'finished', 'ready', 'blocked', 'repair', 'pending'];
+                        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+                        
+                        buildingData[building].data[`${floor}-${unit}`] = {
+                            status: randomStatus
+                        };
+                    });
+                });
+            });
+        }
+
+        // 頁面載入時初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeData();
+            updateUserInfo();
+            updateUserActions();
+            updateContractorSelector();
+            updateGrid();
+        });
+    </script>
+</body>
+</html>

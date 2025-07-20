@@ -452,11 +452,6 @@
         <!-- Success Message -->
         <div class="success-message" id="successMessage">
             ✅ 工程專案頁面已成功建立！URL已複製到剪貼板。
-            <div style="margin-top: 1rem;">
-                <button class="btn btn-primary" onclick="window.location.href='/'">
-                    🏠 回主頁面
-                </button>
-            </div>
         </div>
 
         <!-- Step 1: CRM Selection -->
@@ -666,10 +661,17 @@
             <div class="modal-body">
                 <input type="text" class="form-input" placeholder="搜尋商機名稱..." style="margin-bottom: 1rem;">
                 <div class="crm-list">
-                    <!-- 商機列表將由 JavaScript 動態載入 -->
-                    <div style="text-align: center; padding: 2rem; color: #6b7280;">
-                        <div style="margin-bottom: 1rem; font-size: 2rem;">📋</div>
-                        <div>點擊「選擇商機」按鈕載入 CRM 商機列表</div>
+                    <div class="crm-item" onclick="selectCRM('OPP2024001', '勝興-興安西-2024', '王先生', '15000000')">
+                        <div style="font-weight: 600;">勝興-興安西-2024</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">客戶：王先生 | 金額：NT$ 15,000,000</div>
+                    </div>
+                    <div class="crm-item" onclick="selectCRM('OPP2024002', '市鎮南住宅大樓', '李小姐', '25000000')">
+                        <div style="font-weight: 600;">市鎮南住宅大樓</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">客戶：李小姐 | 金額：NT$ 25,000,000</div>
+                    </div>
+                    <div class="crm-item" onclick="selectCRM('OPP2024003', '科技園區辦公大樓', '陳總經理', '80000000')">
+                        <div style="font-weight: 600;">科技園區辦公大樓</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">客戶：陳總經理 | 金額：NT$ 80,000,000</div>
                     </div>
                 </div>
             </div>
@@ -680,136 +682,8 @@
         let currentStep = 1;
         const totalSteps = 4;
 
-        async function showCRMModal() {
-            const modal = document.getElementById('crmModal');
-            modal.classList.add('show');
-            
-            // 載入 CRM 商機數據
-            await loadCRMOpportunities();
-        }
-
-        // 載入 CRM 商機數據
-        async function loadCRMOpportunities() {
-            const crmList = document.querySelector('.crm-list');
-            const searchInput = document.querySelector('#crmModal input[type="text"]');
-            
-            try {
-                // 顯示載入狀態
-                crmList.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: #6b7280;">
-                        <div style="margin-bottom: 1rem; font-size: 2rem;">⏳</div>
-                        <div>正在載入 CRM 商機...</div>
-                    </div>
-                `;
-                
-                console.log('開始載入 CRM 商機...');
-                
-                // 調用後端 API
-                const response = await fetch('/api/crm/opportunities', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                
-                console.log('API 響應狀態:', response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const result = await response.json();
-                console.log('CRM API 響應:', result);
-                
-                if (!result.success) {
-                    throw new Error(result.message || '載入商機失敗');
-                }
-                
-                const opportunities = result.data || [];
-                
-                if (opportunities.length === 0) {
-                    crmList.innerHTML = `
-                        <div style="text-align: center; padding: 2rem; color: #6b7280;">
-                            <div style="margin-bottom: 1rem; font-size: 2rem;">📭</div>
-                            <div>沒有找到可用的商機</div>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                // 顯示演示數據提示
-                if (result.isDemo) {
-                    const modalHeader = document.querySelector('#crmModal .modal-header');
-                    const existingNotice = modalHeader.querySelector('.demo-notice');
-                    if (!existingNotice) {
-                        const demoNotice = document.createElement('div');
-                        demoNotice.className = 'demo-notice';
-                        demoNotice.style.cssText = 'margin-top: 0.5rem; padding: 0.5rem; background: #fef3c7; border: 1px solid #fbbf24; border-radius: 4px; font-size: 0.9rem; color: #92400e;';
-                        demoNotice.innerHTML = `<strong>演示模式：</strong> ${result.message || '目前顯示演示數據'}`;
-                        modalHeader.appendChild(demoNotice);
-                    }
-                }
-                
-                // 渲染商機列表
-                renderOpportunities(opportunities);
-                
-                // 設置搜尋功能
-                setupOpportunitySearch(opportunities);
-                
-                console.log(`✅ 成功載入 ${opportunities.length} 個商機 ${result.isDemo ? '(演示數據)' : '(真實數據)'}`);
-                
-            } catch (error) {
-                console.error('載入 CRM 商機失敗:', error);
-                crmList.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: #ef4444;">
-                        <div style="margin-bottom: 1rem; font-size: 2rem;">❌</div>
-                        <div>載入商機失敗</div>
-                        <div style="font-size: 0.9rem; margin-top: 0.5rem; color: #6b7280;">
-                            ${error.message}
-                        </div>
-                        <button onclick="loadCRMOpportunities()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #4f46e5; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            重新載入
-                        </button>
-                    </div>
-                `;
-            }
-        }
-
-        // 渲染商機列表
-        function renderOpportunities(opportunities) {
-            const crmList = document.querySelector('.crm-list');
-            
-            crmList.innerHTML = opportunities.map(opp => `
-                <div class="crm-item" onclick="selectCRM('${opp.id}', '${escapeHtml(opp.name)}', '${escapeHtml(opp.customer)}', '${opp.amount}')">
-                    <div style="font-weight: 600;">${escapeHtml(opp.name)}</div>
-                    <div style="font-size: 0.9rem; color: #6b7280;">
-                        客戶：${escapeHtml(opp.customer)} | 金額：${opp.amount}
-                    </div>
-                    ${opp.stage ? `<div style="font-size: 0.8rem; color: #8b5cf6;">階段：${escapeHtml(opp.stage)}</div>` : ''}
-                </div>
-            `).join('');
-        }
-
-        // 設置商機搜尋功能
-        function setupOpportunitySearch(opportunities) {
-            const searchInput = document.querySelector('#crmModal input[type="text"]');
-            
-            searchInput.oninput = function(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                const filteredOpportunities = opportunities.filter(opp => 
-                    opp.name.toLowerCase().includes(searchTerm) ||
-                    opp.customer.toLowerCase().includes(searchTerm)
-                );
-                
-                renderOpportunities(filteredOpportunities);
-            };
-        }
-
-        // HTML 轉義函數
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        function showCRMModal() {
+            document.getElementById('crmModal').classList.add('show');
         }
 
         function selectCRM(id, name, customer, amount) {
@@ -896,136 +770,17 @@
             alert('草稿已儲存');
         }
 
-        async function createProject() {
-            // 收集表單資料
-            const projectData = {
-                projectName: document.getElementById('projectName').value,
-                projectSlug: document.getElementById('projectSlug').value,
-                buildingCount: document.getElementById('buildingCount').value,
-                floorCount: document.getElementById('floorCount').value,
-                projectDescription: document.getElementById('projectDescription').value,
-                crmInfo: {
-                    id: document.getElementById('crmId').textContent,
-                    name: document.getElementById('crmName').textContent,
-                    customer: document.getElementById('crmCustomer').textContent,
-                    amount: document.getElementById('crmAmount').textContent
-                },
-                permissions: collectPermissions()
-            };
-
-            // 驗證資料
-            if (!projectData.projectName || !projectData.projectSlug) {
-                alert('請填寫必要欄位');
-                return;
-            }
-
-            // 顯示載入狀態
-            const createBtn = document.getElementById('createBtn');
-            const originalText = createBtn.textContent;
-            createBtn.textContent = '建立中...';
-            createBtn.disabled = true;
-
-            try {
-                // 調用後端API
-                console.log('發送專案資料:', projectData);
+        function createProject() {
+            // Simulate project creation
+            setTimeout(() => {
+                document.getElementById('successMessage').classList.add('show');
+                document.getElementById('step4').style.display = 'none';
+                document.querySelector('.actions').style.display = 'none';
                 
-                const response = await fetch('/api/projects', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(projectData)
-                });
-
-                console.log('API響應狀態:', response.status);
-                console.log('響應頭:', response.headers);
-                
-                let result;
-                const responseText = await response.text();
-                console.log('原始響應內容:', responseText);
-                
-                try {
-                    result = JSON.parse(responseText);
-                } catch (parseError) {
-                    console.error('JSON解析錯誤:', parseError);
-                    throw new Error(`無法解析響應: ${responseText.substring(0, 100)}`);
-                }
-
-                console.log('解析後結果:', result);
-
-                if (response.ok && result.success) {
-                    // 建立成功
-                    setTimeout(() => {
-                        document.getElementById('successMessage').classList.add('show');
-                        document.getElementById('step4').style.display = 'none';
-                        document.querySelector('.actions').style.display = 'none';
-                        
-                        // 更新成功訊息中的URL
-                        const successMsg = document.getElementById('successMessage');
-                        successMsg.innerHTML = `
-                            ✅ 工程專案頁面已成功建立！
-                            <div style="margin: 1rem 0; padding: 1rem; background: #f3f4f6; border-radius: 8px; font-family: monospace;">
-                                ${result.url}
-                            </div>
-                            <div style="margin-top: 1rem;">
-                                <button class="btn btn-primary" onclick="copyURL('${result.url}')">
-                                    📋 複製連結
-                                </button>
-                                <button class="btn btn-primary" onclick="window.location.href='/'">
-                                    🏠 回主頁面
-                                </button>
-                            </div>
-                        `;
-                        
-                        // 複製URL到剪貼板
-                        if (navigator.clipboard) {
-                            navigator.clipboard.writeText(result.url);
-                        }
-                    }, 100);
-                } else {
-                    // 建立失敗
-                    console.error('建立專案失敗:', result.error || '未知錯誤');
-                    alert(`建立專案失敗: ${result.error || `HTTP ${response.status}`}`);
-                    createBtn.textContent = originalText;
-                    createBtn.disabled = false;
-                }
-            } catch (error) {
-                console.error('API調用失敗:', error);
-                alert(`建立專案時發生錯誤: ${error.message}`);
-                createBtn.textContent = originalText;
-                createBtn.disabled = false;
-            }
-        }
-
-        // 收集權限設定
-        function collectPermissions() {
-            const permissions = {
-                owner: {},
-                contractorLeader: {},
-                member: {},
-                emailAuth: document.querySelector('input[name="emailAuth"]:checked').value
-            };
-
-            // 收集各角色權限
-            document.querySelectorAll('.permission-row').forEach(row => {
-                const role = row.querySelector('.permission-label').textContent.trim();
-                const options = {};
-                
-                row.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                    const optionName = checkbox.nextElementSibling.textContent.trim();
-                    options[optionName] = checkbox.checked;
-                });
-
-                if (role.includes('業主')) {
-                    permissions.owner = options;
-                } else if (role.includes('工班負責人')) {
-                    permissions.contractorLeader = options;
-                } else if (role.includes('工班成員')) {
-                    permissions.member = options;
-                }
-            });
-
-            return permissions;
+                // Copy URL to clipboard
+                const url = document.getElementById('urlPreview').textContent;
+                navigator.clipboard.writeText(url);
+            }, 1000);
         }
 
         // Close modal when clicking outside

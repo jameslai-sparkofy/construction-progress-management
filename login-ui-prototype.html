@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入 - 興安西工程進度管理系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .otp-input {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        @media (max-width: 640px) {
+            .otp-input {
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-500 to-purple-600 min-h-screen flex items-center justify-center p-4">
+    <!-- 登入容器 -->
+    <div class="w-full max-w-md">
+        <!-- Logo區域 -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full shadow-lg mb-4">
+                <i class="fas fa-building text-3xl text-blue-600"></i>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-bold text-white">興安西工程</h1>
+            <p class="text-blue-100 mt-2">工程進度管理系統</p>
+        </div>
+
+        <!-- 登入卡片 - 手機號碼輸入 -->
+        <div id="phoneStep" class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-6">歡迎登入</h2>
+            
+            <form onsubmit="sendOTP(event)">
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        手機號碼
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-mobile-alt text-gray-400"></i>
+                        </div>
+                        <input type="tel" 
+                            id="phoneInput"
+                            pattern="09[0-9]{8}"
+                            placeholder="0912345678" 
+                            class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                            required>
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500">請輸入您的手機號碼以接收驗證碼</p>
+                </div>
+
+                <button type="submit" 
+                    class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition duration-200 transform hover:scale-[1.02]">
+                    發送驗證碼
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">
+                    沒有帳號？請聯繫管理員
+                </p>
+            </div>
+        </div>
+
+        <!-- OTP驗證步驟 -->
+        <div id="otpStep" class="bg-white rounded-2xl shadow-xl p-6 md:p-8 hidden">
+            <button onclick="backToPhone()" class="mb-4 text-gray-600 hover:text-gray-800">
+                <i class="fas fa-arrow-left mr-2"></i>返回
+            </button>
+            
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-2">輸入驗證碼</h2>
+            <p class="text-gray-600 mb-6">驗證碼已發送至 <span id="phoneDisplay" class="font-medium"></span></p>
+            
+            <form onsubmit="verifyOTP(event)">
+                <div class="mb-6">
+                    <div class="flex justify-center space-x-2 md:space-x-3">
+                        <input type="text" maxlength="1" class="otp-input border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" oninput="moveToNext(this, 0)">
+                        <input type="text" maxlength="1" class="otp-input border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" oninput="moveToNext(this, 1)">
+                        <input type="text" maxlength="1" class="otp-input border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" oninput="moveToNext(this, 2)">
+                        <input type="text" maxlength="1" class="otp-input border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" oninput="moveToNext(this, 3)">
+                        <input type="text" maxlength="1" class="otp-input border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" oninput="moveToNext(this, 4)">
+                        <input type="text" maxlength="1" class="otp-input border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" oninput="moveToNext(this, 5)">
+                    </div>
+                </div>
+
+                <button type="submit" 
+                    class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition duration-200 transform hover:scale-[1.02]">
+                    確認登入
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600 mb-2">沒有收到驗證碼？</p>
+                <button onclick="resendOTP()" class="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                    重新發送 <span id="countdown"></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 載入中狀態 -->
+        <div id="loadingStep" class="bg-white rounded-2xl shadow-xl p-8 hidden">
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 mb-4">
+                    <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+                <p class="text-gray-600">正在處理...</p>
+            </div>
+        </div>
+
+        <!-- 成功提示 -->
+        <div id="successStep" class="bg-white rounded-2xl shadow-xl p-8 hidden">
+            <div class="text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                    <i class="fas fa-check text-3xl text-green-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">登入成功！</h3>
+                <p class="text-gray-600">正在為您跳轉至系統首頁...</p>
+            </div>
+        </div>
+
+        <!-- 錯誤提示 -->
+        <div id="errorMessage" class="hidden mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <i class="fas fa-exclamation-circle mr-2"></i>
+            <span id="errorText"></span>
+        </div>
+    </div>
+
+    <!-- 角色選擇（測試用） -->
+    <div class="fixed bottom-4 right-4">
+        <div class="bg-white rounded-lg shadow-lg p-4">
+            <p class="text-xs text-gray-600 mb-2">測試角色切換：</p>
+            <select onchange="switchRole(this.value)" class="text-sm border rounded px-2 py-1">
+                <option value="worker">工班</option>
+                <option value="owner">業主</option>
+                <option value="admin">管理員</option>
+            </select>
+        </div>
+    </div>
+
+    <script>
+        let countdownTimer;
+        let countdownValue = 60;
+
+        // 發送OTP
+        function sendOTP(event) {
+            event.preventDefault();
+            const phone = document.getElementById('phoneInput').value;
+            
+            // 顯示載入狀態
+            document.getElementById('phoneStep').classList.add('hidden');
+            document.getElementById('loadingStep').classList.remove('hidden');
+            
+            // 模擬API請求
+            setTimeout(() => {
+                document.getElementById('loadingStep').classList.add('hidden');
+                document.getElementById('otpStep').classList.remove('hidden');
+                document.getElementById('phoneDisplay').textContent = phone;
+                
+                // 開始倒計時
+                startCountdown();
+                
+                // 聚焦第一個輸入框
+                document.querySelector('.otp-input').focus();
+            }, 1500);
+        }
+
+        // 返回手機輸入
+        function backToPhone() {
+            document.getElementById('otpStep').classList.add('hidden');
+            document.getElementById('phoneStep').classList.remove('hidden');
+            clearInterval(countdownTimer);
+            
+            // 清空OTP輸入
+            document.querySelectorAll('.otp-input').forEach(input => {
+                input.value = '';
+            });
+        }
+
+        // OTP輸入自動跳轉
+        function moveToNext(input, index) {
+            if (input.value.length === 1) {
+                const inputs = document.querySelectorAll('.otp-input');
+                if (index < inputs.length - 1) {
+                    inputs[index + 1].focus();
+                }
+            }
+            
+            // 檢查是否所有輸入框都已填寫
+            checkAllFilled();
+        }
+
+        // 檢查是否所有OTP都已輸入
+        function checkAllFilled() {
+            const inputs = document.querySelectorAll('.otp-input');
+            const allFilled = Array.from(inputs).every(input => input.value.length === 1);
+            
+            if (allFilled) {
+                // 自動提交
+                verifyOTP(new Event('submit'));
+            }
+        }
+
+        // 驗證OTP
+        function verifyOTP(event) {
+            event.preventDefault();
+            
+            const inputs = document.querySelectorAll('.otp-input');
+            const otp = Array.from(inputs).map(input => input.value).join('');
+            
+            if (otp.length !== 6) {
+                showError('請輸入完整的6位數驗證碼');
+                return;
+            }
+            
+            // 顯示載入狀態
+            document.getElementById('otpStep').classList.add('hidden');
+            document.getElementById('loadingStep').classList.remove('hidden');
+            
+            // 模擬驗證
+            setTimeout(() => {
+                document.getElementById('loadingStep').classList.add('hidden');
+                
+                // 模擬成功
+                if (otp === '123456') {
+                    document.getElementById('successStep').classList.remove('hidden');
+                    setTimeout(() => {
+                        window.location.href = '#dashboard';
+                    }, 2000);
+                } else {
+                    // 顯示錯誤
+                    document.getElementById('otpStep').classList.remove('hidden');
+                    showError('驗證碼錯誤，請重新輸入');
+                    
+                    // 清空輸入
+                    inputs.forEach(input => {
+                        input.value = '';
+                    });
+                    inputs[0].focus();
+                }
+            }, 1500);
+        }
+
+        // 重新發送OTP
+        function resendOTP() {
+            if (countdownValue > 0) return;
+            
+            // 重置倒計時
+            countdownValue = 60;
+            startCountdown();
+            
+            // 顯示提示
+            showSuccess('驗證碼已重新發送');
+        }
+
+        // 開始倒計時
+        function startCountdown() {
+            updateCountdown();
+            countdownTimer = setInterval(() => {
+                countdownValue--;
+                updateCountdown();
+                
+                if (countdownValue <= 0) {
+                    clearInterval(countdownTimer);
+                }
+            }, 1000);
+        }
+
+        // 更新倒計時顯示
+        function updateCountdown() {
+            const element = document.getElementById('countdown');
+            if (countdownValue > 0) {
+                element.textContent = `(${countdownValue}秒)`;
+            } else {
+                element.textContent = '';
+            }
+        }
+
+        // 顯示錯誤
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorDiv.classList.remove('hidden');
+            
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        // 角色切換（測試用）
+        function switchRole(role) {
+            console.log('切換到角色:', role);
+            // 這裡可以根據不同角色顯示不同的提示
+        }
+
+        // 監聽鍵盤事件（OTP輸入）
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Backspace') {
+                const activeElement = document.activeElement;
+                if (activeElement.classList.contains('otp-input') && activeElement.value === '') {
+                    const inputs = Array.from(document.querySelectorAll('.otp-input'));
+                    const currentIndex = inputs.indexOf(activeElement);
+                    if (currentIndex > 0) {
+                        inputs[currentIndex - 1].focus();
+                        inputs[currentIndex - 1].value = '';
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

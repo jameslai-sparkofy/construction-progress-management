@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>纷享销客API在线测试工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .nav {
+            background: rgba(248, 249, 250, 0.8);
+            padding: 20px;
+            border-bottom: 1px solid rgba(222, 226, 230, 0.5);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .nav button {
+            background: linear-gradient(135deg, #007cba, #005a87);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .nav button:hover {
+            background: linear-gradient(135deg, #005a87, #004065);
+            transform: translateY(-2px);
+        }
+        
+        .nav button.active {
+            background: linear-gradient(135deg, #28a745, #20a139);
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .box {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(222, 226, 230, 0.5);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        }
+        
+        .box h3, .box h4 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+        
+        .api-endpoint {
+            background: linear-gradient(135deg, #e7f3ff, #b8daff);
+            border: 2px solid #007cba;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            color: #856404;
+        }
+        
+        .result {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        .error {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .warning {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border-color: #ffc107;
+            color: #856404;
+        }
+        
+        .log {
+            background: #1a202c;
+            color: #68d391;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            height: 250px;
+            overflow-y: auto;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            white-space: pre-wrap;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #007cba, #28a745);
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #007cba;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #007cba, #005a87);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            background: linear-gradient(135deg, #005a87, #004065);
+            transform: translateY(-1px);
+        }
+        
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .nav {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 纷享销客API在线测试工具</h1>
+            <p>基于真实字段映射 · 完整API验证 · 即时测试结果</p>
+        </div>
+        
+        <div class="nav">
+            <button onclick="showSection('overview')" class="active">📋 概述</button>
+            <button onclick="showSection('test-tool')">🧪 API测试</button>
+            <button onclick="showSection('docs')">📚 文档</button>
+            <button onclick="showSection('data-list')" id="dataListNavBtn" style="display: none;">📋 数据清单</button>
+        </div>
+        
+        <div class="content">
+            <!-- 概述部分 -->
+            <div id="overview" class="section active">
+                <div class="box">
+                    <h3>🎯 工具概述</h3>
+                    <p>这个在线测试工具基于您的Excel字段映射文档和纷享销客官方API开发，可以直接在浏览器中测试API调用。</p>
+                    
+                    <h4>🌟 主要功能</h4>
+                    <ul>
+                        <li><strong>Token管理</strong> - 自动获取和管理企业访问令牌</li>
+                        <li><strong>用户验证</strong> - 通过手机号获取用户信息</li>
+                        <li><strong>数据查询</strong> - 查询维修单数据，支持多种筛选条件</li>
+                        <li><strong>实时日志</strong> - 显示详细的API调用过程和响应</li>
+                        <li><strong>数据导出</strong> - 将查询结果导出为JSON文件</li>
+                    </ul>
+                </div>
+                
+                <div class="box">
+                    <h3>⚙️ 您的配置信息</h3>
+                    <div class="api-endpoint">
+                        <strong>应用配置：</strong><br>
+                        <span class="highlight">AppID:</span> FSAID_1320691<br>
+                        <span class="highlight">AppSecret:</span> ec63ff237c5c4a759be36d3a8fb7a3b4<br>
+                        <span class="highlight">永久授权码:</span> 899433A4A04A3B8CB1CC2183DA4B5B48<br>
+                        <span class="highlight">测试手机:</span> 17675662629<br>
+                        <span class="highlight">维修单对象:</span> on_site_signature__c
+                    </div>
+                </div>
+                
+                <div class="box">
+                    <h3>🚨 重要提醒</h3>
+                    <div class="warning">
+                        <strong>CORS跨域问题：</strong><br>
+                        浏览器可能会阻止跨域请求。如果遇到CORS错误，请：
+                        <ul>
+                            <li>使用Chrome开发者模式启动（添加 --disable-web-security 参数）</li>
+                            <li>安装CORS浏览器扩展</li>
+                            <li>将代码复制到本地服务器运行</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- API测试工具 -->
+            <div id="test-tool" class="section">
+                <div class="box">
+                    <h3>🧪 API功能测试</h3>
+                    
+                    <div class="box">
+                        <h4>步骤 1: 获取企业访问令牌</h4>
+                        <button onclick="testGetToken()" id="tokenBtn">🔑 获取Token</button>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="tokenProgress" style="width: 0%"></div>
+                        </div>
+                        <div id="tokenResult"></div>
+                    </div>
+                    
+                    <div class="box">
+                        <h4>步骤 2: 获取用户信息</h4>
+                        <input type="text" id="mobileInput" placeholder="输入手机号" value="17675662629">
+                        <button onclick="testGetUser()" id="userBtn" disabled>👤 获取用户</button>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="userProgress" style="width: 0%"></div>
+                        </div>
+                        <div id="userResult"></div>
+                    </div>
+                    
+                    <div class="box">
+                        <h4>步骤 3: 查询维修单数据</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <input type="number" id="limitInput" placeholder="查询数量" value="10" min="1" max="100">
+                            <input type="number" id="offsetInput" placeholder="偏移量" value="0" min="0">
+                            <select id="statusInput">
+                                <option value="">全部状态</option>
+                                <option value="正常">正常</option>
+                                <option value="未生效">未生效</option>
+                                <option value="審核中">審核中</option>
+                                <option value="變更中">變更中</option>
+                                <option value="作廢">作廢</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button onclick="testQueryWithoutSearchFields()" id="queryNoFieldsBtn" disabled>🚀 不限字段查询</button>
+                            <button onclick="testQueryBasic()" id="queryBasicBtn" disabled>📋 基础查询</button>
+                            <button onclick="debugData()" id="debugBtn" style="background: #dc3545;">🔧 调试数据</button>
+                        </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                            <button onclick="testExport()" id="exportBtn" disabled>💾 导出数据</button>
+                            <button onclick="showDataList()" id="listBtn" disabled>📊 数据清单</button>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="queryProgress" style="width: 0%"></div>
+                        </div>
+                        <div id="queryResult"></div>
+                    </div>
+                </div>
+                
+                <div class="box">
+                    <h3>📊 实时日志</h3>
+                    <button onclick="clearLog()">🗑️ 清除日志</button>
+                    <div id="testLog" class="log">等待API测试操作...\n</div>
+                </div>
+            </div>
+            
+            <!-- 数据清单 -->
+            <div id="data-list" class="section">
+                <div class="box">
+                    <h3>📋 维修单数据清单</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <span id="listSummary">暂无数据</span>
+                        </div>
+                        <div>
+                            <button onclick="batchEdit()" style="background: #ffc107; color: #212529;">📝 批量编辑</button>
+                            <button onclick="testExport()">💾 导出数据</button>
+                            <button onclick="clearDataList()">🗑️ 清空清单</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 数据表格 -->
+                    <div style="overflow-x: auto; margin-top: 20px;">
+                        <table id="dataTable" style="width: 100%; border-collapse: collapse; font-size: 12px; background: white; border-radius: 8px; overflow: hidden;">
+                            <thead id="tableHeader" style="background: #007cba; color: white;">
+                                <tr>
+                                    <th style="padding: 12px 8px;">序号</th>
+                                    <th style="padding: 12px 8px;">维修单编号</th>
+                                    <th style="padding: 12px 8px;">状态</th>
+                                    <th style="padding: 12px 8px;">创建时间</th>
+                                    <th style="padding: 12px 8px;">负责人</th>
+                                    <th style="padding: 12px 8px;">商机</th>
+                                    <th style="padding: 12px 8px;">案场</th>
+                                    <th style="padding: 12px 8px;">金额</th>
+                                    <th style="padding: 12px 8px; width: 120px;">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <tr><td colspan="9" style="text-align: center; padding: 40px; color: #6c757d;">暂无数据</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- 编辑弹窗 -->
+                <div id="editModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; border-radius: 15px; padding: 30px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto;">
+                        <h3>✏️ 编辑维修单</h3>
+                        <div id="editForm">
+                            <!-- 编辑表单将由JavaScript生成 -->
+                        </div>
+                        <div style="margin-top: 20px; text-align: right;">
+                            <button onclick="closeEditModal()" style="background: #6c757d; margin-right: 10px;">取消</button>
+                            <button onclick="saveChanges()" style="background: #28a745;">💾 保存修改</button>
+                        </div>
+                        <div id="editResult" style="margin-top: 15px;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 文档部分 -->
+            <div id="docs" class="section">
+                <div class="box">
+                    <h3>📚 API端点文档</h3>
+                    
+                    <h4>1. 获取企业访问令牌</h4>
+                    <div class="api-endpoint">
+                        <strong>URL:</strong> <code>https://open.fxiaoke.com/cgi/corpAccessToken/get/V2</code><br>
+                        <strong>方法:</strong> POST<br>
+                        <strong>说明:</strong> 获取企业级访问令牌，有效期7200秒
+                    </div>
+                    
+                    <h4>2. 通过手机号获取用户信息</h4>
+                    <div class="api-endpoint">
+                        <strong>URL:</strong> <code>https://open.fxiaoke.com/cgi/user/getByMobile</code><br>
+                        <strong>方法:</strong> POST<br>
+                        <strong>说明:</strong> 获取用户的openUserId，用于API调用身份认证
+                    </div>
+                    
+                    <h4>3. 查询自定义对象数据 ⭐</h4>
+                    <div class="api-endpoint">
+                        <strong>URL:</strong> <code>https://open.fxiaoke.com/cgi/crm/custom/v2/data/query</code><br>
+                        <strong>方法:</strong> POST<br>
+                        <strong>对象:</strong> on_site_signature__c (维修单)<br>
+                        <strong>重要:</strong> 自定义对象必须使用 custom 端点！
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let testToken = null;
+        let testCorpId = null;
+        let testUserId = null;
+        let testData = [];
+        let currentEditIndex = -1;
+        let originalData = {};
+        
+        const CONFIG = {
+            appId: "FSAID_1320691",
+            appSecret: "ec63ff237c5c4a759be36d3a8fb7a3b4",
+            permanentCode: "899433A4A04A3B8CB1CC2183DA4B5B48",
+            baseUrl: "https://open.fxiaoke.com"
+        };
+
+        // 显示不同部分的函数
+        function showSection(sectionId) {
+            console.log('切换到页面:', sectionId);
+            
+            // 隐藏所有部分
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // 移除所有按钮的active类
+            document.querySelectorAll('.nav button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 显示目标部分
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+                log(`切换到页面: ${sectionId}`);
+            } else {
+                console.error('找不到页面:', sectionId);
+            }
+            
+            // 激活对应按钮
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+        }
+
+        // 日志函数
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logDiv = document.getElementById('testLog');
+            if (logDiv) {
+                logDiv.textContent += `[${timestamp}] ${message}\n`;
+                logDiv.scrollTop = logDiv.scrollHeight;
+            }
+            console.log(message);
+        }
+
+        // 显示结果
+        function showResult(elementId, message, type = '') {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = `<div class="result ${type}">${message}</div>`;
+            }
+        }
+
+        // 更新进度条
+        function updateProgress(progressId, percent) {
+            const progressBar = document.getElementById(progressId);
+            if (progressBar) {
+                progressBar.style.width = `${percent}%`;
+            }
+        }
+
+        // 测试获取Token
+        async function testGetToken() {
+            log('开始获取企业访问令牌...');
+            updateProgress('tokenProgress', 20);
+            
+            try {
+                const response = await fetch(`${CONFIG.baseUrl}/cgi/corpAccessToken/get/V2`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        appId: CONFIG.appId,
+                        appSecret: CONFIG.appSecret,
+                        permanentCode: CONFIG.permanentCode
+                    }),
+                    mode: 'cors'
+                });
+                
+                updateProgress('tokenProgress', 60);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                log(`Token响应: ${JSON.stringify(result, null, 2)}`);
+                
+                if (result.errorCode === 0) {
+                    testToken = result.corpAccessToken;
+                    testCorpId = result.corpId;
+                    updateProgress('tokenProgress', 100);
+                    
+                    showResult('tokenResult', 
+                        `✅ Token获取成功!<br><strong>企业ID:</strong> ${testCorpId}<br><strong>Token:</strong> ${testToken.substring(0, 20)}...`, 'success');
+                    
+                    // 启用下一步按钮
+                    document.getElementById('userBtn').disabled = false;
+                    log('Token获取成功，可以进行用户验证');
+                } else {
+                    throw new Error(`API错误: ${result.errorMessage} (${result.errorCode})`);
+                }
+            } catch (error) {
+                updateProgress('tokenProgress', 0);
+                log(`Token获取失败: ${error.message}`);
+                showResult('tokenResult', `❌ Token获取失败: ${error.message}`, 'error');
+                
+                if (error.message.includes('CORS')) {
+                    showResult('tokenResult', 
+                        `❌ CORS跨域错误<br>请尝试：<br>1. 使用Chrome开发者模式<br>2. 安装CORS扩展<br>3. 在服务器环境运行`, 'error');
+                }
+            }
+        }
+
+        // 测试获取用户
+        async function testGetUser() {
+            const mobile = document.getElementById('mobileInput').value.trim();
+            if (!mobile) {
+                log('请输入手机号');
+                return;
+            }
+            
+            if (!testToken) {
+                log('请先获取Token');
+                return;
+            }
+            
+            log(`获取用户信息: ${mobile}`);
+            updateProgress('userProgress', 30);
+            
+            try {
+                const response = await fetch(`${CONFIG.baseUrl}/cgi/user/getByMobile`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        corpId: testCorpId,
+                        corpAccessToken: testToken,
+                        mobile: mobile
+                    }),
+                    mode: 'cors'
+                });
+                
+                updateProgress('userProgress', 70);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                log(`用户响应: ${JSON.stringify(result, null, 2)}`);
+                
+                if (result.errorCode === 0 && result.empList?.length > 0) {
+                    const user = result.empList[0];
+                    testUserId = user.openUserId;
+                    updateProgress('userProgress', 100);
+                    
+                    showResult('userResult', 
+                        `✅ 用户信息获取成功!<br><strong>姓名:</strong> ${user.name}<br><strong>用户ID:</strong> ${testUserId}<br><strong>部门:</strong> ${user.department?.name || '未知'}`, 'success');
+                    
+                    // 启用查询按钮
+                    document.getElementById('queryNoFieldsBtn').disabled = false;
+                    document.getElementById('queryBasicBtn').disabled = false;
+                    log('用户信息获取成功，可以查询数据');
+                } else {
+                    throw new Error(`API错误: ${result.errorMessage || '用户不存在'} (${result.errorCode})`);
+                }
+            } catch (error) {
+                updateProgress('userProgress', 0);
+                log(`用户获取失败: ${error.message}`);
+                showResult('userResult', `❌ 用户获取失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 不限字段查询
+        async function testQueryWithoutSearchFields() {
+            const limit = parseInt(document.getElementById('limitInput').value) || 10;
+            const offset = parseInt(document.getElementById('offsetInput').value) || 0;
+            const status = document.getElementById('statusInput').value;
+            
+            if (!testToken || !testUserId) {
+                log('请先完成Token获取和用户验证');
+                return;
+            }
+            
+            log(`执行不限字段查询: limit=${limit}, offset=${offset}, status=${status || '全部'}`);
+            updateProgress('queryProgress', 20);
+            
+            try {
+                // 构建过滤条件
+                const filters = [];
+                if (status) {
+                    filters.push({
+                        field_name: "life_status",
+                        field_values: [status],
+                        operator: "EQ"
+                    });
+                }
+                
+                updateProgress('queryProgress', 40);
+                
+                const requestData = {
+                    corpId: testCorpId,
+                    corpAccessToken: testToken,
+                    currentOpenUserId: testUserId,
+                    data: {
+                        dataObjectApiName: "on_site_signature__c",
+                        search_query_info: {
+                            limit: Math.min(limit, 100),
+                            offset: offset,
+                            filters: filters,
+                            orders: [{fieldName: "create_time", isAsc: "false"}]
+                        }
+                    }
+                };
+                
+                log(`请求数据: ${JSON.stringify(requestData, null, 2)}`);
+                
+                const response = await fetch(`${CONFIG.baseUrl}/cgi/crm/custom/v2/data/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(requestData),
+                    mode: 'cors'
+                });
+                
+                updateProgress('queryProgress', 70);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                log(`查询响应: ${JSON.stringify(result, null, 2)}`);
+                
+                if (result.errorCode === 0) {
+                    // 提取数据 - 根据真实API响应格式
+                    let extractedData = [];
+                    let total = 0;
+                    
+                    if (result.data && result.data.dataList && Array.isArray(result.data.dataList)) {
+                        extractedData = result.data.dataList;
+                        total = result.data.total || result.data.dataList.length;
+                        log('✅ 检测到dataList格式（维修单标准格式）');
+                    }
+                    
+                    testData = extractedData;
+                    updateProgress('queryProgress', 100);
+                    
+                    console.log('最终提取的testData:', testData);
+                    console.log('testData长度:', testData.length);
+                    
+                    if (testData.length > 0) {
+                        console.log('第一条记录:', testData[0]);
+                        console.log('第一条记录的字段:', Object.keys(testData[0]));
+                    }
+                    
+                    // 格式化显示结果
+                    let displayData = `<h5>📊 查询结果统计:</h5>`;
+                    displayData += `<p><strong>API总记录数:</strong> ${total}</p>`;
+                    displayData += `<p><strong>实际返回记录:</strong> ${testData.length}</p>`;
+                    displayData += `<p><strong>数据提取方式:</strong> 智能检测API响应格式</p>`;
+                    
+                    if (testData.length > 0) {
+                        const sample = testData[0];
+                        const fieldCount = Object.keys(sample).length;
+                        displayData += `<p><strong>记录字段数:</strong> ${fieldCount} 个</p>`;
+                        
+                        displayData += `<h5>🔍 关键数据预览:</h5>`;
+                        displayData += '<table style="width:100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; border: 1px solid #dee2e6;">';
+                        
+                        // 显示关键字段
+                        const keyFields = [
+                            { key: 'name', label: '维修单编号' },
+                            { key: 'life_status__r', label: '生命状态', fallback: 'life_status' },
+                            { key: 'owner__r', label: '负责人', fallback: 'owner' },
+                            { key: 'create_time', label: '创建时间' },
+                            { key: 'opportunity__c__r', label: '商机', fallback: 'opportunity__c' },
+                            { key: 'sales_floor__c__r', label: '案场', fallback: 'sales_floor__c' },
+                            { key: 'field_gKt1C__c', label: '维修金额' },
+                            { key: 'field_eTwh1__c', label: '请款金额' }
+                        ];
+                        
+                        keyFields.forEach(field => {
+                            let value = sample[field.key];
+                            if (!value && field.fallback) {
+                                value = sample[field.fallback];
+                            }
+                            
+                            if (value !== undefined && value !== null && value !== '') {
+                                // 格式化值
+                                if (typeof value === 'object' && value !== null) {
+                                    if (value.name) value = value.name;
+                                    else if (Array.isArray(value)) {
+                                        if (value.length === 1 && typeof value[0] === 'string') {
+                                            value = value[0];
+                                        } else {
+                                            value = `${value.length} 个项目`;
+                                        }
+                                    }
+                                    else value = JSON.stringify(value).substring(0, 50) + '...';
+                                }
+                                
+                                // 时间戳转换
+                                if (field.key === 'create_time' && typeof value === 'number') {
+                                    value = new Date(value).toLocaleString('zh-CN');
+                                }
+                                
+                                displayData += `<tr style="border: 1px solid #ddd;">
+                                    <td style="padding: 8px; background: #f8f9fa; font-weight: bold; width: 120px;">${field.label}</td>
+                                    <td style="padding: 8px; word-break: break-all;">${value}</td>
+                                </tr>`;
+                            }
+                        });
+                        displayData += '</table>';
+                        
+                        displayData += `<p style="margin-top: 15px;"><em>💡 数据包含 ${fieldCount} 个字段，点击"数据清单"查看完整表格</em></p>`;
+                    } else {
+                        displayData += `<div class="warning">⚠️ API返回了总数 ${total}，但实际记录为空。</div>`;
+                    }
+                    
+                    showResult('queryResult', `✅ 查询成功!<br>${displayData}`, testData.length > 0 ? 'success' : 'warning');
+                    
+                    document.getElementById('exportBtn').disabled = false;
+                    document.getElementById('listBtn').disabled = testData.length === 0;
+                    log(`✅ 查询完成: API总数${total}, 实际提取${testData.length}条记录`);
+                } else {
+                    throw new Error(`API错误: ${result.errorMessage} (${result.errorCode})`);
+                }
+            } catch (error) {
+                updateProgress('queryProgress', 0);
+                log(`查询失败: ${error.message}`);
+                showResult('queryResult', `❌ 查询失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 基础查询
+        async function testQueryBasic() {
+            log('执行基础查询...');
+            // 可以复用不限字段查询的逻辑
+            await testQueryWithoutSearchFields();
+        }
+
+        // 显示数据清单
+        function showDataList() {
+            log('=== 开始显示数据清单 ===');
+            log(`testData类型: ${typeof testData}`);
+            log(`testData是否为数组: ${Array.isArray(testData)}`);
+            log(`testData长度: ${testData ? testData.length : 'undefined'}`);
+            
+            if (!testData || !Array.isArray(testData) || testData.length === 0) {
+                log('错误: 没有数据可显示');
+                showResult('queryResult', '❌ 没有数据可显示，请先执行查询获取数据', 'warning');
+                return;
+            }
+            
+            log(`数据验证通过，准备显示 ${testData.length} 条记录`);
+            
+            // 显示数据清单导航按钮
+            document.getElementById('dataListNavBtn').style.display = 'inline-block';
+            
+            // 切换到数据清单页面
+            showSection('data-list');
+            
+            // 渲染数据到表格
+            renderDataListTable();
+            
+            log(`✅ 数据清单显示成功: ${testData.length} 条记录`);
+        }
+
+        // 渲染数据清单表格
+        function renderDataListTable() {
+            const tableBody = document.getElementById('tableBody');
+            const listSummary = document.getElementById('listSummary');
+            
+            if (!testData || testData.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 40px; color: #6c757d;">暂无数据</td></tr>';
+                listSummary.textContent = '暂无数据';
+                return;
+            }
+            
+            // 更新摘要
+            listSummary.innerHTML = `共 <strong>${testData.length}</strong> 条维修单记录`;
+            
+            // 渲染表格行
+            let html = '';
+            testData.forEach((item, index) => {
+                // 格式化时间
+                let createTime = '-';
+                if (item.create_time) {
+                    if (typeof item.create_time === 'number') {
+                        createTime = new Date(item.create_time).toLocaleString('zh-CN');
+                    } else {
+                        createTime = item.create_time;
+                    }
+                }
+                
+                // 格式化负责人
+                let owner = '-';
+                if (item.owner__r && item.owner__r.name) {
+                    owner = item.owner__r.name;
+                } else if (item.owner && Array.isArray(item.owner) && item.owner.length > 0) {
+                    owner = item.owner[0];
+                }
+                
+                // 格式化状态
+                let status = item.life_status__r || item.life_status || '-';
+                
+                // 格式化金额
+                let amount = '-';
+                if (item.field_gKt1C__c) {
+                    amount = `¥${parseFloat(item.field_gKt1C__c).toLocaleString()}`;
+                }
+                
+                html += `<tr style="border-bottom: 1px solid #e9ecef;">
+                    <td style="padding: 12px 8px; text-align: center;">${index + 1}</td>
+                    <td style="padding: 12px 8px;"><strong>${item.name || '-'}</strong></td>
+                    <td style="padding: 12px 8px;">
+                        <span style="padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; 
+                                     background: ${status === '正常' ? '#d4edda' : '#fff3cd'}; 
+                                     color: ${status === '正常' ? '#155724' : '#856404'};">
+                            ${status}
+                        </span>
+                    </td>
+                    <td style="padding: 12px 8px; font-size: 11px;">${createTime}</td>
+                    <td style="padding: 12px 8px;">${owner}</td>
+                    <td style="padding: 12px 8px; max-width: 120px; overflow: hidden; text-overflow: ellipsis;" title="${item.opportunity__c__r || item.opportunity__c || ''}">${item.opportunity__c__r || item.opportunity__c || '-'}</td>
+                    <td style="padding: 12px 8px; max-width: 120px; overflow: hidden; text-overflow: ellipsis;" title="${item.sales_floor__c__r || item.sales_floor__c || ''}">${item.sales_floor__c__r || item.sales_floor__c || '-'}</td>
+                    <td style="padding: 12px 8px; text-align: right; font-family: 'Courier New', monospace;">${amount}</td>
+                    <td style="padding: 12px 8px; text-align: center;">
+                        <button onclick="viewItemDetails(${index})" style="padding: 4px 8px; font-size: 11px; background: #17a2b8; border: none; color: white; border-radius: 4px; cursor: pointer; margin-right: 4px;">详情</button>
+                        <button onclick="editItem(${index})" style="padding: 4px 8px; font-size: 11px; background: #28a745; border: none; color: white; border-radius: 4px; cursor: pointer;">编辑</button>
+                    </td>
+                </tr>`;
+            });
+            
+            tableBody.innerHTML = html;
+        }
+
+        // 查看详情
+        function viewItemDetails(index) {
+            if (!testData || index >= testData.length) return;
+            
+            const item = testData[index];
+            let detailsHTML = '<div style="max-height: 400px; overflow-y: auto; padding: 10px;">';
+            detailsHTML += `<h4>维修单详情: ${item.name || '未知编号'}</h4>`;
+            
+            // 基础信息
+            detailsHTML += '<h5>基础信息</h5>';
+            detailsHTML += `<p><strong>编号:</strong> ${item.name || '-'}</p>`;
+            detailsHTML += `<p><strong>状态:</strong> ${item.life_status__r || item.life_status || '-'}</p>`;
+            if (item.create_time) {
+                const createTime = typeof item.create_time === 'number' ? 
+                    new Date(item.create_time).toLocaleString('zh-CN') : item.create_time;
+                detailsHTML += `<p><strong>创建时间:</strong> ${createTime}</p>`;
+            }
+            if (item.owner__r) {
+                detailsHTML += `<p><strong>负责人:</strong> ${item.owner__r.name}</p>`;
+            }
+            
+            // 业务信息
+            detailsHTML += '<h5>业务信息</h5>';
+            if (item.opportunity__c__r) detailsHTML += `<p><strong>商机:</strong> ${item.opportunity__c__r}</p>`;
+            if (item.sales_floor__c__r) detailsHTML += `<p><strong>案场:</strong> ${item.sales_floor__c__r}</p>`;
+            if (item.building_type__c) detailsHTML += `<p><strong>栋别:</strong> ${item.building_type__c}</p>`;
+            if (item.customer_type__c) detailsHTML += `<p><strong>户别:</strong> ${item.customer_type__c}</p>`;
+            if (item.floor_level__c) detailsHTML += `<p><strong>楼层:</strong> ${item.floor_level__c}</p>`;
+            
+            // 金额信息
+            if (item.field_gKt1C__c || item.field_eTwh1__c) {
+                detailsHTML += '<h5>金额信息</h5>';
+                if (item.field_gKt1C__c) detailsHTML += `<p><strong>维修金额:</strong> ¥${parseFloat(item.field_gKt1C__c).toLocaleString()}</p>`;
+                if (item.field_eTwh1__c) detailsHTML += `<p><strong>请款金额:</strong> ¥${parseFloat(item.field_eTwh1__c).toLocaleString()}</p>`;
+            }
+            
+            // 多媒体信息
+            detailsHTML += '<h5>多媒体信息</h5>';
+            const signCount = (item.field_iSwte__c && Array.isArray(item.field_iSwte__c)) ? item.field_iSwte__c.length : 0;
+            const photoCount = (item.field_xZj3E__c && Array.isArray(item.field_xZj3E__c)) ? item.field_xZj3E__c.length : 0;
+            const videoCount = (item.video__c && Array.isArray(item.video__c)) ? item.video__c.length : 0;
+            
+            detailsHTML += `<p><strong>签名:</strong> ${signCount > 0 ? `${signCount} 个签名` : '无签名'}</p>`;
+            detailsHTML += `<p><strong>照片:</strong> ${photoCount > 0 ? `${photoCount} 张照片` : '无照片'}</p>`;
+            detailsHTML += `<p><strong>视频:</strong> ${videoCount > 0 ? `${videoCount} 个视频` : '无视频'}</p>`;
+            
+            detailsHTML += '</div>';
+            
+            showResult('queryResult', detailsHTML, 'success');
+            log(`查看详情: ${item.name || index}`);
+        }
+
+        // 导出数据
+        function testExport() {
+            if (!testData || testData.length === 0) {
+                log('没有数据可导出');
+                return;
+            }
+            
+            try {
+                // 格式化数据
+                const exportData = testData.map(record => {
+                    const formatted = {};
+                    
+                    // 基础字段
+                    formatted['维修单编号'] = record.name || '';
+                    formatted['生命状态'] = record.life_status__r || record.life_status || '';
+                    formatted['负责人'] = record.owner__r ? record.owner__r.name : (Array.isArray(record.owner) ? record.owner[0] : record.owner || '');
+                    formatted['创建时间'] = record.create_time ? (typeof record.create_time === 'number' ? new Date(record.create_time).toLocaleString('zh-CN') : record.create_time) : '';
+                    formatted['商机'] = record.opportunity__c__r || record.opportunity__c || '';
+                    formatted['案场'] = record.sales_floor__c__r || record.sales_floor__c || '';
+                    formatted['栋别'] = record.building_type__c || '';
+                    formatted['户别'] = record.customer_type__c || '';
+                    formatted['楼层'] = record.floor_level__c || '';
+                    formatted['维修金额'] = record.field_gKt1C__c || '';
+                    formatted['请款金额'] = record.field_eTwh1__c || '';
+                    
+                    // 多媒体字段
+                    formatted['签名数量'] = (record.field_iSwte__c && Array.isArray(record.field_iSwte__c)) ? record.field_iSwte__c.length : 0;
+                    formatted['照片数量'] = (record.field_xZj3E__c && Array.isArray(record.field_xZj3E__c)) ? record.field_xZj3E__c.length : 0;
+                    formatted['视频数量'] = (record.video__c && Array.isArray(record.video__c)) ? record.video__c.length : 0;
+                    
+                    return formatted;
+                });
+                
+                const json = JSON.stringify(exportData, null, 2);
+                const blob = new Blob([json], {type: 'application/json'});
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `维修单数据_${new Date().toISOString().slice(0,19).replace(/[:.]/g, '-')}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                URL.revokeObjectURL(url);
+                log(`导出成功: ${testData.length} 条记录，文件: ${a.download}`);
+                
+                showResult('queryResult', `✅ 数据导出成功！<br>文件名: ${a.download}<br>记录数: ${testData.length}`, 'success');
+            } catch (error) {
+                log(`导出失败: ${error.message}`);
+                showResult('queryResult', `❌ 导出失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 调试数据函数
+        function debugData() {
+            log('=== 数据调试信息 ===');
+            
+            log(`testToken: ${testToken ? '已设置' : '未设置'}`);
+            log(`testCorpId: ${testCorpId || '未设置'}`);
+            log(`testUserId: ${testUserId || '未设置'}`);
+            log(`testData类型: ${typeof testData}`);
+            log(`testData是否为数组: ${Array.isArray(testData)}`);
+            log(`testData长度: ${testData ? testData.length : 'undefined'}`);
+            
+            if (testData && testData.length > 0) {
+                log('testData第一条记录:');
+                console.log(testData[0]);
+                
+                log('第一条记录的所有字段:');
+                Object.keys(testData[0]).forEach(key => {
+                    const value = testData[0][key];
+                    log(`  ${key}: ${typeof value} = ${JSON.stringify(value).substring(0, 100)}`);
+                });
+            }
+            
+            let debugHTML = '<h4>🔧 数据调试信息</h4>';
+            debugHTML += `<p><strong>Token状态:</strong> ${testToken ? '✅ 已设置' : '❌ 未设置'}</p>`;
+            debugHTML += `<p><strong>用户ID:</strong> ${testUserId || '❌ 未设置'}</p>`;
+            debugHTML += `<p><strong>数据状态:</strong> ${testData ? `✅ 数组，长度 ${testData.length}` : '❌ 未定义'}</p>`;
+            
+            if (testData && testData.length > 0) {
+                debugHTML += '<h5>第一条记录字段:</h5><ul>';
+                Object.keys(testData[0]).slice(0, 10).forEach(key => {
+                    debugHTML += `<li><strong>${key}:</strong> ${typeof testData[0][key]}</li>`;
+                });
+                debugHTML += '</ul>';
+            }
+            
+            showResult('queryResult', debugHTML, 'warning');
+        }
+
+        // 编辑条目
+        function editItem(index) {
+            if (!testData || index >= testData.length) {
+                log('编辑失败：无效的索引');
+                return;
+            }
+            
+            currentEditIndex = index;
+            const item = testData[index];
+            originalData = JSON.parse(JSON.stringify(item)); // 深拷贝原始数据
+            
+            log(`开始编辑维修单: ${item.name || index}`);
+            
+            // 生成编辑表单
+            generateEditForm(item);
+            
+            // 显示编辑弹窗
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // 生成编辑表单
+        function generateEditForm(item) {
+            const editForm = document.getElementById('editForm');
+            
+            // 定义可编辑的字段
+            const editableFields = [
+                { key: 'building_type__c', label: '栋别', type: 'text', placeholder: '例如：A、B、C' },
+                { key: 'customer_type__c', label: '户别', type: 'text', placeholder: '例如：A1、B2、C3' },
+                { key: 'floor_level__c', label: '楼层', type: 'text', placeholder: '例如：1F、2F、3F' },
+                { key: 'field_gKt1C__c', label: '维修金额', type: 'number', placeholder: '输入金额，例如：1500.00' },
+                { key: 'field_eTwh1__c', label: '请款金额', type: 'number', placeholder: '输入金额，例如：2000.00' },
+                { key: 'field_JmGkC__c', label: '维修状况', type: 'textarea', placeholder: '描述维修详细状况...' },
+                { key: 'life_status', label: '生命状态', type: 'select', options: ['normal', 'draft', 'invalid'], 
+                  optionLabels: { 'normal': '正常', 'draft': '草稿', 'invalid': '作废' } }
+            ];
+            
+            let formHTML = `
+                <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <h5>📝 编辑维修单：${item.name || '未知编号'}</h5>
+                    <p style="margin: 5px 0; color: #6c757d;">记录ID: ${item._id}</p>
+                </div>
+            `;
+            
+            editableFields.forEach(field => {
+                const currentValue = item[field.key] || '';
+                
+                formHTML += `<div style="margin-bottom: 15px;">`;
+                formHTML += `<label style="display: block; font-weight: 600; margin-bottom: 5px; color: #495057;">${field.label}:</label>`;
+                
+                if (field.type === 'select') {
+                    formHTML += `<select id="edit_${field.key}" style="width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px;">`;
+                    field.options.forEach(option => {
+                        const label = field.optionLabels ? field.optionLabels[option] : option;
+                        const selected = currentValue === option ? 'selected' : '';
+                        formHTML += `<option value="${option}" ${selected}>${label}</option>`;
+                    });
+                    formHTML += `</select>`;
+                } else if (field.type === 'textarea') {
+                    formHTML += `<textarea id="edit_${field.key}" rows="3" placeholder="${field.placeholder}" style="width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px; resize: vertical;">${currentValue}</textarea>`;
+                } else {
+                    formHTML += `<input type="${field.type}" id="edit_${field.key}" value="${currentValue}" placeholder="${field.placeholder}" style="width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px;">`;
+                }
+                formHTML += `</div>`;
+            });
+            
+            // 添加提示信息
+            formHTML += `
+                <div style="margin-top: 20px; padding: 10px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; font-size: 13px;">
+                    <strong>💡 编辑提示：</strong>
+                    <ul style="margin: 5px 0; padding-left: 20px;">
+                        <li>修改后点击"保存修改"按钮提交到服务器</li>
+                        <li>金额字段请输入数字，支持小数点</li>
+                        <li>状态修改会影响维修单的生命周期</li>
+                    </ul>
+                </div>
+            `;
+            
+            editForm.innerHTML = formHTML;
+        }
+
+        // 保存修改
+        async function saveChanges() {
+            if (currentEditIndex < 0 || !testData[currentEditIndex]) {
+                log('保存失败：无效的编辑状态');
+                return;
+            }
+            
+            const item = testData[currentEditIndex];
+            log(`开始保存维修单修改: ${item.name}`);
+            
+            // 收集表单数据
+            const updatedData = {};
+            const editableFields = ['building_type__c', 'customer_type__c', 'floor_level__c', 'field_gKt1C__c', 'field_eTwh1__c', 'field_JmGkC__c', 'life_status'];
+            
+            let hasChanges = false;
+            editableFields.forEach(fieldKey => {
+                const inputElement = document.getElementById(`edit_${fieldKey}`);
+                if (inputElement) {
+                    let newValue = inputElement.value.trim();
+                    
+                    // 数字字段特殊处理
+                    if (fieldKey.includes('__c') && (fieldKey.includes('field_g') || fieldKey.includes('field_e'))) {
+                        if (newValue && !isNaN(newValue)) {
+                            newValue = parseFloat(newValue).toFixed(2);
+                        }
+                    }
+                    
+                    // 检查是否有变化
+                    const oldValue = originalData[fieldKey] || '';
+                    if (newValue !== oldValue.toString()) {
+                        updatedData[fieldKey] = newValue;
+                        hasChanges = true;
+                        log(`字段变化: ${fieldKey} = "${oldValue}" -> "${newValue}"`);
+                    }
+                }
+            });
+            
+            if (!hasChanges) {
+                showEditResult('⚠️ 没有检测到数据变化', 'warning');
+                return;
+            }
+            
+            // 显示加载状态
+            showEditResult('🔄 正在保存修改...', 'info');
+            
+            try {
+                // 构建API请求数据
+                const requestData = {
+                    corpAccessToken: testToken,
+                    corpId: testCorpId,
+                    currentOpenUserId: testUserId,
+                    data: {
+                        object_data: {
+                            _id: item._id,
+                            dataObjectApiName: "on_site_signature__c",
+                            ...updatedData
+                        },
+                        details: {}
+                    }
+                };
+                
+                log(`更新请求数据: ${JSON.stringify(requestData, null, 2)}`);
+                
+                // 调用更新API
+                const response = await fetch(`${CONFIG.baseUrl}/cgi/crm/custom/v2/data/update`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(requestData),
+                    mode: 'cors'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                log(`更新响应: ${JSON.stringify(result, null, 2)}`);
+                
+                if (result.errorCode === 0) {
+                    // 更新成功
+                    showEditResult('✅ 修改保存成功！', 'success');
+                    
+                    // 更新本地数据
+                    Object.keys(updatedData).forEach(key => {
+                        testData[currentEditIndex][key] = updatedData[key];
+                    });
+                    
+                    // 刷新表格显示
+                    renderDataListTable();
+                    
+                    log(`✅ 维修单 ${item.name} 修改成功`);
+                    
+                    // 3秒后自动关闭弹窗
+                    setTimeout(() => {
+                        closeEditModal();
+                    }, 2000);
+                    
+                } else {
+                    throw new Error(`API错误: ${result.errorMessage} (${result.errorCode})`);
+                }
+                
+            } catch (error) {
+                log(`保存失败: ${error.message}`);
+                showEditResult(`❌ 保存失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 显示编辑结果
+        function showEditResult(message, type) {
+            const editResult = document.getElementById('editResult');
+            let className = '';
+            
+            switch (type) {
+                case 'success':
+                    className = 'success';
+                    break;
+                case 'error':
+                    className = 'error';
+                    break;
+                case 'warning':
+                    className = 'warning';
+                    break;
+                default:
+                    className = '';
+            }
+            
+            editResult.innerHTML = `<div class="result ${className}" style="margin: 0; padding: 10px;">${message}</div>`;
+        }
+
+        // 关闭编辑弹窗
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            document.getElementById('editResult').innerHTML = '';
+            currentEditIndex = -1;
+            originalData = {};
+            log('编辑弹窗已关闭');
+        }
+
+        // 批量编辑功能
+        function batchEdit() {
+            if (!testData || testData.length === 0) {
+                log('批量编辑失败：没有数据');
+                return;
+            }
+            
+            // 这里可以实现批量编辑功能
+            log('批量编辑功能开发中...');
+            showResult('queryResult', '📝 批量编辑功能正在开发中，敬请期待！', 'warning');
+        }
+        function clearDataList() {
+            if (confirm('确定要清空数据清单吗？')) {
+                testData = [];
+                document.getElementById('tableBody').innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 40px; color: #6c757d;">暂无数据</td></tr>';
+                document.getElementById('listSummary').textContent = '暂无数据';
+                document.getElementById('dataListNavBtn').style.display = 'none';
+                log('数据清单已清空');
+            }
+        }
+
+        // 清除日志
+        function clearLog() {
+            document.getElementById('testLog').textContent = '日志已清除...\n';
+        }
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('纷享销客API在线测试工具已加载');
+            log('测试工具初始化完成，请按步骤进行API测试');
+            
+            // 确保默认显示概述页面
+            showSection('overview');
+        });
+    </script>
+</body>
+</html>
