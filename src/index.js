@@ -35,6 +35,9 @@ export default {
       } else if (projectSlug === 'api') {
         // API 端點
         return await handleAPI(request, env, pathParts.slice(1));
+      } else if (projectSlug === 'create.html') {
+        // 建立專案頁面
+        return await serveStaticAsset(env, 'create.html');
       } else {
         // 專案頁面
         return await handleProjectPage(request, env, projectSlug, pathParts.slice(1));
@@ -60,7 +63,31 @@ export default {
  */
 async function handleProjectDashboard(request, env) {
   // 返回靜態的專案管理頁面
-  return await serveStaticFile('index.html');
+  return await serveStaticAsset(env, 'index.html');
+}
+
+/**
+ * 從 frontend 目錄提供靜態資源
+ */
+async function serveStaticAsset(env, filename) {
+  try {
+    if (env && env.ASSETS) {
+      const response = await env.ASSETS.fetch(new Request(`https://fake-host/${filename}`));
+      if (response && response.ok) {
+        return new Response(await response.text(), {
+          headers: { 
+            'Content-Type': 'text/html; charset=utf-8',
+            'Cache-Control': 'public, max-age=300'
+          }
+        });
+      }
+    }
+  } catch (error) {
+    console.error(`Failed to load ${filename} from assets:`, error);
+  }
+  
+  // 如果從ASSETS獲取失敗，嘗試使用內建版本
+  return await serveStaticFile(filename);
 }
 
 /**
@@ -160,6 +187,188 @@ async function getProjectBySlug(env, slug) {
   } catch (error) {
     console.error('獲取專案失敗:', error);
     return null;
+  }
+}
+
+/**
+ * 建立新專案
+ */
+async function createNewProject(env, projectData) {
+  try {
+    // 驗證必要欄位
+    const requiredFields = ['projectName', 'projectSlug', 'buildingCount', 'floorCount'];
+    for (const field of requiredFields) {
+      if (!projectData[field]) {
+        return {
+          success: false,
+          error: `缺少必要欄位: ${field}`
+        };
+      }
+    }
+
+    // 生成安全令牌 (12位隨機字符)
+    const token = generateSecureToken();
+    const projectId = `${projectData.projectSlug}-${token}`;
+    
+    // 檢查專案是否已存在
+    const existingProject = await getProjectBySlug(env, projectId);
+    if (existingProject) {
+      return {
+        success: false,
+        error: '專案已存在，請使用不同的專案簡稱'
+      };
+    }
+
+    // 建立專案資料結構
+    const project = {
+      id: projectId,
+      name: projectData.projectName,
+      slug: projectData.projectSlug,
+      description: projectData.projectDescription || '',
+      buildingCount: parseInt(projectData.buildingCount),
+      floorCount: parseInt(projectData.floorCount),
+      crmInfo: projectData.crmInfo || {},
+      permissions: projectData.permissions || getDefaultPermissions(),
+      status: 'construction',
+      created: new Date().toISOString(),
+      lastUpdated: new Date().toISOString(),
+      url: `progress.yes-ceramics.com/${projectId}/`
+    };
+
+    // 儲存專案到 KV
+    await env.PROJECTS.put(`project:${projectId}`, JSON.stringify(project));
+    
+    // 更新專案列表
+    await updateProjectsList(env, project);
+    
+    // 初始化專案相關資料
+    await initializeProjectData(env, project);
+
+    console.log('專案建立成功:', projectId);
+    
+    return {
+      success: true,
+      project: project,
+      url: `https://${project.url}`
+    };
+
+  } catch (error) {
+    console.error('建立專案錯誤:', error);
+    return {
+      success: false,
+      error: '建立專案時發生內部錯誤'
+    };
+  }
+}
+
+/**
+ * 生成安全令牌
+ */
+function generateSecureToken(length = 12) {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+/**
+ * 取得預設權限設定
+ */
+function getDefaultPermissions() {
+  return {
+    owner: {
+      viewProgress: true,
+      viewPhotos: false,
+      viewFinance: false
+    },
+    contractorLeader: {
+      updateProgress: true,
+      uploadPhotos: true,
+      manageMembers: true
+    },
+    member: {
+      updatePersonalProgress: true,
+      uploadPhotos: true,
+      viewOtherProgress: false
+    },
+    emailAuth: 'required'
+  };
+}
+
+/**
+ * 更新專案列表
+ */
+async function updateProjectsList(env, newProject) {
+  try {
+    const existingProjects = await getAllProjects(env);
+    const updatedProjects = [...existingProjects, {
+      id: newProject.id,
+      name: newProject.name,
+      status: newProject.status,
+      created: newProject.created,
+      url: newProject.url,
+      buildingCount: newProject.buildingCount,
+      floorCount: newProject.floorCount
+    }];
+    
+    await env.PROJECTS.put('all_projects', JSON.stringify(updatedProjects));
+  } catch (error) {
+    console.error('更新專案列表失敗:', error);
+  }
+}
+
+/**
+ * 初始化專案相關資料
+ */
+async function initializeProjectData(env, project) {
+  try {
+    // 初始化建築結構資料
+    const buildings = ['A', 'B', 'C', 'D'].slice(0, project.buildingCount);
+    
+    for (const building of buildings) {
+      // 為每棟建築建立樓層結構
+      const buildingData = {
+        name: `${building}棟`,
+        floors: project.floorCount,
+        units: 6, // 預設每層6戶
+        contractor: null,
+        status: 'pending'
+      };
+      
+      await env.PROJECTS.put(
+        `project:${project.id}:building:${building}`, 
+        JSON.stringify(buildingData)
+      );
+      
+      // 初始化每個案場的施工狀態
+      for (let floor = 1; floor <= project.floorCount; floor++) {
+        for (let unit = 1; unit <= 6; unit++) {
+          const caseData = {
+            building: building,
+            floor: floor,
+            unit: unit,
+            status: 'pending', // pending, in_progress, completed, problem
+            area: null,
+            date: null,
+            contractor: null,
+            contractorShortName: null,
+            note: null,
+            photos: []
+          };
+          
+          await env.PROJECTS.put(
+            `project:${project.id}:case:${building}_${floor}_${unit}`,
+            JSON.stringify(caseData)
+          );
+        }
+      }
+    }
+    
+    console.log('專案資料初始化完成:', project.id);
+  } catch (error) {
+    console.error('初始化專案資料失敗:', error);
   }
 }
 
@@ -1568,12 +1777,39 @@ async function handleProjectsAPI(request, env, pathParts) {
     
     case 'POST':
       // 建立新專案
-      const newProject = await request.json();
-      // TODO: 實作專案建立邏輯
-      return new Response(JSON.stringify({ message: '專案建立成功' }), {
-        status: 201,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      try {
+        const projectData = await request.json();
+        const result = await createNewProject(env, projectData);
+        
+        if (result.success) {
+          return new Response(JSON.stringify({
+            success: true,
+            message: '專案建立成功',
+            project: result.project,
+            url: result.url
+          }), {
+            status: 201,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        } else {
+          return new Response(JSON.stringify({
+            success: false,
+            error: result.error
+          }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+      } catch (error) {
+        console.error('建立專案失敗:', error);
+        return new Response(JSON.stringify({
+          success: false,
+          error: '建立專案時發生錯誤'
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
     
     default:
       return new Response(JSON.stringify({ error: '不支援的方法' }), {

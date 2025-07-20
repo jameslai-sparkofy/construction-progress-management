@@ -452,6 +452,11 @@
         <!-- Success Message -->
         <div class="success-message" id="successMessage">
             ✅ 工程專案頁面已成功建立！URL已複製到剪貼板。
+            <div style="margin-top: 1rem;">
+                <button class="btn btn-primary" onclick="window.location.href='/'">
+                    🏠 回主頁面
+                </button>
+            </div>
         </div>
 
         <!-- Step 1: CRM Selection -->
@@ -770,17 +775,136 @@
             alert('草稿已儲存');
         }
 
-        function createProject() {
-            // Simulate project creation
-            setTimeout(() => {
-                document.getElementById('successMessage').classList.add('show');
-                document.getElementById('step4').style.display = 'none';
-                document.querySelector('.actions').style.display = 'none';
+        async function createProject() {
+            // 收集表單資料
+            const projectData = {
+                projectName: document.getElementById('projectName').value,
+                projectSlug: document.getElementById('projectSlug').value,
+                buildingCount: document.getElementById('buildingCount').value,
+                floorCount: document.getElementById('floorCount').value,
+                projectDescription: document.getElementById('projectDescription').value,
+                crmInfo: {
+                    id: document.getElementById('crmId').textContent,
+                    name: document.getElementById('crmName').textContent,
+                    customer: document.getElementById('crmCustomer').textContent,
+                    amount: document.getElementById('crmAmount').textContent
+                },
+                permissions: collectPermissions()
+            };
+
+            // 驗證資料
+            if (!projectData.projectName || !projectData.projectSlug) {
+                alert('請填寫必要欄位');
+                return;
+            }
+
+            // 顯示載入狀態
+            const createBtn = document.getElementById('createBtn');
+            const originalText = createBtn.textContent;
+            createBtn.textContent = '建立中...';
+            createBtn.disabled = true;
+
+            try {
+                // 調用後端API
+                console.log('發送專案資料:', projectData);
                 
-                // Copy URL to clipboard
-                const url = document.getElementById('urlPreview').textContent;
-                navigator.clipboard.writeText(url);
-            }, 1000);
+                const response = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(projectData)
+                });
+
+                console.log('API響應狀態:', response.status);
+                console.log('響應頭:', response.headers);
+                
+                let result;
+                const responseText = await response.text();
+                console.log('原始響應內容:', responseText);
+                
+                try {
+                    result = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('JSON解析錯誤:', parseError);
+                    throw new Error(`無法解析響應: ${responseText.substring(0, 100)}`);
+                }
+
+                console.log('解析後結果:', result);
+
+                if (response.ok && result.success) {
+                    // 建立成功
+                    setTimeout(() => {
+                        document.getElementById('successMessage').classList.add('show');
+                        document.getElementById('step4').style.display = 'none';
+                        document.querySelector('.actions').style.display = 'none';
+                        
+                        // 更新成功訊息中的URL
+                        const successMsg = document.getElementById('successMessage');
+                        successMsg.innerHTML = `
+                            ✅ 工程專案頁面已成功建立！
+                            <div style="margin: 1rem 0; padding: 1rem; background: #f3f4f6; border-radius: 8px; font-family: monospace;">
+                                ${result.url}
+                            </div>
+                            <div style="margin-top: 1rem;">
+                                <button class="btn btn-primary" onclick="copyURL('${result.url}')">
+                                    📋 複製連結
+                                </button>
+                                <button class="btn btn-primary" onclick="window.location.href='/'">
+                                    🏠 回主頁面
+                                </button>
+                            </div>
+                        `;
+                        
+                        // 複製URL到剪貼板
+                        if (navigator.clipboard) {
+                            navigator.clipboard.writeText(result.url);
+                        }
+                    }, 100);
+                } else {
+                    // 建立失敗
+                    console.error('建立專案失敗:', result.error || '未知錯誤');
+                    alert(`建立專案失敗: ${result.error || `HTTP ${response.status}`}`);
+                    createBtn.textContent = originalText;
+                    createBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('API調用失敗:', error);
+                alert(`建立專案時發生錯誤: ${error.message}`);
+                createBtn.textContent = originalText;
+                createBtn.disabled = false;
+            }
+        }
+
+        // 收集權限設定
+        function collectPermissions() {
+            const permissions = {
+                owner: {},
+                contractorLeader: {},
+                member: {},
+                emailAuth: document.querySelector('input[name="emailAuth"]:checked').value
+            };
+
+            // 收集各角色權限
+            document.querySelectorAll('.permission-row').forEach(row => {
+                const role = row.querySelector('.permission-label').textContent.trim();
+                const options = {};
+                
+                row.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    const optionName = checkbox.nextElementSibling.textContent.trim();
+                    options[optionName] = checkbox.checked;
+                });
+
+                if (role.includes('業主')) {
+                    permissions.owner = options;
+                } else if (role.includes('工班負責人')) {
+                    permissions.contractorLeader = options;
+                } else if (role.includes('工班成員')) {
+                    permissions.member = options;
+                }
+            });
+
+            return permissions;
         }
 
         // Close modal when clicking outside
