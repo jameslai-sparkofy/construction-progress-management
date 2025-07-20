@@ -1,174 +1,4 @@
-/**
- * 興安西工程進度管理系統 - 主路由器
- * 多租戶建築工程管理平台
- */
-
-// 主要路由處理函數
-export default {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-    
-    // 解析路徑，提取專案識別碼
-    const pathParts = url.pathname.split('/').filter(Boolean);
-    const projectSlug = pathParts[0];
-    
-    // CORS 設定
-    const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    };
-    
-    // 處理 OPTIONS 預檢請求
-    if (request.method === 'OPTIONS') {
-      return new Response(null, { headers: corsHeaders });
-    }
-    
-    try {
-      // 路由分發
-      if (!projectSlug) {
-        // 根路徑 - 顯示專案管理總覽
-        return await handleProjectDashboard(request, env);
-      } else if (projectSlug === 'admin') {
-        // 管理後台
-        return await handleAdminDashboard(request, env);
-      } else if (projectSlug === 'api') {
-        // API 端點
-        return await handleAPI(request, env, pathParts.slice(1));
-      } else {
-        // 專案頁面
-        return await handleProjectPage(request, env, projectSlug, pathParts.slice(1));
-      }
-    } catch (error) {
-      console.error('路由錯誤:', error);
-      return new Response(JSON.stringify({ 
-        error: '伺服器錯誤', 
-        message: error.message 
-      }), {
-        status: 500,
-        headers: { 
-          'Content-Type': 'application/json',
-          ...corsHeaders 
-        }
-      });
-    }
-  }
-};
-
-/**
- * 處理專案管理總覽頁面
- */
-async function handleProjectDashboard(request, env) {
-  // 返回靜態的專案管理頁面
-  return await serveStaticFile('index.html');
-}
-
-/**
- * 處理管理後台
- */
-async function handleAdminDashboard(request, env) {
-  // TODO: 實作管理員認證
-  
-  const html = `
-    <!DOCTYPE html>
-    <html lang="zh-TW">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>管理後台 - 興安建設管理系統</title>
-    </head>
-    <body>
-        <h1>管理後台</h1>
-        <p>此功能正在開發中...</p>
-        <a href="/">返回專案列表</a>
-    </body>
-    </html>
-  `;
-  
-  return new Response(html, {
-    headers: { 'Content-Type': 'text/html; charset=utf-8' }
-  });
-}
-
-/**
- * 處理 API 請求
- */
-async function handleAPI(request, env, pathParts) {
-  const endpoint = pathParts[0];
-  
-  switch (endpoint) {
-    case 'projects':
-      return await handleProjectsAPI(request, env, pathParts.slice(1));
-    case 'auth':
-      return await handleAuthAPI(request, env, pathParts.slice(1));
-    case 'sync':
-      return await handleSyncAPI(request, env, pathParts.slice(1));
-    default:
-      return new Response(JSON.stringify({ error: 'API 端點不存在' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' }
-      });
-  }
-}
-
-/**
- * 處理專案頁面
- */
-async function handleProjectPage(request, env, projectSlug, subPaths) {
-  // 從專案 slug 中解析專案名稱和令牌
-  const [projectName, token] = projectSlug.split('-');
-  
-  if (!projectName || !token) {
-    return new Response('專案 URL 格式錯誤', { status: 400 });
-  }
-  
-  // 根據子路徑決定顯示內容
-  if (subPaths.length === 0) {
-    // 主專案頁面 - 返回詳細的專案管理頁面
-    return await serveStaticFile('project.html');
-  } else {
-    // 專案子頁面 (例如：報表、設定等)
-    const subPage = subPaths[0];
-    if (subPage === 'login') {
-      return await serveStaticFile('login.html');
-    } else {
-      return new Response('頁面不存在', { status: 404 });
-    }
-  }
-}
-
-/**
- * 從 KV 獲取所有專案
- */
-async function getAllProjects(env) {
-  try {
-    const projectsData = await env.PROJECTS.get('all_projects');
-    return projectsData ? JSON.parse(projectsData) : [];
-  } catch (error) {
-    console.error('獲取專案列表失敗:', error);
-    return [];
-  }
-}
-
-/**
- * 根據 slug 獲取專案
- */
-async function getProjectBySlug(env, slug) {
-  try {
-    const projectData = await env.PROJECTS.get(`project:${slug}`);
-    return projectData ? JSON.parse(projectData) : null;
-  } catch (error) {
-    console.error('獲取專案失敗:', error);
-    return null;
-  }
-}
-
-/**
- * 處理靜態檔案
- */
-async function serveStaticFile(filename) {
-  const fileMap = {
-    'index.html': `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -615,7 +445,7 @@ async function serveStaticFile(filename) {
                     <span>👤</span>
                     <span>管理員</span>
                 </div>
-                <button class="btn-new-project" onclick="window.location.href='create.html'">
+                <button class="btn-new-project" onclick="window.location.href='create-project-page-ui.html'">
                     <span>➕</span>
                     <span>新增專案</span>
                 </button>
@@ -701,7 +531,7 @@ async function serveStaticFile(filename) {
                             <tr>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <a href="xinganxi-abc123def456/" class="project-name" target="_blank">興安西工程</a>
+                                        <a href="https://progress.yes-ceramics.com/xinganxi-abc123def456/" class="project-name" target="_blank">興安西工程</a>
                                         <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/xinganxi-abc123def456/')" title="複製專案連結">🔗</button>
                                     </div>
                                 </td>
@@ -731,7 +561,7 @@ async function serveStaticFile(filename) {
                             <tr>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <a href="shizhennan-xyz789uvw012/" class="project-name" target="_blank">市鎮南住宅大樓</a>
+                                        <a href="https://progress.yes-ceramics.com/shizhennan-xyz789uvw012/" class="project-name" target="_blank">市鎮南住宅大樓</a>
                                         <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/shizhennan-xyz789uvw012/')" title="複製專案連結">🔗</button>
                                     </div>
                                 </td>
@@ -761,7 +591,7 @@ async function serveStaticFile(filename) {
                             <tr>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <a href="riverside-pqr678stu901/" class="project-name" target="_blank">河岸景觀宅</a>
+                                        <a href="https://progress.yes-ceramics.com/riverside-pqr678stu901/" class="project-name" target="_blank">河岸景觀宅</a>
                                         <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/riverside-pqr678stu901/')" title="複製專案連結">🔗</button>
                                     </div>
                                 </td>
@@ -791,7 +621,7 @@ async function serveStaticFile(filename) {
                             <tr>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <a href="citycenter-vwx234yz567/" class="project-name" target="_blank">都心豪宅</a>
+                                        <a href="https://progress.yes-ceramics.com/citycenter-vwx234yz567/" class="project-name" target="_blank">都心豪宅</a>
                                         <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/citycenter-vwx234yz567/')" title="複製專案連結">🔗</button>
                                     </div>
                                 </td>
@@ -821,7 +651,7 @@ async function serveStaticFile(filename) {
                             <tr>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <a href="techpark-jkl012mno345/" class="project-name" target="_blank">科技園區辦公大樓</a>
+                                        <a href="https://progress.yes-ceramics.com/techpark-jkl012mno345/" class="project-name" target="_blank">科技園區辦公大樓</a>
                                         <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/techpark-jkl012mno345/')" title="複製專案連結">🔗</button>
                                     </div>
                                 </td>
@@ -851,7 +681,7 @@ async function serveStaticFile(filename) {
                             <tr>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <a href="lakeside-mno456pqr789/" class="project-name" target="_blank">湖畔別墅</a>
+                                        <a href="https://progress.yes-ceramics.com/lakeside-mno456pqr789/" class="project-name" target="_blank">湖畔別墅</a>
                                         <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/lakeside-mno456pqr789/')" title="複製專案連結">🔗</button>
                                     </div>
                                 </td>
@@ -881,7 +711,7 @@ async function serveStaticFile(filename) {
                             <tr>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <a href="station-stu012vwx345/" class="project-name" target="_blank">站前廣場大樓</a>
+                                        <a href="https://progress.yes-ceramics.com/station-stu012vwx345/" class="project-name" target="_blank">站前廣場大樓</a>
                                         <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/station-stu012vwx345/')" title="複製專案連結">🔗</button>
                                     </div>
                                 </td>
@@ -931,7 +761,7 @@ async function serveStaticFile(filename) {
                             <tr>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <a href="xinyi-abc789def012/" class="project-name" target="_blank">信義商辦大樓</a>
+                                        <a href="https://progress.yes-ceramics.com/xinyi-abc789def012/" class="project-name" target="_blank">信義商辦大樓</a>
                                         <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/xinyi-abc789def012/')" title="複製專案連結">🔗</button>
                                     </div>
                                 </td>
@@ -954,7 +784,7 @@ async function serveStaticFile(filename) {
                             <tr>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <a href="qingpu-ghi345jkl678/" class="project-name" target="_blank">青埔住宅</a>
+                                        <a href="https://progress.yes-ceramics.com/qingpu-ghi345jkl678/" class="project-name" target="_blank">青埔住宅</a>
                                         <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/qingpu-ghi345jkl678/')" title="複製專案連結">🔗</button>
                                     </div>
                                 </td>
@@ -997,7 +827,7 @@ async function serveStaticFile(filename) {
                             <tr>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <a href="cuihu-def456ghi789/" class="project-name" target="_blank">翠湖天地</a>
+                                        <a href="https://progress.yes-ceramics.com/cuihu-def456ghi789/" class="project-name" target="_blank">翠湖天地</a>
                                         <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/cuihu-def456ghi789/')" title="複製專案連結">🔗</button>
                                     </div>
                                 </td>
@@ -1020,7 +850,7 @@ async function serveStaticFile(filename) {
                             <tr>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <a href="neihu-mno789pqr012/" class="project-name" target="_blank">內湖科技園</a>
+                                        <a href="https://progress.yes-ceramics.com/neihu-mno789pqr012/" class="project-name" target="_blank">內湖科技園</a>
                                         <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/neihu-mno789pqr012/')" title="複製專案連結">🔗</button>
                                     </div>
                                 </td>
@@ -1043,7 +873,7 @@ async function serveStaticFile(filename) {
                             <tr>
                                 <td>
                                     <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                        <a href="nangang-stu345vwx678/" class="project-name" target="_blank">南港車站共構宅</a>
+                                        <a href="https://progress.yes-ceramics.com/nangang-stu345vwx678/" class="project-name" target="_blank">南港車站共構宅</a>
                                         <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/nangang-stu345vwx678/')" title="複製專案連結">🔗</button>
                                     </div>
                                 </td>
@@ -1105,19 +935,22 @@ async function serveStaticFile(filename) {
             });
         }
 
+        // Enter project - removed popup behavior
+        // Projects now link directly via <a> tags
+
         // Edit project
         function editProject(projectName) {
-            alert(\`編輯專案: \${projectName}\`);
+            alert(`編輯專案: ${projectName}`);
         }
 
         // View report
         function viewReport(projectName) {
-            alert(\`查看報表: \${projectName}\`);
+            alert(`查看報表: ${projectName}`);
         }
 
         // View archive
         function viewArchive(projectName) {
-            alert(\`查看歸檔: \${projectName}\`);
+            alert(`查看歸檔: ${projectName}`);
         }
 
         // Search functionality
@@ -1149,414 +982,4 @@ async function serveStaticFile(filename) {
         });
     </script>
 </body>
-</html>`,
-    'project.html': '', // Will be loaded from frontend/project.html
-  };
-  
-  // Set project.html content directly  
-  fileMap['project.html'] = `<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>興安西工程進度管理系統</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Microsoft JhengHei', Arial, sans-serif; 
-            background: #f5f7fa; 
-            color: #333; 
-            line-height: 1.6;
-        }
-        .header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-        .welcome-card {
-            background: white;
-            border-radius: 12px;
-            padding: 3rem;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-        .feature-card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: transform 0.2s;
-        }
-        .feature-card:hover {
-            transform: translateY(-2px);
-        }
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-        .btn-primary {
-            background: #4f46e5;
-            color: white;
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-block;
-            margin: 1rem 0.5rem;
-        }
-        .btn-primary:hover {
-            background: #4338ca;
-            transform: translateY(-1px);
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-        .stat-item {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
-        }
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            display: block;
-        }
-    </style>
-</head>
-<body>
-    <header class="header">
-        <h1>🏗️ 興安西工程進度管理系統</h1>
-        <p>即時監控建築進度，提升施工效率</p>
-    </header>
-
-    <div class="container">
-        <div class="welcome-card">
-            <h2>歡迎使用工程進度管理系統</h2>
-            <p style="color: #6b7280; margin: 1rem 0;">這是興安西建案的專屬進度管理平台，提供即時進度追蹤、施工照片管理等功能。</p>
-            
-            <div class="stats">
-                <div class="stat-item">
-                    <span class="stat-number">3</span>
-                    <span>建築棟數</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">15</span>
-                    <span>樓層數</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">72%</span>
-                    <span>整體進度</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">24</span>
-                    <span>施工班組</span>
-                </div>
-            </div>
-
-            <div style="margin-top: 2rem;">
-                <a href="#" class="btn-primary" onclick="alert('登入功能開發中...')">🔐 登入系統</a>
-                <a href="#" class="btn-primary" onclick="alert('訪客模式開發中...')">👁️ 訪客瀏覽</a>
-            </div>
-        </div>
-
-        <div class="feature-grid">
-            <div class="feature-card">
-                <div class="feature-icon">📊</div>
-                <h3>即時進度追蹤</h3>
-                <p>各樓層施工進度即時更新，一目了然掌握整體狀況</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">📸</div>
-                <h3>施工照片管理</h3>
-                <p>工班上傳施工現場照片，記錄每個重要施工節點</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">📈</div>
-                <h3>進度報表分析</h3>
-                <p>自動生成進度報表，支援多種格式匯出</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">👥</div>
-                <h3>多角色權限</h3>
-                <p>業主、工班負責人、成員等不同角色權限管理</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">🔔</div>
-                <h3>即時通知</h3>
-                <p>重要進度更新即時推送，確保溝通無誤</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">📱</div>
-                <h3>行動裝置支援</h3>
-                <p>手機、平板完美適配，隨時隨地掌握進度</p>
-            </div>
-        </div>
-
-        <div style="text-align: center; margin: 3rem 0; padding: 2rem; background: white; border-radius: 12px;">
-            <h3>🚧 系統正在開發中</h3>
-            <p style="color: #6b7280; margin: 1rem 0;">
-                完整的工程進度管理功能正在開發中，包括詳細的進度圖表、施工日誌、
-                材料管理、質量檢查等功能即將上線。
-            </p>
-            <p style="color: #6b7280;">
-                <strong>預計完成時間：</strong>2025年8月
-            </p>
-        </div>
-    </div>
-</body>
-</html>`;
-  
-  const content = fileMap[filename];
-  if (!content) {
-    return new Response('檔案不存在', { status: 404 });
-  }
-  
-  return new Response(content, {
-    headers: { 
-      'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'public, max-age=300'
-    }
-  });
-}
-
-/**
- * 生成專案頁面 HTML
- */
-async function generateProjectHTML(project) {
-  return `
-    <!DOCTYPE html>
-    <html lang="zh-TW">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${project.name} - 工程進度</title>
-        <style>
-          body { font-family: 'Microsoft JhengHei', sans-serif; margin: 0; padding: 20px; }
-          .container { max-width: 800px; margin: 0 auto; }
-          .header { background: #1e3c72; color: white; padding: 20px; margin: -20px -20px 20px -20px; }
-          .content { background: white; padding: 30px; border-radius: 8px; }
-        </style>
-    </head>
-    <body>
-        <div class="header">
-            <h1>🏗️ ${project.name}</h1>
-            <p>${project.description}</p>
-        </div>
-        <div class="container">
-            <div class="content">
-                <h2>專案資訊</h2>
-                <p><strong>建築規模：</strong>${project.buildings}棟${project.floors}層</p>
-                <p><strong>專案狀態：</strong>${project.status === 'construction' ? '施工中' : project.status}</p>
-                <p><strong>建立日期：</strong>${project.created}</p>
-                
-                <div style="margin-top: 30px;">
-                    <h3>系統功能</h3>
-                    <ul>
-                        <li>即時進度追蹤</li>
-                        <li>施工照片管理</li>
-                        <li>進度報表分析</li>
-                        <li>多角色權限控制</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </body>
-    </html>
-  `;
-}
-
-/**
- * 生成登入頁面 HTML
- */
-async function generateLoginHTML(project) {
-  return `
-    <!DOCTYPE html>
-    <html lang="zh-TW">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${project.name} - 登入</title>
-        <style>
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { 
-            font-family: 'Microsoft JhengHei', sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-          .login-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            padding: 50px;
-            width: 100%;
-            max-width: 420px;
-            margin: 20px;
-          }
-          .logo { text-align: center; font-size: 2.5em; margin-bottom: 15px; }
-          .project-name {
-            text-align: center;
-            font-size: 1.3em;
-            color: #1e3c72;
-            margin-bottom: 35px;
-            font-weight: 600;
-          }
-          .form-group { margin-bottom: 25px; }
-          label { display: block; margin-bottom: 8px; font-weight: 500; color: #333; }
-          input[type="email"] {
-            width: 100%;
-            padding: 14px 16px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s;
-            background: #fafbfc;
-          }
-          input[type="email"]:focus {
-            outline: none;
-            border-color: #1e3c72;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
-          }
-          .login-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            color: white;
-            border: none;
-            padding: 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s;
-          }
-          .info {
-            background: #e3f2fd;
-            color: #1976d2;
-            border: 1px solid #2196f3;
-            margin-bottom: 25px;
-            padding: 12px;
-            border-radius: 6px;
-            text-align: center;
-            font-size: 14px;
-          }
-        </style>
-    </head>
-    <body>
-        <div class="login-container">
-            <div class="logo">🏗️</div>
-            <div class="project-name">${project.name}</div>
-            
-            <div class="info">
-                請使用您的 Email 地址登入系統
-            </div>
-            
-            <form>
-                <div class="form-group">
-                    <label for="email">Email 地址</label>
-                    <input type="email" id="email" name="email" placeholder="請輸入您的 Email" required>
-                </div>
-                
-                <button type="submit" class="login-btn">登入</button>
-            </form>
-        </div>
-    </body>
-    </html>
-  `;
-}
-
-/**
- * 處理專案 API
- */
-async function handleProjectsAPI(request, env, pathParts) {
-  const method = request.method;
-  
-  switch (method) {
-    case 'GET':
-      if (pathParts.length === 0) {
-        // 獲取所有專案
-        const projects = await getAllProjects(env);
-        return new Response(JSON.stringify(projects), {
-          headers: { 'Content-Type': 'application/json' }
-        });
-      } else {
-        // 獲取特定專案
-        const projectSlug = pathParts[0];
-        const project = await getProjectBySlug(env, projectSlug);
-        if (!project) {
-          return new Response(JSON.stringify({ error: '專案不存在' }), {
-            status: 404,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        }
-        return new Response(JSON.stringify(project), {
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-    
-    case 'POST':
-      // 建立新專案
-      const newProject = await request.json();
-      // TODO: 實作專案建立邏輯
-      return new Response(JSON.stringify({ message: '專案建立成功' }), {
-        status: 201,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    
-    default:
-      return new Response(JSON.stringify({ error: '不支援的方法' }), {
-        status: 405,
-        headers: { 'Content-Type': 'application/json' }
-      });
-  }
-}
-
-/**
- * 處理認證 API
- */
-async function handleAuthAPI(request, env, pathParts) {
-  // TODO: 實作 Email 認證系統
-  return new Response(JSON.stringify({ message: '認證功能開發中' }), {
-    headers: { 'Content-Type': 'application/json' }
-  });
-}
-
-/**
- * 處理同步 API (與 Fxiaoke CRM 同步)
- */
-async function handleSyncAPI(request, env, pathParts) {
-  // TODO: 實作 CRM 同步功能
-  return new Response(JSON.stringify({ message: '同步功能開發中' }), {
-    headers: { 'Content-Type': 'application/json' }
-  });
-}
+</html>

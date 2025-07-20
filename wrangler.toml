@@ -7,6 +7,27 @@ compatibility_date = "2024-01-15"
 name = "construction-progress-prod"
 route = "progress.yes-ceramics.com/*"
 
+# 生產環境變數
+[env.production.vars]
+ENVIRONMENT = "production"
+FXIAOKE_APP_ID = "FSAID_1320691"
+FXIAOKE_BASE_URL = "https://open.fxiaoke.com"
+
+# 生產環境 D1 資料庫
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "construction_progress"
+database_id = "1aa3a4f6-b6cd-41d7-852b-b5a3589c86d7"
+
+# 生產環境 KV 命名空間
+[[env.production.kv_namespaces]]
+binding = "PROJECTS"
+id = "3412b7781d5246b5aeab0c32ac5f9170"
+
+[[env.production.kv_namespaces]]
+binding = "SESSIONS"
+id = "52e735d7bdde46b0bed86ff0f84a8c8d"
+
 # 開發環境配置 
 [env.development]
 name = "construction-progress-dev"
@@ -15,18 +36,16 @@ name = "construction-progress-dev"
 [[d1_databases]]
 binding = "DB"
 database_name = "construction_progress"
-database_id = "" # 需要在建立資料庫後填入
+database_id = "1aa3a4f6-b6cd-41d7-852b-b5a3589c86d7"
 
 # KV 命名空間配置
 [[kv_namespaces]]
 binding = "PROJECTS"
-id = "" # 需要在建立命名空間後填入
-preview_id = ""
+id = "3412b7781d5246b5aeab0c32ac5f9170"
 
 [[kv_namespaces]]
 binding = "SESSIONS"
-id = "" # 需要在建立命名空間後填入
-preview_id = ""
+id = "52e735d7bdde46b0bed86ff0f84a8c8d"
 
 # 環境變數
 [vars]
