@@ -124,8 +124,8 @@ async function handleProjectPage(request, env, projectSlug, subPaths) {
   
   // 根據子路徑決定顯示內容
   if (subPaths.length === 0) {
-    // 主專案頁面 - 返回詳細的專案管理頁面
-    return await serveStaticFile('project.html');
+    // 主專案頁面 - 返回完整的興安西工程管理頁面
+    return await serveProjectHTML(env);
   } else {
     // 專案子頁面 (例如：報表、設定等)
     const subPage = subPaths[0];
@@ -161,6 +161,48 @@ async function getProjectBySlug(env, slug) {
     console.error('獲取專案失敗:', error);
     return null;
   }
+}
+
+/**
+ * 服務完整的專案HTML頁面
+ */
+async function serveProjectHTML(env) {
+  // 直接從環境中的ASSETS獲取完整的project.html
+  try {
+    if (env && env.ASSETS) {
+      const response = await env.ASSETS.fetch(new Request('https://fake-host/project.html'));
+      if (response && response.ok) {
+        return new Response(await response.text(), {
+          headers: { 
+            'Content-Type': 'text/html; charset=utf-8',
+            'Cache-Control': 'public, max-age=300'
+          }
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load project.html from assets:', error);
+  }
+  
+  // 如果從ASSETS獲取失敗，返回錯誤頁面
+  return new Response(`
+    <!DOCTYPE html>
+    <html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8">
+        <title>載入錯誤</title>
+    </head>
+    <body>
+        <h1>專案頁面載入失敗</h1>
+        <p>無法載入完整的專案管理頁面，請稍後再試。</p>
+        <a href="/">返回首頁</a>
+    </body>
+    </html>
+  `, {
+    headers: { 
+      'Content-Type': 'text/html; charset=utf-8'
+    }
+  });
 }
 
 /**
