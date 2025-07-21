@@ -1,0 +1,4003 @@
+{
+  "timestamp": "2025-07-21T07:29:40.780Z",
+  "opportunities": [
+    {
+      "account_id__r": "陳元治建築師事務所",
+      "cost_time": "0",
+      "sales_stage__r": "發現需求",
+      "owner_department_id": "1006",
+      "searchAfterId": [
+        "1752842466082",
+        "687a40e1fec873000180c5b4"
+      ],
+      "currentStageIndex": 1,
+      "data_own_department__r": {
+        "deptName": "業務二部",
+        "leaderUserId": "1000",
+        "deptId": "1006",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "probability": 10,
+      "version": "3",
+      "field_SdEgv__c": "地壁磚/SPC/不鏽鋼浴櫃",
+      "opp_discount": 100,
+      "sales_process_id": "64ec36f86815cf000178aec1",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1006",
+          "deptName": "業務二部",
+          "leaderUserId": "1000",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "field_zO24t__c": "14",
+      "field_e8m3q__c": "0",
+      "sales_status": "1",
+      "sales_stage": "1",
+      "probability_amount": "0.00",
+      "sales_process_id__r": "建案销售流程",
+      "sales_status__r": "进行中",
+      "last_modified_time": 1752844757277,
+      "life_status": "normal",
+      "field_vE1Zn__c": "0",
+      "account_id": "676911978f955f00016c56c7",
+      "account_id__relation_ids": "676911978f955f00016c56c7",
+      "close_date": 1767110400000,
+      "extend_obj_data_id": "687a40e2fec873000180c6de",
+      "created_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "total_num": 489,
+      "owner_department": "業務二部",
+      "lock_status": "0",
+      "create_time": 1752842466082,
+      "last_followed_time": 1752843931763,
+      "created_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1006"
+      ],
+      "field_lmjjf__c": "6nmcIepC8",
+      "name": "坎城團隊秉和-樂田段-2025",
+      "_id": "687a40e1fec873000180c5b4",
+      "lock_status__r": "未锁定",
+      "totalStageCount": 6,
+      "is_deleted": false,
+      "stg_changed_time": 1752842465836,
+      "owner__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "relevant_team__r": "戴朝興",
+      "owner__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "amount": "0.00",
+      "field_i32Uj__c": "0",
+      "last_modified_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "field_5co25__c": "0",
+      "last_modified_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "record_type": "default__c",
+      "last_modified_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "life_status__r": "正常",
+      "field_30rKQ__c": "2",
+      "field_lmjjf__c__r": "低"
+    },
+    {
+      "account_id__r": "昌銳建設股份有限公司",
+      "cost_time": "0",
+      "sales_stage__r": "發現需求",
+      "owner_department_id": "1006",
+      "searchAfterId": [
+        "1752743974242",
+        "6878c026e0c51e0001181dc1"
+      ],
+      "currentStageIndex": 1,
+      "data_own_department__r": {
+        "deptName": "業務二部",
+        "leaderUserId": "1000",
+        "deptId": "1006",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "probability": 10,
+      "version": "2",
+      "field_SdEgv__c": "SPC/地壁磚/不鏽鋼浴櫃",
+      "opp_discount": 100,
+      "sales_process_id": "64ec36f86815cf000178aec1",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1006",
+          "deptName": "業務二部",
+          "leaderUserId": "1000",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "field_e8m3q__c": "0",
+      "sales_status": "1",
+      "sales_stage": "1",
+      "probability_amount": "0.00",
+      "sales_process_id__r": "建案销售流程",
+      "sales_status__r": "进行中",
+      "last_modified_time": 1752744210872,
+      "life_status": "normal",
+      "field_vE1Zn__c": "0",
+      "account_id": "6878bfc6a0544a00012a4cc5",
+      "account_id__relation_ids": "6878bfc6a0544a00012a4cc5",
+      "close_date": 1767110400000,
+      "extend_obj_data_id": "6878c026e0c51e0001181eb9",
+      "created_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "total_num": 489,
+      "owner_department": "業務二部",
+      "lock_status": "0",
+      "create_time": 1752743974242,
+      "last_followed_time": 1752744210277,
+      "created_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1006"
+      ],
+      "field_lmjjf__c": "6nmcIepC8",
+      "name": "昌銳-海濱段-2025",
+      "_id": "6878c026e0c51e0001181dc1",
+      "lock_status__r": "未锁定",
+      "totalStageCount": 6,
+      "is_deleted": false,
+      "stg_changed_time": 1752743974071,
+      "owner__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "relevant_team__r": "戴朝興",
+      "owner__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "amount": "0.00",
+      "field_i32Uj__c": "0",
+      "last_modified_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "field_5co25__c": "0",
+      "last_modified_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "record_type": "default__c",
+      "last_modified_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "life_status__r": "正常",
+      "field_lmjjf__c__r": "低"
+    },
+    {
+      "account_id__r": "樂居國際室內裝修設計有限公司",
+      "cost_time": "0",
+      "sales_stage__r": "發現需求",
+      "owner_department_id": "1006",
+      "searchAfterId": [
+        "1752722722862",
+        "68786d22e0c51e00011dd792"
+      ],
+      "currentStageIndex": 1,
+      "data_own_department__r": {
+        "deptName": "業務二部",
+        "leaderUserId": "1000",
+        "deptId": "1006",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "probability": 10,
+      "version": "2",
+      "field_SdEgv__c": "樂居吳總監，客戶何先生購買鏡櫃2個",
+      "opp_discount": 100,
+      "sales_process_id": "650e4c4bb8e6ee000158c356",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1006",
+          "deptName": "業務二部",
+          "leaderUserId": "1000",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "field_e8m3q__c": "0",
+      "sales_status": "1",
+      "sales_stage": "1",
+      "probability_amount": "0.00",
+      "sales_process_id__r": "個人案場",
+      "sales_status__r": "进行中",
+      "last_modified_time": 1752722722976,
+      "life_status": "normal",
+      "field_vE1Zn__c": "0",
+      "account_id": "66b073e366986a00016fc965",
+      "account_id__relation_ids": "66b073e366986a00016fc965",
+      "close_date": 1753891200000,
+      "extend_obj_data_id": "68786d22e0c51e00011dd9f5",
+      "created_by__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00015",
+        "modifyTime": 1733372035959,
+        "post": "",
+        "createTime": 1718069575797,
+        "phone": "",
+        "name": "張筠敏",
+        "nickname": "張筠敏",
+        "tenantId": "781014",
+        "id": "1081",
+        "email": "",
+        "status": 0
+      },
+      "total_num": 489,
+      "owner_department": "業務二部",
+      "lock_status": "0",
+      "create_time": 1752722722862,
+      "last_followed_time": 1752722722268,
+      "created_by": [
+        "FSUID_AD309509F9680EEE9CBCAE8C8B8FFBD6"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_82B59F013EBD12AEAF9A482F0B9D9B03"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1006"
+      ],
+      "field_lmjjf__c": "TvP3c4kMA",
+      "name": "樂居-永昌二街何先生自宅",
+      "_id": "68786d22e0c51e00011dd792",
+      "lock_status__r": "未锁定",
+      "totalStageCount": 7,
+      "is_deleted": false,
+      "stg_changed_time": 1752722722268,
+      "owner__l": [
+        {
+          "id": "1087",
+          "tenantId": "781014",
+          "name": "江士進",
+          "picAddr": "",
+          "email": "",
+          "nickname": "江士進",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1744762118979,
+          "modifyTime": 1744777866703,
+          "dept": "1006",
+          "post": "",
+          "empNum": ""
+        }
+      ],
+      "relevant_team__r": "江士進",
+      "owner__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "",
+        "modifyTime": 1744777866703,
+        "post": "",
+        "createTime": 1744762118979,
+        "phone": "",
+        "name": "江士進",
+        "nickname": "江士進",
+        "tenantId": "781014",
+        "id": "1087",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_82B59F013EBD12AEAF9A482F0B9D9B03"
+      ],
+      "amount": "0.00",
+      "field_i32Uj__c": "0",
+      "last_modified_by__l": [
+        {
+          "id": "1081",
+          "tenantId": "781014",
+          "name": "張筠敏",
+          "picAddr": "",
+          "email": "",
+          "nickname": "張筠敏",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718069575797,
+          "modifyTime": 1733372035959,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00015"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1081",
+          "tenantId": "781014",
+          "name": "張筠敏",
+          "picAddr": "",
+          "email": "",
+          "nickname": "張筠敏",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718069575797,
+          "modifyTime": 1733372035959,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00015"
+        }
+      ],
+      "field_5co25__c": "0",
+      "last_modified_by": [
+        "FSUID_AD309509F9680EEE9CBCAE8C8B8FFBD6"
+      ],
+      "record_type": "record_88sg6__c",
+      "last_modified_by__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00015",
+        "modifyTime": 1733372035959,
+        "post": "",
+        "createTime": 1718069575797,
+        "phone": "",
+        "name": "張筠敏",
+        "nickname": "張筠敏",
+        "tenantId": "781014",
+        "id": "1081",
+        "email": "",
+        "status": 0
+      },
+      "life_status__r": "正常",
+      "field_lmjjf__c__r": "高"
+    },
+    {
+      "account_id__r": "上雋建設有限公司",
+      "cost_time": "0",
+      "sales_stage__r": "發現需求",
+      "owner_department_id": "1006",
+      "searchAfterId": [
+        "1752647973427",
+        "68774925e0c51e00018f75df"
+      ],
+      "currentStageIndex": 1,
+      "data_own_department__r": {
+        "deptName": "業務二部",
+        "leaderUserId": "1000",
+        "deptId": "1006",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "probability": 10,
+      "version": "2",
+      "field_SdEgv__c": "不鏽鋼浴櫃/地壁磚",
+      "opp_discount": 100,
+      "sales_process_id": "64ec36f86815cf000178aec1",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1006",
+          "deptName": "業務二部",
+          "leaderUserId": "1000",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "field_e8m3q__c": "0",
+      "sales_status": "1",
+      "sales_stage": "1",
+      "probability_amount": "0.00",
+      "sales_process_id__r": "建案销售流程",
+      "sales_status__r": "进行中",
+      "last_modified_time": 1752648059220,
+      "life_status": "normal",
+      "field_vE1Zn__c": "0",
+      "account_id": "65b30f94c880a70001d48154",
+      "account_id__relation_ids": "65b30f94c880a70001d48154",
+      "close_date": 1767110400000,
+      "extend_obj_data_id": "68774925e0c51e00018f79c5",
+      "created_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "total_num": 489,
+      "owner_department": "業務二部",
+      "lock_status": "0",
+      "create_time": 1752647973427,
+      "last_followed_time": 1752648058420,
+      "created_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1006"
+      ],
+      "field_lmjjf__c": "6nmcIepC8",
+      "name": "晟溢-南興段(驛湛精店墅）-2025",
+      "_id": "68774925e0c51e00018f75df",
+      "lock_status__r": "未锁定",
+      "totalStageCount": 6,
+      "is_deleted": false,
+      "stg_changed_time": 1752647973082,
+      "owner__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "relevant_team__r": "戴朝興",
+      "owner__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "amount": "0.00",
+      "field_i32Uj__c": "0",
+      "last_modified_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "field_5co25__c": "0",
+      "last_modified_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "record_type": "default__c",
+      "last_modified_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "life_status__r": "正常",
+      "field_lmjjf__c__r": "低"
+    },
+    {
+      "account_id__r": "雙橡園建設股份有限公司",
+      "cost_time": "0",
+      "sales_stage__r": "發現需求",
+      "owner_department_id": "1006",
+      "searchAfterId": [
+        "1752645737925",
+        "68774069280bfe0001773d53"
+      ],
+      "currentStageIndex": 1,
+      "data_own_department__r": {
+        "deptName": "業務二部",
+        "leaderUserId": "1000",
+        "deptId": "1006",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "probability": 10,
+      "version": "3",
+      "field_SdEgv__c": "SPC/不鏽鋼浴櫃",
+      "opp_discount": 100,
+      "sales_process_id": "64ec36f86815cf000178aec1",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1006",
+          "deptName": "業務二部",
+          "leaderUserId": "1000",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "field_zO24t__c": "31",
+      "field_e8m3q__c": "0",
+      "sales_status": "1",
+      "sales_stage": "1",
+      "probability_amount": "0.00",
+      "sales_process_id__r": "建案销售流程",
+      "sales_status__r": "进行中",
+      "last_modified_time": 1752649492552,
+      "life_status": "normal",
+      "field_vE1Zn__c": "0",
+      "account_id": "68773d25ed2cd30001ce6ec5",
+      "account_id__relation_ids": "68773d25ed2cd30001ce6ec5",
+      "close_date": 1767110400000,
+      "extend_obj_data_id": "68774069280bfe0001773e33",
+      "created_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "total_num": 489,
+      "owner_department": "業務二部",
+      "lock_status": "0",
+      "create_time": 1752645737925,
+      "last_followed_time": 1752649491918,
+      "created_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1006"
+      ],
+      "field_lmjjf__c": "6nmcIepC8",
+      "name": "雙橡園-南興段-2025",
+      "_id": "68774069280bfe0001773d53",
+      "lock_status__r": "未锁定",
+      "totalStageCount": 6,
+      "is_deleted": false,
+      "stg_changed_time": 1752645737760,
+      "owner__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "relevant_team__r": "戴朝興",
+      "owner__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "amount": "0.00",
+      "field_i32Uj__c": "0",
+      "last_modified_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "field_5co25__c": "0",
+      "last_modified_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "record_type": "default__c",
+      "last_modified_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "life_status__r": "正常",
+      "field_30rKQ__c": "3",
+      "field_lmjjf__c__r": "低"
+    },
+    {
+      "account_id__r": "十邑設計工程股份有限公司",
+      "cost_time": "0",
+      "sales_stage__r": "送樣",
+      "owner_department_id": "1001",
+      "searchAfterId": [
+        "1752629944114",
+        "687702b7ed2cd300013f071e"
+      ],
+      "currentStageIndex": 3,
+      "data_own_department__r": {
+        "deptName": "業務一部",
+        "leaderUserId": "1018",
+        "deptId": "1001",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "probability": 40,
+      "version": "4",
+      "field_SdEgv__c": "Spc",
+      "opp_discount": 100,
+      "sales_process_id": "650e4c4bb8e6ee000158c356",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1001",
+          "deptName": "業務一部",
+          "leaderUserId": "1018",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "field_e8m3q__c": "0",
+      "sales_status": "1",
+      "sales_stage": "wce84rw2m",
+      "probability_amount": "0.00",
+      "sales_process_id__r": "個人案場",
+      "sales_status__r": "进行中",
+      "last_modified_time": 1752723481410,
+      "life_status": "normal",
+      "field_vE1Zn__c": "0",
+      "account_id": "68500276fab1990001d87294",
+      "account_id__relation_ids": "68500276fab1990001d87294",
+      "close_date": 1767110400000,
+      "extend_obj_data_id": "687702b8ed2cd300013f0885",
+      "created_by__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1001",
+        "supervisorId": "1000",
+        "empNum": "00003",
+        "modifyTime": 1733371923316,
+        "post": "",
+        "createTime": 1694661475337,
+        "phone": "",
+        "name": "趙嘉麟",
+        "nickname": "趙嘉麟",
+        "tenantId": "781014",
+        "id": "1018",
+        "email": "",
+        "status": 0
+      },
+      "total_num": 489,
+      "owner_department": "業務一部",
+      "lock_status": "0",
+      "create_time": 1752629944114,
+      "last_followed_time": 1752723481247,
+      "created_by": [
+        "FSUID_5DE709BF9F2813F33F30423AC820681E"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_5DE709BF9F2813F33F30423AC820681E"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1001"
+      ],
+      "field_lmjjf__c": "f7kZZzp6x",
+      "name": "十邑-定泰富櫻翫-2025",
+      "_id": "687702b7ed2cd300013f071e",
+      "lock_status__r": "未锁定",
+      "totalStageCount": 7,
+      "is_deleted": false,
+      "stg_changed_time": 1752723481155,
+      "owner__l": [
+        {
+          "id": "1018",
+          "tenantId": "781014",
+          "name": "趙嘉麟",
+          "picAddr": "",
+          "email": "",
+          "nickname": "趙嘉麟",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1694661475337,
+          "modifyTime": 1733371923316,
+          "dept": "1001",
+          "post": "",
+          "empNum": "00003"
+        }
+      ],
+      "relevant_team__r": "趙嘉麟",
+      "owner__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1001",
+        "supervisorId": "1000",
+        "empNum": "00003",
+        "modifyTime": 1733371923316,
+        "post": "",
+        "createTime": 1694661475337,
+        "phone": "",
+        "name": "趙嘉麟",
+        "nickname": "趙嘉麟",
+        "tenantId": "781014",
+        "id": "1018",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_5DE709BF9F2813F33F30423AC820681E"
+      ],
+      "amount": "0.00",
+      "field_i32Uj__c": "0",
+      "last_modified_by__l": [
+        {
+          "id": "1018",
+          "tenantId": "781014",
+          "name": "趙嘉麟",
+          "picAddr": "",
+          "email": "",
+          "nickname": "趙嘉麟",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1694661475337,
+          "modifyTime": 1733371923316,
+          "dept": "1001",
+          "post": "",
+          "empNum": "00003"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1018",
+          "tenantId": "781014",
+          "name": "趙嘉麟",
+          "picAddr": "",
+          "email": "",
+          "nickname": "趙嘉麟",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1694661475337,
+          "modifyTime": 1733371923316,
+          "dept": "1001",
+          "post": "",
+          "empNum": "00003"
+        }
+      ],
+      "field_5co25__c": "0",
+      "last_modified_by": [
+        "FSUID_5DE709BF9F2813F33F30423AC820681E"
+      ],
+      "record_type": "record_88sg6__c",
+      "last_modified_by__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1001",
+        "supervisorId": "1000",
+        "empNum": "00003",
+        "modifyTime": 1733371923316,
+        "post": "",
+        "createTime": 1694661475337,
+        "phone": "",
+        "name": "趙嘉麟",
+        "nickname": "趙嘉麟",
+        "tenantId": "781014",
+        "id": "1018",
+        "email": "",
+        "status": 0
+      },
+      "life_status__r": "正常",
+      "field_lmjjf__c__r": "中"
+    },
+    {
+      "account_id__r": "北督建材有限公司",
+      "cost_time": "0",
+      "sales_stage__r": "發現需求",
+      "owner_department_id": "1006",
+      "searchAfterId": [
+        "1752494685646",
+        "6874f25d280bfe0001751d12"
+      ],
+      "currentStageIndex": 1,
+      "data_own_department__r": {
+        "deptName": "業務二部",
+        "leaderUserId": "1000",
+        "deptId": "1006",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "probability": 10,
+      "version": "2",
+      "field_SdEgv__c": "歐洲磚",
+      "opp_discount": 100,
+      "sales_process_id": "64ec36f86815cf000178aec1",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1006",
+          "deptName": "業務二部",
+          "leaderUserId": "1000",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "field_e8m3q__c": "0",
+      "sales_status": "1",
+      "sales_stage": "1",
+      "probability_amount": "0.00",
+      "sales_process_id__r": "建案销售流程",
+      "sales_status__r": "进行中",
+      "last_modified_time": 1752494699116,
+      "life_status": "normal",
+      "field_vE1Zn__c": "0",
+      "account_id": "6874f1a3a0544a000199e7fc",
+      "account_id__relation_ids": "6874f1a3a0544a000199e7fc",
+      "close_date": 1753891200000,
+      "extend_obj_data_id": "6874f25d280bfe0001751d39",
+      "created_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "total_num": 489,
+      "owner_department": "業務二部",
+      "lock_status": "0",
+      "create_time": 1752494685646,
+      "last_followed_time": 1752494698558,
+      "created_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1006"
+      ],
+      "field_lmjjf__c": "f7kZZzp6x",
+      "name": "北督-竹北勝利段-2025",
+      "_id": "6874f25d280bfe0001751d12",
+      "lock_status__r": "未锁定",
+      "totalStageCount": 6,
+      "is_deleted": false,
+      "stg_changed_time": 1752494685530,
+      "owner__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "relevant_team__r": "戴朝興",
+      "owner__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "amount": "0.00",
+      "field_i32Uj__c": "0",
+      "last_modified_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "field_5co25__c": "0",
+      "last_modified_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "record_type": "record_ie612__c",
+      "last_modified_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "life_status__r": "正常",
+      "field_lmjjf__c__r": "中"
+    },
+    {
+      "account_id__r": "愛菲爾室內設計松竹店",
+      "cost_time": "0",
+      "sales_stage__r": "發現需求",
+      "owner_department_id": "1006",
+      "searchAfterId": [
+        "1752459862930",
+        "68746a56e0c51e0001d9671a"
+      ],
+      "currentStageIndex": 1,
+      "data_own_department__r": {
+        "deptName": "業務二部",
+        "leaderUserId": "1000",
+        "deptId": "1006",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "probability": 10,
+      "version": "3",
+      "field_SdEgv__c": "商辦大阪施工",
+      "opp_discount": 100,
+      "sales_process_id": "650e4c4bb8e6ee000158c356",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1006",
+          "deptName": "業務二部",
+          "leaderUserId": "1000",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "field_e8m3q__c": "0",
+      "sales_status": "1",
+      "sales_stage": "1",
+      "probability_amount": "0.00",
+      "sales_process_id__r": "個人案場",
+      "sales_status__r": "进行中",
+      "last_modified_time": 1752574165757,
+      "life_status": "normal",
+      "field_vE1Zn__c": "0",
+      "account_id": "67c941e9227820000123b067",
+      "account_id__relation_ids": "67c941e9227820000123b067",
+      "close_date": 1759161600000,
+      "extend_obj_data_id": "68746a56e0c51e0001d9680f",
+      "created_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "total_num": 489,
+      "owner_department": "業務二部",
+      "lock_status": "0",
+      "create_time": 1752459862930,
+      "last_followed_time": 1752574165232,
+      "created_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1006"
+      ],
+      "field_lmjjf__c": "6nmcIepC8",
+      "name": "愛菲爾松竹-盤興寬心-2025",
+      "_id": "68746a56e0c51e0001d9671a",
+      "lock_status__r": "未锁定",
+      "totalStageCount": 7,
+      "is_deleted": false,
+      "stg_changed_time": 1752459862659,
+      "owner__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "relevant_team__r": "戴朝興",
+      "owner__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "amount": "0.00",
+      "field_i32Uj__c": "0",
+      "last_modified_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "field_5co25__c": "0",
+      "last_modified_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "record_type": "record_88sg6__c",
+      "last_modified_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "life_status__r": "正常",
+      "field_lmjjf__c__r": "低"
+    },
+    {
+      "account_id__r": "寬心開發建設股份有限公司",
+      "cost_time": "0",
+      "sales_stage__r": "發現需求",
+      "owner_department_id": "1001",
+      "searchAfterId": [
+        "1752455480533",
+        "68745938a0544a0001c5e96a"
+      ],
+      "currentStageIndex": 1,
+      "data_own_department__r": {
+        "deptName": "業務一部",
+        "leaderUserId": "1018",
+        "deptId": "1001",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "probability": 10,
+      "version": "2",
+      "field_SdEgv__c": "Spc磁磚",
+      "opp_discount": 100,
+      "sales_process_id": "64ec36f86815cf000178aec1",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1001",
+          "deptName": "業務一部",
+          "leaderUserId": "1018",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "field_zO24t__c": "15",
+      "field_e8m3q__c": "0",
+      "sales_status": "1",
+      "sales_stage": "1",
+      "probability_amount": "0.00",
+      "sales_process_id__r": "建案销售流程",
+      "sales_status__r": "进行中",
+      "last_modified_time": 1752455480671,
+      "life_status": "normal",
+      "field_vE1Zn__c": "0",
+      "account_id": "6818a79350034a0001c34eec",
+      "account_id__relation_ids": "6818a79350034a0001c34eec",
+      "close_date": 1798646400000,
+      "extend_obj_data_id": "68745938a0544a0001c5e9bc",
+      "created_by__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1001",
+        "supervisorId": "1000",
+        "empNum": "00003",
+        "modifyTime": 1733371923316,
+        "post": "",
+        "createTime": 1694661475337,
+        "phone": "",
+        "name": "趙嘉麟",
+        "nickname": "趙嘉麟",
+        "tenantId": "781014",
+        "id": "1018",
+        "email": "",
+        "status": 0
+      },
+      "total_num": 489,
+      "owner_department": "業務一部",
+      "lock_status": "0",
+      "create_time": 1752455480533,
+      "last_followed_time": 1752455480368,
+      "created_by": [
+        "FSUID_5DE709BF9F2813F33F30423AC820681E"
+      ],
+      "field_hh49z__c": "224",
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_5DE709BF9F2813F33F30423AC820681E"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1001"
+      ],
+      "field_lmjjf__c": "6nmcIepC8",
+      "name": "寬心-日新-2025",
+      "_id": "68745938a0544a0001c5e96a",
+      "lock_status__r": "未锁定",
+      "totalStageCount": 6,
+      "is_deleted": false,
+      "stg_changed_time": 1752455480368,
+      "owner__l": [
+        {
+          "id": "1018",
+          "tenantId": "781014",
+          "name": "趙嘉麟",
+          "picAddr": "",
+          "email": "",
+          "nickname": "趙嘉麟",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1694661475337,
+          "modifyTime": 1733371923316,
+          "dept": "1001",
+          "post": "",
+          "empNum": "00003"
+        }
+      ],
+      "relevant_team__r": "趙嘉麟",
+      "owner__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1001",
+        "supervisorId": "1000",
+        "empNum": "00003",
+        "modifyTime": 1733371923316,
+        "post": "",
+        "createTime": 1694661475337,
+        "phone": "",
+        "name": "趙嘉麟",
+        "nickname": "趙嘉麟",
+        "tenantId": "781014",
+        "id": "1018",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_5DE709BF9F2813F33F30423AC820681E"
+      ],
+      "amount": "0.00",
+      "field_i32Uj__c": "246",
+      "last_modified_by__l": [
+        {
+          "id": "1018",
+          "tenantId": "781014",
+          "name": "趙嘉麟",
+          "picAddr": "",
+          "email": "",
+          "nickname": "趙嘉麟",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1694661475337,
+          "modifyTime": 1733371923316,
+          "dept": "1001",
+          "post": "",
+          "empNum": "00003"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1018",
+          "tenantId": "781014",
+          "name": "趙嘉麟",
+          "picAddr": "",
+          "email": "",
+          "nickname": "趙嘉麟",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1694661475337,
+          "modifyTime": 1733371923316,
+          "dept": "1001",
+          "post": "",
+          "empNum": "00003"
+        }
+      ],
+      "field_5co25__c": "4480",
+      "last_modified_by": [
+        "FSUID_5DE709BF9F2813F33F30423AC820681E"
+      ],
+      "record_type": "default__c",
+      "last_modified_by__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1001",
+        "supervisorId": "1000",
+        "empNum": "00003",
+        "modifyTime": 1733371923316,
+        "post": "",
+        "createTime": 1694661475337,
+        "phone": "",
+        "name": "趙嘉麟",
+        "nickname": "趙嘉麟",
+        "tenantId": "781014",
+        "id": "1018",
+        "email": "",
+        "status": 0
+      },
+      "life_status__r": "正常",
+      "field_30rKQ__c": "2",
+      "field_lmjjf__c__r": "低"
+    },
+    {
+      "account_id__r": "新聚發建設股份有限公司",
+      "cost_time": "0",
+      "sales_stage__r": "發現需求",
+      "owner_department_id": "1003",
+      "searchAfterId": [
+        "1752226550438",
+        "6870daf69d3f1000018dd800"
+      ],
+      "currentStageIndex": 1,
+      "data_own_department__r": {
+        "deptName": "管理部",
+        "leaderUserId": "1000",
+        "deptId": "1003",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "probability": 10,
+      "version": "2",
+      "field_SdEgv__c": "大板",
+      "opp_discount": 100,
+      "sales_process_id": "650e4c4bb8e6ee000158c356",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1003",
+          "deptName": "管理部",
+          "leaderUserId": "1000",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "field_e8m3q__c": "0",
+      "sales_status": "1",
+      "sales_stage": "1",
+      "probability_amount": "0.00",
+      "sales_process_id__r": "個人案場",
+      "sales_status__r": "进行中",
+      "last_modified_time": 1752226550531,
+      "life_status": "normal",
+      "field_vE1Zn__c": "0",
+      "account_id": "6870daba0611de000107e308",
+      "account_id__relation_ids": "6870daba0611de000107e308",
+      "close_date": 1753891200000,
+      "extend_obj_data_id": "6870daf69d3f1000018dd859",
+      "created_by__r": {
+        "picAddr": "N_202310_05_4c8f70e1b83f488e99c8626b438418d1",
+        "description": "",
+        "dept": "1003",
+        "empNum": "00002",
+        "modifyTime": 1733371988316,
+        "post": "",
+        "createTime": 1693202085819,
+        "phone": "",
+        "name": "賴俊穎",
+        "nickname": "賴俊穎",
+        "tenantId": "781014",
+        "id": "1000",
+        "email": "",
+        "status": 0
+      },
+      "total_num": 489,
+      "owner_department": "管理部",
+      "lock_status": "0",
+      "create_time": 1752226550438,
+      "last_followed_time": 1752226550162,
+      "created_by": [
+        "FSUID_F8E5C73533927249281F06800BC975AA"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_F8E5C73533927249281F06800BC975AA"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1003"
+      ],
+      "field_lmjjf__c": "TvP3c4kMA",
+      "name": "新聚發-少東-住家",
+      "_id": "6870daf69d3f1000018dd800",
+      "lock_status__r": "未锁定",
+      "totalStageCount": 7,
+      "is_deleted": false,
+      "stg_changed_time": 1752226550162,
+      "owner__l": [
+        {
+          "id": "1000",
+          "tenantId": "781014",
+          "name": "賴俊穎",
+          "picAddr": "N_202310_05_4c8f70e1b83f488e99c8626b438418d1",
+          "email": "",
+          "nickname": "賴俊穎",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1693202085819,
+          "modifyTime": 1733371988316,
+          "dept": "1003",
+          "post": "",
+          "empNum": "00002"
+        }
+      ],
+      "relevant_team__r": "賴俊穎",
+      "owner__r": {
+        "picAddr": "N_202310_05_4c8f70e1b83f488e99c8626b438418d1",
+        "description": "",
+        "dept": "1003",
+        "empNum": "00002",
+        "modifyTime": 1733371988316,
+        "post": "",
+        "createTime": 1693202085819,
+        "phone": "",
+        "name": "賴俊穎",
+        "nickname": "賴俊穎",
+        "tenantId": "781014",
+        "id": "1000",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_F8E5C73533927249281F06800BC975AA"
+      ],
+      "amount": "0.00",
+      "field_i32Uj__c": "0",
+      "last_modified_by__l": [
+        {
+          "id": "1000",
+          "tenantId": "781014",
+          "name": "賴俊穎",
+          "picAddr": "N_202310_05_4c8f70e1b83f488e99c8626b438418d1",
+          "email": "",
+          "nickname": "賴俊穎",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1693202085819,
+          "modifyTime": 1733371988316,
+          "dept": "1003",
+          "post": "",
+          "empNum": "00002"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1000",
+          "tenantId": "781014",
+          "name": "賴俊穎",
+          "picAddr": "N_202310_05_4c8f70e1b83f488e99c8626b438418d1",
+          "email": "",
+          "nickname": "賴俊穎",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1693202085819,
+          "modifyTime": 1733371988316,
+          "dept": "1003",
+          "post": "",
+          "empNum": "00002"
+        }
+      ],
+      "field_5co25__c": "0",
+      "last_modified_by": [
+        "FSUID_F8E5C73533927249281F06800BC975AA"
+      ],
+      "record_type": "record_88sg6__c",
+      "last_modified_by__r": {
+        "picAddr": "N_202310_05_4c8f70e1b83f488e99c8626b438418d1",
+        "description": "",
+        "dept": "1003",
+        "empNum": "00002",
+        "modifyTime": 1733371988316,
+        "post": "",
+        "createTime": 1693202085819,
+        "phone": "",
+        "name": "賴俊穎",
+        "nickname": "賴俊穎",
+        "tenantId": "781014",
+        "id": "1000",
+        "email": "",
+        "status": 0
+      },
+      "life_status__r": "正常",
+      "field_lmjjf__c__r": "高"
+    }
+  ],
+  "salesRecords": [
+    {
+      "active_record_content": "7/21，至勝美欣\n1.從B1搬運10箱Y5007至10A1給屋主（已匯款），如附件\n2.B1的庫存剩11箱，如附件\n3.庫存放在B1，殘障車位旁邊\n",
+      "field_36Zg0__c__r": "普通",
+      "extend_obj_data_id": "687dcbf75ef0ee0001df1155",
+      "created_by__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1000",
+        "supervisorId": "1069",
+        "empNum": "00020",
+        "modifyTime": 1733371720078,
+        "post": "",
+        "createTime": 1733107682208,
+        "phone": "",
+        "name": "陳智琛",
+        "nickname": "陳智琛",
+        "tenantId": "781014",
+        "id": "1086",
+        "email": "ponknom@yes-ceramics.com",
+        "status": 0
+      },
+      "owner_department_id": "1000",
+      "total_num": 4202,
+      "owner_department": "工務部門",
+      "searchAfterId": [
+        "1753074679193",
+        "687dcbf65ef0ee0001df10b9"
+      ],
+      "related_api_names__r": "商機",
+      "lock_status": "0",
+      "data_own_department__r": {
+        "deptName": "工務部門",
+        "leaderUserId": "1069",
+        "deptId": "1000",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "create_time": 1753074679193,
+      "related_object_data": [
+        {
+          "describe_api_name": "NewOpportunityObj",
+          "name": "勝美-育賢二-2023",
+          "id": "650c09e8dc044f0001973eab"
+        }
+      ],
+      "version": "1",
+      "created_by": [
+        "FSUID_9FEC6F867473395A975900F3F9949242"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_9FEC6F867473395A975900F3F9949242"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1000"
+      ],
+      "name": "2025-07-21-004225",
+      "_id": "687dcbf65ef0ee0001df10b9",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1000",
+          "deptName": "工務部門",
+          "leaderUserId": "1069",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "related_api_names": [
+        "NewOpportunityObj"
+      ],
+      "lock_status__r": "未锁定",
+      "is_deleted": false,
+      "owner__l": [
+        {
+          "id": "1086",
+          "tenantId": "781014",
+          "name": "陳智琛",
+          "picAddr": "",
+          "email": "ponknom@yes-ceramics.com",
+          "nickname": "陳智琛",
+          "supervisorId": "1069",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1733107682208,
+          "modifyTime": 1733371720078,
+          "dept": "1000",
+          "post": "",
+          "empNum": "00020"
+        }
+      ],
+      "relevant_team__r": "陳智琛",
+      "owner__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1000",
+        "supervisorId": "1069",
+        "empNum": "00020",
+        "modifyTime": 1733371720078,
+        "post": "",
+        "createTime": 1733107682208,
+        "phone": "",
+        "name": "陳智琛",
+        "nickname": "陳智琛",
+        "tenantId": "781014",
+        "id": "1086",
+        "email": "ponknom@yes-ceramics.com",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_9FEC6F867473395A975900F3F9949242"
+      ],
+      "last_modified_time": 1753074679193,
+      "life_status": "normal",
+      "last_modified_by__l": [
+        {
+          "id": "1086",
+          "tenantId": "781014",
+          "name": "陳智琛",
+          "picAddr": "",
+          "email": "ponknom@yes-ceramics.com",
+          "nickname": "陳智琛",
+          "supervisorId": "1069",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1733107682208,
+          "modifyTime": 1733371720078,
+          "dept": "1000",
+          "post": "",
+          "empNum": "00020"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1086",
+          "tenantId": "781014",
+          "name": "陳智琛",
+          "picAddr": "",
+          "email": "ponknom@yes-ceramics.com",
+          "nickname": "陳智琛",
+          "supervisorId": "1069",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1733107682208,
+          "modifyTime": 1733371720078,
+          "dept": "1000",
+          "post": "",
+          "empNum": "00020"
+        }
+      ],
+      "last_modified_by": [
+        "FSUID_9FEC6F867473395A975900F3F9949242"
+      ],
+      "record_type": "default__c",
+      "field_36Zg0__c": "5n94HP281",
+      "last_modified_by__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1000",
+        "supervisorId": "1069",
+        "empNum": "00020",
+        "modifyTime": 1733371720078,
+        "post": "",
+        "createTime": 1733107682208,
+        "phone": "",
+        "name": "陳智琛",
+        "nickname": "陳智琛",
+        "tenantId": "781014",
+        "id": "1086",
+        "email": "ponknom@yes-ceramics.com",
+        "status": 0
+      },
+      "external_form_display__c__r": "無",
+      "related_object": {
+        "NewOpportunityObj": [
+          "650c09e8dc044f0001973eab"
+        ]
+      },
+      "life_status__r": "正常",
+      "external_form_display__c": "option_empty_value__c"
+    },
+    {
+      "active_record_content": "至和宜育賢與李主任閒聊，主任今年度襄理職位還是未能如願，心情不太好",
+      "field_aN2iY__c": "120.719806#%$24.154775#%$411台湾台中市太平區樹孝路336巷9號台中市太平区新平国民小学",
+      "field_36Zg0__c__r": "重要",
+      "extend_obj_data_id": "687db3b31795c60001f3217e",
+      "created_by__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1001",
+        "supervisorId": "1000",
+        "empNum": "00003",
+        "modifyTime": 1733371923316,
+        "post": "",
+        "createTime": 1694661475337,
+        "phone": "",
+        "name": "趙嘉麟",
+        "nickname": "趙嘉麟",
+        "tenantId": "781014",
+        "id": "1018",
+        "email": "",
+        "status": 0
+      },
+      "owner_department_id": "1001",
+      "total_num": 4202,
+      "owner_department": "業務一部",
+      "searchAfterId": [
+        "1753068467472",
+        "687db3b31795c60001f320b5"
+      ],
+      "related_api_names__r": "連絡人",
+      "lock_status": "0",
+      "data_own_department__r": {
+        "deptName": "業務一部",
+        "leaderUserId": "1018",
+        "deptId": "1001",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "create_time": 1753068467472,
+      "related_object_data": [
+        {
+          "describe_api_name": "ContactObj",
+          "name": "李緯銘",
+          "id": "65128e969386da00012775f6"
+        },
+        {
+          "describe_api_name": "ContactObj",
+          "name": "李尚鴻",
+          "id": "6513797af1bfcf0001d4e991"
+        }
+      ],
+      "version": "4",
+      "created_by": [
+        "FSUID_5DE709BF9F2813F33F30423AC820681E"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_5DE709BF9F2813F33F30423AC820681E"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1001"
+      ],
+      "name": "2025-07-21-004224",
+      "_id": "687db3b31795c60001f320b5",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1001",
+          "deptName": "業務一部",
+          "leaderUserId": "1018",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "related_api_names": [
+        "ContactObj"
+      ],
+      "active_record_type": "0171d325d10945ee966f90b176f68ce3",
+      "lock_status__r": "未锁定",
+      "active_record_type__r": "親自拜訪",
+      "is_deleted": false,
+      "owner__l": [
+        {
+          "id": "1018",
+          "tenantId": "781014",
+          "name": "趙嘉麟",
+          "picAddr": "",
+          "email": "",
+          "nickname": "趙嘉麟",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1694661475337,
+          "modifyTime": 1733371923316,
+          "dept": "1001",
+          "post": "",
+          "empNum": "00003"
+        }
+      ],
+      "relevant_team__r": "趙嘉麟",
+      "owner__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1001",
+        "supervisorId": "1000",
+        "empNum": "00003",
+        "modifyTime": 1733371923316,
+        "post": "",
+        "createTime": 1694661475337,
+        "phone": "",
+        "name": "趙嘉麟",
+        "nickname": "趙嘉麟",
+        "tenantId": "781014",
+        "id": "1018",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_5DE709BF9F2813F33F30423AC820681E"
+      ],
+      "last_modified_time": 1753069410687,
+      "life_status": "normal",
+      "last_modified_by__l": [
+        {
+          "id": "1018",
+          "tenantId": "781014",
+          "name": "趙嘉麟",
+          "picAddr": "",
+          "email": "",
+          "nickname": "趙嘉麟",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1694661475337,
+          "modifyTime": 1733371923316,
+          "dept": "1001",
+          "post": "",
+          "empNum": "00003"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1018",
+          "tenantId": "781014",
+          "name": "趙嘉麟",
+          "picAddr": "",
+          "email": "",
+          "nickname": "趙嘉麟",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1694661475337,
+          "modifyTime": 1733371923316,
+          "dept": "1001",
+          "post": "",
+          "empNum": "00003"
+        }
+      ],
+      "last_modified_by": [
+        "FSUID_5DE709BF9F2813F33F30423AC820681E"
+      ],
+      "record_type": "default__c",
+      "field_36Zg0__c": "og2H26v6n",
+      "last_modified_by__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1001",
+        "supervisorId": "1000",
+        "empNum": "00003",
+        "modifyTime": 1733371923316,
+        "post": "",
+        "createTime": 1694661475337,
+        "phone": "",
+        "name": "趙嘉麟",
+        "nickname": "趙嘉麟",
+        "tenantId": "781014",
+        "id": "1018",
+        "email": "",
+        "status": 0
+      },
+      "external_form_display__c__r": "顯示",
+      "related_object": {
+        "ContactObj": [
+          "65128e969386da00012775f6",
+          "6513797af1bfcf0001d4e991"
+        ]
+      },
+      "life_status__r": "正常",
+      "external_form_display__c": "option_displayed__c"
+    },
+    {
+      "active_record_content": "至勝發僑興2暸解進度",
+      "field_aN2iY__c": "120.701096#%$24.2089519#%$427台湾台中市潭子區勝利路101號103號7-ELEVEN 潭胜门市",
+      "field_36Zg0__c__r": "重要",
+      "extend_obj_data_id": "687da481a2569a0001bfdf62",
+      "created_by__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1001",
+        "supervisorId": "1000",
+        "empNum": "00003",
+        "modifyTime": 1733371923316,
+        "post": "",
+        "createTime": 1694661475337,
+        "phone": "",
+        "name": "趙嘉麟",
+        "nickname": "趙嘉麟",
+        "tenantId": "781014",
+        "id": "1018",
+        "email": "",
+        "status": 0
+      },
+      "owner_department_id": "1001",
+      "total_num": 4202,
+      "owner_department": "業務一部",
+      "searchAfterId": [
+        "1753064577110",
+        "687da480a2569a0001bfdce0"
+      ],
+      "related_api_names__r": "連絡人|商機",
+      "lock_status": "0",
+      "data_own_department__r": {
+        "deptName": "業務一部",
+        "leaderUserId": "1018",
+        "deptId": "1001",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "create_time": 1753064577110,
+      "related_object_data": [
+        {
+          "describe_api_name": "ContactObj",
+          "name": "袁承",
+          "id": "67ece92ccc4b770001414cf8"
+        },
+        {
+          "describe_api_name": "ContactObj",
+          "name": "江佳良",
+          "id": "67f5d18adf5f51000176b93a"
+        },
+        {
+          "describe_api_name": "NewOpportunityObj",
+          "name": "勝發-僑興2-2024",
+          "id": "664efe68f318d000014f5059"
+        }
+      ],
+      "version": "2",
+      "created_by": [
+        "FSUID_5DE709BF9F2813F33F30423AC820681E"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_5DE709BF9F2813F33F30423AC820681E"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1001"
+      ],
+      "name": "2025-07-21-004223",
+      "_id": "687da480a2569a0001bfdce0",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1001",
+          "deptName": "業務一部",
+          "leaderUserId": "1018",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "related_api_names": [
+        "ContactObj",
+        "NewOpportunityObj"
+      ],
+      "active_record_type": "0171d325d10945ee966f90b176f68ce3",
+      "lock_status__r": "未锁定",
+      "active_record_type__r": "親自拜訪",
+      "is_deleted": false,
+      "owner__l": [
+        {
+          "id": "1018",
+          "tenantId": "781014",
+          "name": "趙嘉麟",
+          "picAddr": "",
+          "email": "",
+          "nickname": "趙嘉麟",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1694661475337,
+          "modifyTime": 1733371923316,
+          "dept": "1001",
+          "post": "",
+          "empNum": "00003"
+        }
+      ],
+      "relevant_team__r": "趙嘉麟",
+      "owner__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1001",
+        "supervisorId": "1000",
+        "empNum": "00003",
+        "modifyTime": 1733371923316,
+        "post": "",
+        "createTime": 1694661475337,
+        "phone": "",
+        "name": "趙嘉麟",
+        "nickname": "趙嘉麟",
+        "tenantId": "781014",
+        "id": "1018",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_5DE709BF9F2813F33F30423AC820681E"
+      ],
+      "last_modified_time": 1753064680929,
+      "life_status": "normal",
+      "last_modified_by__l": [
+        {
+          "id": "1018",
+          "tenantId": "781014",
+          "name": "趙嘉麟",
+          "picAddr": "",
+          "email": "",
+          "nickname": "趙嘉麟",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1694661475337,
+          "modifyTime": 1733371923316,
+          "dept": "1001",
+          "post": "",
+          "empNum": "00003"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1018",
+          "tenantId": "781014",
+          "name": "趙嘉麟",
+          "picAddr": "",
+          "email": "",
+          "nickname": "趙嘉麟",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1694661475337,
+          "modifyTime": 1733371923316,
+          "dept": "1001",
+          "post": "",
+          "empNum": "00003"
+        }
+      ],
+      "last_modified_by": [
+        "FSUID_5DE709BF9F2813F33F30423AC820681E"
+      ],
+      "record_type": "default__c",
+      "field_36Zg0__c": "og2H26v6n",
+      "last_modified_by__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1001",
+        "supervisorId": "1000",
+        "empNum": "00003",
+        "modifyTime": 1733371923316,
+        "post": "",
+        "createTime": 1694661475337,
+        "phone": "",
+        "name": "趙嘉麟",
+        "nickname": "趙嘉麟",
+        "tenantId": "781014",
+        "id": "1018",
+        "email": "",
+        "status": 0
+      },
+      "external_form_display__c__r": "顯示",
+      "related_object": {
+        "ContactObj": [
+          "67ece92ccc4b770001414cf8",
+          "67f5d18adf5f51000176b93a"
+        ],
+        "NewOpportunityObj": [
+          "664efe68f318d000014f5059"
+        ]
+      },
+      "life_status__r": "正常",
+      "external_form_display__c": "option_displayed__c"
+    },
+    {
+      "active_record_content": "原定7/15(二)送至案場，因工程延後，故7/16(三)請慶和-阿偉從樂邁龍井倉載到復興倉暫放，預計8月底9月初施作\n!!設計師買斷，無退貨!!",
+      "field_36Zg0__c__r": "普通",
+      "extend_obj_data_id": "687d62c81795c600017a6046",
+      "created_by__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1000",
+        "supervisorId": "1069",
+        "empNum": "00017",
+        "modifyTime": 1733371777953,
+        "post": "",
+        "createTime": 1718069682972,
+        "phone": "",
+        "name": "葉韋伶",
+        "nickname": "葉韋伶",
+        "tenantId": "781014",
+        "id": "1082",
+        "email": "",
+        "status": 0
+      },
+      "owner_department_id": "1000",
+      "total_num": 4202,
+      "owner_department": "工務部門",
+      "searchAfterId": [
+        "1753047752047",
+        "687d62c71795c600017a5ff4"
+      ],
+      "related_api_names__r": "採購單(採購計劃)",
+      "lock_status": "0",
+      "data_own_department__r": {
+        "deptName": "工務部門",
+        "leaderUserId": "1069",
+        "deptId": "1000",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "create_time": 1753047752047,
+      "related_object_data": [
+        {
+          "describe_api_name": "object_hX8zM__c",
+          "name": "勝美-客變戶二-SPC(原向設計-陝西二街)",
+          "id": "6819b64c42dcf30001e6f1cd"
+        }
+      ],
+      "version": "3",
+      "created_by": [
+        "FSUID_79BE7C04DA8D1C5EADB903953B8E5026"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_79BE7C04DA8D1C5EADB903953B8E5026"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1000"
+      ],
+      "name": "2025-07-21-004222",
+      "_id": "687d62c71795c600017a5ff4",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1000",
+          "deptName": "工務部門",
+          "leaderUserId": "1069",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "related_api_names": [
+        "object_hX8zM__c"
+      ],
+      "lock_status__r": "未锁定",
+      "is_deleted": false,
+      "owner__l": [
+        {
+          "id": "1082",
+          "tenantId": "781014",
+          "name": "葉韋伶",
+          "picAddr": "",
+          "email": "",
+          "nickname": "葉韋伶",
+          "supervisorId": "1069",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718069682972,
+          "modifyTime": 1733371777953,
+          "dept": "1000",
+          "post": "",
+          "empNum": "00017"
+        }
+      ],
+      "relevant_team__r": "葉韋伶",
+      "owner__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1000",
+        "supervisorId": "1069",
+        "empNum": "00017",
+        "modifyTime": 1733371777953,
+        "post": "",
+        "createTime": 1718069682972,
+        "phone": "",
+        "name": "葉韋伶",
+        "nickname": "葉韋伶",
+        "tenantId": "781014",
+        "id": "1082",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_79BE7C04DA8D1C5EADB903953B8E5026"
+      ],
+      "last_modified_time": 1753047900363,
+      "life_status": "normal",
+      "last_modified_by__l": [
+        {
+          "id": "1082",
+          "tenantId": "781014",
+          "name": "葉韋伶",
+          "picAddr": "",
+          "email": "",
+          "nickname": "葉韋伶",
+          "supervisorId": "1069",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718069682972,
+          "modifyTime": 1733371777953,
+          "dept": "1000",
+          "post": "",
+          "empNum": "00017"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1082",
+          "tenantId": "781014",
+          "name": "葉韋伶",
+          "picAddr": "",
+          "email": "",
+          "nickname": "葉韋伶",
+          "supervisorId": "1069",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718069682972,
+          "modifyTime": 1733371777953,
+          "dept": "1000",
+          "post": "",
+          "empNum": "00017"
+        }
+      ],
+      "last_modified_by": [
+        "FSUID_79BE7C04DA8D1C5EADB903953B8E5026"
+      ],
+      "record_type": "default__c",
+      "field_36Zg0__c": "5n94HP281",
+      "last_modified_by__r": {
+        "picAddr": "",
+        "description": "",
+        "dept": "1000",
+        "supervisorId": "1069",
+        "empNum": "00017",
+        "modifyTime": 1733371777953,
+        "post": "",
+        "createTime": 1718069682972,
+        "phone": "",
+        "name": "葉韋伶",
+        "nickname": "葉韋伶",
+        "tenantId": "781014",
+        "id": "1082",
+        "email": "",
+        "status": 0
+      },
+      "external_form_display__c__r": "無",
+      "related_object": {
+        "object_hX8zM__c": [
+          "6819b64c42dcf30001e6f1cd"
+        ]
+      },
+      "life_status__r": "正常",
+      "external_form_display__c": "option_empty_value__c"
+    },
+    {
+      "active_record_content": "7/18 陌開秉和坎城團隊13期樂田段新建案。\n經查重：該客戶已被認領。\n所以本次就單純僅做CRM開發紀錄~\n想提問：\n公司先前提過業務所認領客戶若經營受挫或\n無進展等⋯公司可協助良性溝通協助業務來\n嘗試換人經營不知道此不成文規定是否還在？\n",
+      "field_36Zg0__c__r": "普通",
+      "extend_obj_data_id": "687a469be41a70000134b5c0",
+      "created_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner_department_id": "1006",
+      "total_num": 4202,
+      "owner_department": "業務二部",
+      "searchAfterId": [
+        "1752843931763",
+        "687a469be41a70000134b4bc"
+      ],
+      "related_api_names__r": "商機|客戶",
+      "lock_status": "0",
+      "data_own_department__r": {
+        "deptName": "業務二部",
+        "leaderUserId": "1000",
+        "deptId": "1006",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "create_time": 1752843931763,
+      "related_object_data": [
+        {
+          "describe_api_name": "NewOpportunityObj",
+          "name": "坎城團隊秉和-樂田段-2025",
+          "id": "687a40e1fec873000180c5b4"
+        },
+        {
+          "describe_api_name": "AccountObj",
+          "name": "陳元治建築師事務所",
+          "id": "676911978f955f00016c56c7"
+        }
+      ],
+      "version": "1",
+      "created_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1006"
+      ],
+      "name": "2025-07-18-004221",
+      "_id": "687a469be41a70000134b4bc",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1006",
+          "deptName": "業務二部",
+          "leaderUserId": "1000",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "related_api_names": [
+        "NewOpportunityObj",
+        "AccountObj"
+      ],
+      "lock_status__r": "未锁定",
+      "is_deleted": false,
+      "owner__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "relevant_team__r": "戴朝興",
+      "owner__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "last_modified_time": 1752843931763,
+      "life_status": "normal",
+      "last_modified_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "last_modified_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "record_type": "default__c",
+      "field_36Zg0__c": "5n94HP281",
+      "last_modified_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "external_form_display__c__r": "無",
+      "related_object": {
+        "NewOpportunityObj": [
+          "687a40e1fec873000180c5b4"
+        ],
+        "AccountObj": [
+          "676911978f955f00016c56c7"
+        ]
+      },
+      "life_status__r": "正常",
+      "external_form_display__c": "option_empty_value__c"
+    },
+    {
+      "active_record_content": "7/18 萬群代銷莊協理今回覆：可代為協助了解\n和瑞中義段李副總管理層後續評估進展😬。",
+      "field_36Zg0__c__r": "普通",
+      "extend_obj_data_id": "687a3f492a1465000115d680",
+      "created_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner_department_id": "1006",
+      "total_num": 4202,
+      "owner_department": "業務二部",
+      "searchAfterId": [
+        "1752842057862",
+        "687a3f492a1465000115d5e2"
+      ],
+      "related_api_names__r": "商機|客戶",
+      "lock_status": "0",
+      "data_own_department__r": {
+        "deptName": "業務二部",
+        "leaderUserId": "1000",
+        "deptId": "1006",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "create_time": 1752842057862,
+      "related_object_data": [
+        {
+          "describe_api_name": "NewOpportunityObj",
+          "name": "和瑞-中義-2024",
+          "id": "66bf0e87d1f9160001a5e90c"
+        },
+        {
+          "describe_api_name": "AccountObj",
+          "name": "和瑞建設股份有限公司",
+          "id": "66bef9df7d966a00017cb3b7"
+        }
+      ],
+      "version": "1",
+      "created_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1006"
+      ],
+      "name": "2025-07-18-004220",
+      "_id": "687a3f492a1465000115d5e2",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1006",
+          "deptName": "業務二部",
+          "leaderUserId": "1000",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "related_api_names": [
+        "NewOpportunityObj",
+        "AccountObj"
+      ],
+      "lock_status__r": "未锁定",
+      "is_deleted": false,
+      "owner__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "relevant_team__r": "戴朝興",
+      "owner__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "last_modified_time": 1752842057862,
+      "life_status": "normal",
+      "last_modified_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "last_modified_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "record_type": "default__c",
+      "field_36Zg0__c": "5n94HP281",
+      "last_modified_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "external_form_display__c__r": "無",
+      "related_object": {
+        "NewOpportunityObj": [
+          "66bf0e87d1f9160001a5e90c"
+        ],
+        "AccountObj": [
+          "66bef9df7d966a00017cb3b7"
+        ]
+      },
+      "life_status__r": "正常",
+      "external_form_display__c": "option_empty_value__c"
+    },
+    {
+      "active_record_content": "7/18 今直接尋求鉅虹林副總協助😬：\n因先前採購端接洽一直被技術性拒絕~\n林副總：直接找採發曹佩婷若有問題他再\n從旁協助😬~\nnext step : 安排下週再次接洽。\n\n",
+      "field_36Zg0__c__r": "普通",
+      "extend_obj_data_id": "687a3dcea2569a0001a87bd2",
+      "created_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner_department_id": "1006",
+      "total_num": 4202,
+      "owner_department": "業務二部",
+      "searchAfterId": [
+        "1752841678467",
+        "687a3dcea2569a0001a87b47"
+      ],
+      "related_api_names__r": "商機|客戶",
+      "lock_status": "0",
+      "data_own_department__r": {
+        "deptName": "業務二部",
+        "leaderUserId": "1000",
+        "deptId": "1006",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "create_time": 1752841678467,
+      "related_object_data": [
+        {
+          "describe_api_name": "NewOpportunityObj",
+          "name": "鉅虹-樂田-2024",
+          "id": "675b84b6e165ed0001f10ce9"
+        },
+        {
+          "describe_api_name": "NewOpportunityObj",
+          "name": "鉅虹-南興段-2024",
+          "id": "6760e91e8bc69a00016a0fd1"
+        },
+        {
+          "describe_api_name": "AccountObj",
+          "name": "鉅虹建設股份有限公司",
+          "id": "65b71306bfeb26000103bade"
+        }
+      ],
+      "version": "2",
+      "created_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1006"
+      ],
+      "name": "2025-07-18-004219",
+      "_id": "687a3dcea2569a0001a87b47",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1006",
+          "deptName": "業務二部",
+          "leaderUserId": "1000",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "related_api_names": [
+        "NewOpportunityObj",
+        "AccountObj"
+      ],
+      "lock_status__r": "未锁定",
+      "is_deleted": false,
+      "owner__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "relevant_team__r": "戴朝興",
+      "owner__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "last_modified_time": 1752842079869,
+      "life_status": "normal",
+      "last_modified_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "last_modified_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "record_type": "default__c",
+      "field_36Zg0__c": "5n94HP281",
+      "last_modified_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "external_form_display__c__r": "無",
+      "related_object": {
+        "NewOpportunityObj": [
+          "675b84b6e165ed0001f10ce9",
+          "6760e91e8bc69a00016a0fd1"
+        ],
+        "AccountObj": [
+          "65b71306bfeb26000103bade"
+        ]
+      },
+      "life_status__r": "正常",
+      "external_form_display__c": "option_empty_value__c"
+    },
+    {
+      "active_record_content": "7/18 南苑樂田開始如火如荼灌漿施工了\n會再次追蹤先前經營的所長及採購進行\n拜訪～",
+      "field_36Zg0__c__r": "普通",
+      "extend_obj_data_id": "687a2c8ae457a20001060407",
+      "created_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner_department_id": "1006",
+      "total_num": 4202,
+      "owner_department": "業務二部",
+      "searchAfterId": [
+        "1752837258146",
+        "687a2c89e457a2000106037c"
+      ],
+      "related_api_names__r": "商機|客戶",
+      "lock_status": "0",
+      "data_own_department__r": {
+        "deptName": "業務二部",
+        "leaderUserId": "1000",
+        "deptId": "1006",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "create_time": 1752837258146,
+      "related_object_data": [
+        {
+          "describe_api_name": "NewOpportunityObj",
+          "name": "南悦-鎮福-2024",
+          "id": "6708e626f4cfbf00013b4b35"
+        },
+        {
+          "describe_api_name": "AccountObj",
+          "name": "南悅建設股份有限公司",
+          "id": "6560950ea68cbe0001333a71"
+        },
+        {
+          "describe_api_name": "AccountObj",
+          "name": "南悦建設股份有限公司",
+          "id": "6708e4117d141b00012614d7"
+        }
+      ],
+      "version": "2",
+      "created_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1006"
+      ],
+      "name": "2025-07-18-004218",
+      "_id": "687a2c89e457a2000106037c",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1006",
+          "deptName": "業務二部",
+          "leaderUserId": "1000",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "related_api_names": [
+        "NewOpportunityObj",
+        "AccountObj"
+      ],
+      "lock_status__r": "未锁定",
+      "is_deleted": false,
+      "owner__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "relevant_team__r": "戴朝興",
+      "owner__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "last_modified_time": 1752842099581,
+      "life_status": "normal",
+      "last_modified_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "last_modified_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "record_type": "default__c",
+      "field_36Zg0__c": "5n94HP281",
+      "last_modified_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "external_form_display__c__r": "無",
+      "related_object": {
+        "NewOpportunityObj": [
+          "6708e626f4cfbf00013b4b35"
+        ],
+        "AccountObj": [
+          "6560950ea68cbe0001333a71",
+          "6708e4117d141b00012614d7"
+        ]
+      },
+      "life_status__r": "正常",
+      "external_form_display__c": "option_empty_value__c"
+    },
+    {
+      "active_record_content": "7/18 記錄一下（廖董提供）\n👉30*60 (浴室地壁磚) : \n    三-133(010332020048003) 66.5元/片\n👉60*60 (梯廳地壁磚) : \n    五-159(010332026030003) 136元/片\n👉梯廳地面滾邊 : \n    五-207(010332117007002)147元/片\n———————————\n玉美：樣品磚已到公司\n會在下週送樣前再跟老闆行前討論一下\n",
+      "field_36Zg0__c__r": "普通",
+      "extend_obj_data_id": "687a1c7ce457a20001ef0e0c",
+      "created_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner_department_id": "1006",
+      "total_num": 4202,
+      "owner_department": "業務二部",
+      "searchAfterId": [
+        "1752833148712",
+        "687a1c7ce457a20001ef0d21"
+      ],
+      "related_api_names__r": "商機|客戶",
+      "lock_status": "0",
+      "data_own_department__r": {
+        "deptName": "業務二部",
+        "leaderUserId": "1000",
+        "deptId": "1006",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "create_time": 1752833148712,
+      "related_object_data": [
+        {
+          "describe_api_name": "NewOpportunityObj",
+          "name": "協和-豐中段-2024",
+          "id": "67721a1c1a98890001a5901c"
+        },
+        {
+          "describe_api_name": "AccountObj",
+          "name": "協和建設股份有限公司",
+          "id": "650bde4c86a6c800014c066d"
+        },
+        {
+          "describe_api_name": "AccountObj",
+          "name": "協勝建設股份有限公司",
+          "id": "661cad37903b680001cb6aa3"
+        }
+      ],
+      "version": "1",
+      "created_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1006"
+      ],
+      "name": "2025-07-18-004217",
+      "_id": "687a1c7ce457a20001ef0d21",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1006",
+          "deptName": "業務二部",
+          "leaderUserId": "1000",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "related_api_names": [
+        "NewOpportunityObj",
+        "AccountObj"
+      ],
+      "lock_status__r": "未锁定",
+      "is_deleted": false,
+      "owner__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "relevant_team__r": "戴朝興",
+      "owner__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "last_modified_time": 1752833148712,
+      "life_status": "normal",
+      "last_modified_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "last_modified_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "record_type": "default__c",
+      "field_36Zg0__c": "5n94HP281",
+      "last_modified_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "external_form_display__c__r": "無",
+      "related_object": {
+        "NewOpportunityObj": [
+          "67721a1c1a98890001a5901c"
+        ],
+        "AccountObj": [
+          "650bde4c86a6c800014c066d",
+          "661cad37903b680001cb6aa3"
+        ]
+      },
+      "life_status__r": "正常",
+      "external_form_display__c": "option_empty_value__c"
+    },
+    {
+      "active_record_content": "7/18 已經跟工務鄭元僑及大學段黃主任約定\n好下週安排時間先去現場會勘鏡櫃安裝位置\n及估價評估～",
+      "field_36Zg0__c__r": "普通",
+      "extend_obj_data_id": "687a1ab00c996c0001f633a9",
+      "created_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner_department_id": "1006",
+      "total_num": 4202,
+      "owner_department": "業務二部",
+      "searchAfterId": [
+        "1752832688332",
+        "687a1ab00c996c0001f632b8"
+      ],
+      "related_api_names__r": "商機|客戶",
+      "lock_status": "0",
+      "data_own_department__r": {
+        "deptName": "業務二部",
+        "leaderUserId": "1000",
+        "deptId": "1006",
+        "deptType": "dept",
+        "parentId": "999999",
+        "status": 0
+      },
+      "create_time": 1752832688332,
+      "related_object_data": [
+        {
+          "describe_api_name": "NewOpportunityObj",
+          "name": "育堂-大學段-2025",
+          "id": "67ce9deccbdccf00017f9de7"
+        },
+        {
+          "describe_api_name": "AccountObj",
+          "name": "坤興營造股份有限公司",
+          "id": "66cec4677b608b0001494e0f"
+        },
+        {
+          "describe_api_name": "AccountObj",
+          "name": "育堂建設股份有限公司",
+          "id": "67ce9d0bbf28500001876acb"
+        }
+      ],
+      "version": "2",
+      "created_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "relevant_team": [
+        {
+          "teamMemberEmployee": [
+            "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+          ],
+          "teamMemberType": "0",
+          "teamMemberRole": "1",
+          "teamMemberPermissionType": "2",
+          "teamMemberDeptCascade": "0"
+        }
+      ],
+      "data_own_department": [
+        "1006"
+      ],
+      "name": "2025-07-18-004216",
+      "_id": "687a1ab00c996c0001f632b8",
+      "data_own_department__l": [
+        {
+          "parentId": "999999",
+          "deptId": "1006",
+          "deptName": "業務二部",
+          "leaderUserId": "1000",
+          "status": 0,
+          "deptType": "dept"
+        }
+      ],
+      "related_api_names": [
+        "NewOpportunityObj",
+        "AccountObj"
+      ],
+      "lock_status__r": "未锁定",
+      "is_deleted": false,
+      "owner__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "relevant_team__r": "戴朝興",
+      "owner__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "owner": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "last_modified_time": 1752832724712,
+      "life_status": "normal",
+      "last_modified_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "created_by__l": [
+        {
+          "id": "1084",
+          "tenantId": "781014",
+          "name": "戴朝興",
+          "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+          "email": "",
+          "nickname": "戴朝興",
+          "supervisorId": "1000",
+          "phone": "",
+          "description": "",
+          "status": 0,
+          "createTime": 1718591420489,
+          "modifyTime": 1733372102412,
+          "dept": "1006",
+          "post": "",
+          "empNum": "00018"
+        }
+      ],
+      "last_modified_by": [
+        "FSUID_C34E5C9875B7792206848C6449BFEC5A"
+      ],
+      "record_type": "default__c",
+      "field_36Zg0__c": "5n94HP281",
+      "last_modified_by__r": {
+        "picAddr": "N_202406_17_82d4067ee32f4cee8bae92d2747f4d5e",
+        "description": "",
+        "dept": "1006",
+        "supervisorId": "1000",
+        "empNum": "00018",
+        "modifyTime": 1733372102412,
+        "post": "",
+        "createTime": 1718591420489,
+        "phone": "",
+        "name": "戴朝興",
+        "nickname": "戴朝興",
+        "tenantId": "781014",
+        "id": "1084",
+        "email": "",
+        "status": 0
+      },
+      "external_form_display__c__r": "無",
+      "related_object": {
+        "NewOpportunityObj": [
+          "67ce9deccbdccf00017f9de7"
+        ],
+        "AccountObj": [
+          "66cec4677b608b0001494e0f",
+          "67ce9d0bbf28500001876acb"
+        ]
+      },
+      "life_status__r": "正常",
+      "external_form_display__c": "option_empty_value__c"
+    }
+  ]
+}

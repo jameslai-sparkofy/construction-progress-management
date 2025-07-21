@@ -59,6 +59,21 @@ CREATE TABLE building_units (
     UNIQUE (crm_opportunity_id, building_name, floor_number)
 );
 
+-- 先建立興安西專案記錄
+INSERT INTO projects (
+    id, crm_opportunity_id, name, slug, token, description, building_count, floor_count, status
+) VALUES (
+    'xinganxi_project', 
+    'xinganxi_2024', 
+    '勝興-興安西-2024', 
+    'xinganxi-2024', 
+    'xinganxi2024token',
+    '興安西建設案工程進度管理', 
+    3, 
+    15, 
+    'active'
+);
+
 -- 插入興安西專案的實際工班資料
 INSERT INTO contractors (
     id, crm_opportunity_id, name, type, phone, buildings, floors, role, permissions

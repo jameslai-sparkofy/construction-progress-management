@@ -132,6 +132,8 @@ async function handleAPI(request, env, pathParts) {
       return await handleSyncAPI(request, env, pathParts.slice(1));
     case 'crm':
       return await handleCRMAPI(request, env, pathParts.slice(1));
+    case 'test-ip':
+      return await handleTestIP(request, env);
     default:
       return new Response(JSON.stringify({ error: 'API 端點不存在' }), {
         status: 404,
@@ -1862,6 +1864,12 @@ async function handleCRMAPI(request, env, pathParts) {
   switch (endpoint) {
     case 'opportunities':
       return await handleOpportunitiesAPI(request, env, corsHeaders);
+    case 'sales-records':
+      return await handleSalesRecordsAPI(request, env, corsHeaders);
+    case 'sites':
+      return await handleSitesAPI(request, env, corsHeaders);
+    case 'maintenance-orders':
+      return await handleMaintenanceOrdersAPI(request, env, corsHeaders);
     default:
       return new Response(JSON.stringify({ error: 'CRM API 端點不存在' }), {
         status: 404,
@@ -1893,25 +1901,6 @@ async function handleOpportunitiesAPI(request, env, corsHeaders) {
     // Step 1: 獲取 Fxiaoke API Token
     const tokenResult = await getFxiaokeToken();
     if (!tokenResult.success) {
-      // 如果是 IP 白名單問題，使用演示數據
-      if (tokenResult.useDemo) {
-        console.log('使用演示商機數據');
-        const demoOpportunities = getDemoOpportunities();
-        
-        return new Response(JSON.stringify({
-          success: true,
-          data: demoOpportunities,
-          count: demoOpportunities.length,
-          isDemo: true,
-          message: '目前使用演示數據，實際部署時將連接真實 CRM 系統'
-        }), {
-          headers: { 
-            'Content-Type': 'application/json',
-            ...corsHeaders 
-          }
-        });
-      }
-      
       throw new Error(tokenResult.error);
     }
     
@@ -1957,7 +1946,48 @@ async function handleOpportunitiesAPI(request, env, corsHeaders) {
 }
 
 /**
+ * 測試 Worker IP 地址
+ */
+async function handleTestIP(request, env) {
+  try {
+    // 方法1：使用 httpbin.org 獲取 IP
+    const ipResponse1 = await fetch('https://httpbin.org/ip');
+    const ipData1 = await ipResponse1.json();
+    
+    // 方法2：使用 ifconfig.me
+    const ipResponse2 = await fetch('https://ifconfig.me/ip');
+    const ipData2 = await ipResponse2.text();
+    
+    return new Response(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      worker_ip_httpbin: ipData1.origin,
+      worker_ip_ifconfig: ipData2.trim(),
+      cloudflare_ray: request.headers.get('cf-ray'),
+      cf_connecting_ip: request.headers.get('cf-connecting-ip'),
+      x_forwarded_for: request.headers.get('x-forwarded-for'),
+      cf_ipcountry: request.headers.get('cf-ipcountry'),
+      note: 'Cloudflare Workers 使用動態 IP，建議將完整 IP 範圍加入白名單'
+    }, null, 2), {
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
+    
+  } catch (error) {
+    return new Response(JSON.stringify({
+      error: error.message,
+      timestamp: new Date().toISOString()
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+/**
  * 獲取 Fxiaoke API Token
+ * 現在 Fxiaoke 已開放所有 IP，可以直接調用
  */
 async function getFxiaokeToken() {
   const CONFIG = {
@@ -1983,18 +2013,8 @@ async function getFxiaokeToken() {
     
     const tokenResult = await tokenResponse.json();
     
-    // 檢查是否是 IP 白名單問題
+    // 檢查錯誤
     if (tokenResult.errorCode !== 0) {
-      const errorMsg = tokenResult.errorMessage || '';
-      if (errorMsg.includes('ip white list') || errorMsg.includes('白名單')) {
-        console.log('⚠️ IP 白名單限制，使用演示數據');
-        return {
-          success: false,
-          error: `IP 白名單限制: ${errorMsg}`,
-          useDemo: true
-        };
-      }
-      
       return {
         success: false,
         error: `Token獲取失敗: ${tokenResult.errorMessage}`
@@ -2043,6 +2063,144 @@ async function getFxiaokeToken() {
 }
 
 /**
+ * 處理銷售記錄 API 請求
+ */
+async function handleSalesRecordsAPI(request, env, corsHeaders) {
+  if (request.method !== 'GET') {
+    return new Response(JSON.stringify({ error: '僅支援 GET 請求' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+  
+  try {
+    const tokenResult = await getFxiaokeToken();
+    if (!tokenResult.success) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: tokenResult.error,
+        data: []
+      }), {
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    }
+    
+    const { token, corpId, userId } = tokenResult;
+    const salesRecords = await querySalesRecords(token, corpId, userId);
+    
+    return new Response(JSON.stringify({
+      success: true,
+      data: salesRecords,
+      count: salesRecords.length
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+    
+  } catch (error) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      data: []
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+}
+
+/**
+ * 處理案場 API 請求
+ */
+async function handleSitesAPI(request, env, corsHeaders) {
+  if (request.method !== 'GET') {
+    return new Response(JSON.stringify({ error: '僅支援 GET 請求' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+  
+  try {
+    const tokenResult = await getFxiaokeToken();
+    if (!tokenResult.success) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: tokenResult.error,
+        data: []
+      }), {
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    }
+    
+    const { token, corpId, userId } = tokenResult;
+    const sites = await querySites(token, corpId, userId);
+    
+    return new Response(JSON.stringify({
+      success: true,
+      data: sites,
+      count: sites.length
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+    
+  } catch (error) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      data: []
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+}
+
+/**
+ * 處理維修單 API 請求
+ */
+async function handleMaintenanceOrdersAPI(request, env, corsHeaders) {
+  if (request.method !== 'GET') {
+    return new Response(JSON.stringify({ error: '僅支援 GET 請求' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+  
+  try {
+    const tokenResult = await getFxiaokeToken();
+    if (!tokenResult.success) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: tokenResult.error,
+        data: []
+      }), {
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    }
+    
+    const { token, corpId, userId } = tokenResult;
+    const maintenanceOrders = await queryMaintenanceOrders(token, corpId, userId);
+    
+    return new Response(JSON.stringify({
+      success: true,
+      data: maintenanceOrders,
+      count: maintenanceOrders.length
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+    
+  } catch (error) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      data: []
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+}
+
+/**
  * 查詢商機列表
  */
 async function queryOpportunities(token, corpId, userId) {
@@ -2051,7 +2209,7 @@ async function queryOpportunities(token, corpId, userId) {
   };
   
   try {
-    const opportunityResponse = await fetch(`${CONFIG.baseUrl}/cgi/crm/data/query`, {
+    const opportunityResponse = await fetch(`${CONFIG.baseUrl}/cgi/crm/v2/data/query`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -2060,9 +2218,8 @@ async function queryOpportunities(token, corpId, userId) {
         corpId: corpId,
         corpAccessToken: token,
         currentOpenUserId: userId,
-        apiName: "crm.data.query",
         data: {
-          dataType: "OpportunityObj",
+          apiName: "NewOpportunityObj",
           search_query_info: {
             limit: 50,
             offset: 0,
@@ -2099,6 +2256,187 @@ async function queryOpportunities(token, corpId, userId) {
   } catch (error) {
     console.error('查詢商機錯誤:', error);
     throw error;
+  }
+}
+
+/**
+ * 查詢銷售記錄列表
+ */
+async function querySalesRecords(token, corpId, userId) {
+  const CONFIG = {
+    baseUrl: "https://open.fxiaoke.com"
+  };
+  
+  try {
+    const response = await fetch(`${CONFIG.baseUrl}/cgi/crm/v2/data/query`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        corpId: corpId,
+        corpAccessToken: token,
+        currentOpenUserId: userId,
+        data: {
+          apiName: "ActiveRecordObj",
+          search_query_info: {
+            limit: 100,
+            offset: 0,
+            orders: [{fieldName: "create_time", isAsc: "false"}]
+          }
+        }
+      })
+    });
+    
+    const result = await response.json();
+    console.log('銷售記錄查詢原始響應:', JSON.stringify(result, null, 2));
+    
+    if (result.errorCode !== 0) {
+      throw new Error(`銷售記錄查詢失敗: ${result.errorMessage}`);
+    }
+    
+    if (!result.data?.dataList) {
+      return [];
+    }
+    
+    // 轉換為前端需要的格式
+    const salesRecords = result.data.dataList.map(record => ({
+      id: record._id,
+      opportunityId: record.opportunity_id || record.opp_id,
+      content: record.content || record.description || '無內容',
+      type: record.type || '跟進記錄',
+      createTime: record.create_time,
+      updateTime: record.update_time || record.last_modified_time,
+      createdBy: record.created_by_name || record.created_by,
+      raw: record
+    }));
+    
+    return salesRecords;
+    
+  } catch (error) {
+    throw new Error(`銷售記錄查詢失敗: ${error.message}`);
+  }
+}
+
+/**
+ * 查詢案場列表（自定義對象）
+ */
+async function querySites(token, corpId, userId) {
+  const CONFIG = {
+    baseUrl: "https://open.fxiaoke.com"
+  };
+  
+  try {
+    const response = await fetch(`${CONFIG.baseUrl}/cgi/crm/custom/v2/data/query`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        corpId: corpId,
+        corpAccessToken: token,
+        currentOpenUserId: userId,
+        data: {
+          dataObjectApiName: "object_8W9cb__c",
+          search_query_info: {
+            limit: 50,
+            offset: 0,
+            orders: [{fieldName: "create_time", isAsc: "false"}]
+          }
+        }
+      })
+    });
+    
+    const result = await response.json();
+    console.log('案場查詢原始響應:', JSON.stringify(result, null, 2));
+    
+    if (result.errorCode !== 0) {
+      throw new Error(`案場查詢失敗: ${result.errorMessage}`);
+    }
+    
+    if (!result.data?.dataList) {
+      return [];
+    }
+    
+    // 轉換為前端需要的格式
+    const sites = result.data.dataList.map(site => ({
+      id: site._id,
+      name: site.name || '未命名案場',
+      opportunityId: site.opportunity_id,
+      address: site.address || site.location,
+      status: site.status || '進行中',
+      createTime: site.create_time,
+      updateTime: site.update_time,
+      raw: site
+    }));
+    
+    return sites;
+    
+  } catch (error) {
+    throw new Error(`案場查詢失敗: ${error.message}`);
+  }
+}
+
+/**
+ * 查詢維修單列表（自定義對象）
+ */
+async function queryMaintenanceOrders(token, corpId, userId) {
+  const CONFIG = {
+    baseUrl: "https://open.fxiaoke.com"
+  };
+  
+  try {
+    const response = await fetch(`${CONFIG.baseUrl}/cgi/crm/custom/v2/data/query`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        corpId: corpId,
+        corpAccessToken: token,
+        currentOpenUserId: userId,
+        data: {
+          dataObjectApiName: "on_site_signature__c",
+          search_query_info: {
+            limit: 100,
+            offset: 0,
+            orders: [{fieldName: "create_time", isAsc: "false"}]
+          }
+        }
+      })
+    });
+    
+    const result = await response.json();
+    console.log('維修單查詢原始響應:', JSON.stringify(result, null, 2));
+    
+    if (result.errorCode !== 0) {
+      throw new Error(`維修單查詢失敗: ${result.errorMessage}`);
+    }
+    
+    if (!result.data?.dataList) {
+      return [];
+    }
+    
+    // 轉換為前端需要的格式
+    const maintenanceOrders = result.data.dataList.map(order => ({
+      id: order._id,
+      orderNumber: order.order_number || order._id,
+      opportunityId: order.opportunity_id,
+      building: order.building || order.building_name,
+      floor: order.floor || order.floor_number,
+      unit: order.unit || order.unit_number,
+      issue: order.issue || order.problem_description,
+      status: order.status || '待處理',
+      contractor: order.contractor || order.contractor_name,
+      createTime: order.create_time,
+      updateTime: order.update_time,
+      raw: order
+    }));
+    
+    return maintenanceOrders;
+    
+  } catch (error) {
+    throw new Error(`維修單查詢失敗: ${error.message}`);
   }
 }
 
