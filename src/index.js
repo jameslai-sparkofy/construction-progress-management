@@ -55,6 +55,33 @@ export default {
         }
       });
     }
+  },
+
+  /**
+   * Cloudflare Cron Trigger 定時任務
+   * 每小時同步 CRM 商機到 D1 資料庫
+   */
+  async scheduled(event, env, ctx) {
+    console.log('🕐 開始執行定時同步任務...');
+    
+    try {
+      // 執行商機同步
+      const syncResult = await syncOpportunitiesToDB(env);
+      
+      console.log('✅ 定時同步完成:', {
+        syncedCount: syncResult.syncedCount,
+        totalCount: syncResult.totalCount,
+        timestamp: new Date().toISOString()
+      });
+      
+      // 可選：記錄到其他系統或通知
+      
+    } catch (error) {
+      console.error('❌ 定時同步失敗:', error);
+      
+      // 可選：發送警報通知
+      // await sendAlert(env, '定時同步失敗', error.message);
+    }
   }
 };
 
@@ -1837,10 +1864,380 @@ async function handleAuthAPI(request, env, pathParts) {
  * 處理同步 API (與 Fxiaoke CRM 同步)
  */
 async function handleSyncAPI(request, env, pathParts) {
-  // TODO: 實作 CRM 同步功能
-  return new Response(JSON.stringify({ message: '同步功能開發中' }), {
-    headers: { 'Content-Type': 'application/json' }
-  });
+  const endpoint = pathParts[0];
+  
+  // CORS headers
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+  
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+  
+  switch (endpoint) {
+    case 'opportunities':
+      return await handleOpportunitiesSync(request, env, corsHeaders);
+    case 'status':
+      return await handleSyncStatus(request, env, corsHeaders);
+    case 'force':
+      return await handleForceSync(request, env, corsHeaders);
+    default:
+      return new Response(JSON.stringify({ 
+        error: '同步 API 端點不存在',
+        available: ['opportunities', 'status', 'force']
+      }), {
+        status: 404,
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders 
+        }
+      });
+  }
+}
+
+/**
+ * 處理商機同步
+ */
+async function handleOpportunitiesSync(request, env, corsHeaders) {
+  if (request.method !== 'POST') {
+    return new Response(JSON.stringify({ error: '僅支援 POST 請求' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+  
+  try {
+    console.log('🔄 開始同步 Fxiaoke CRM 商機到 D1 資料庫');
+    
+    // 檢查上次同步時間，避免頻繁同步
+    const lastSync = await env.DB.prepare(
+      'SELECT last_sync_time FROM sync_status WHERE sync_type = ?'
+    ).bind('opportunities').first();
+    
+    const now = Date.now();
+    const minInterval = 5 * 60 * 1000; // 5 分鐘最小間隔
+    
+    if (lastSync && (now - lastSync.last_sync_time) < minInterval) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: '同步間隔過短，請稍後再試',
+        nextSyncAvailable: new Date(lastSync.last_sync_time + minInterval).toISOString()
+      }), {
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    }
+    
+    // 執行同步
+    const syncResult = await syncOpportunitiesToDB(env);
+    
+    return new Response(JSON.stringify(syncResult), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+    
+  } catch (error) {
+    console.error('同步失敗:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+}
+
+/**
+ * 查詢同步狀態
+ */
+async function handleSyncStatus(request, env, corsHeaders) {
+  if (request.method !== 'GET') {
+    return new Response(JSON.stringify({ error: '僅支援 GET 請求' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+  
+  try {
+    const status = await env.DB.prepare(
+      'SELECT * FROM sync_status WHERE sync_type = ?'
+    ).bind('opportunities').first();
+    
+    const opportunityCount = await env.DB.prepare(
+      'SELECT COUNT(*) as count FROM opportunities'
+    ).first();
+    
+    return new Response(JSON.stringify({
+      success: true,
+      syncStatus: status,
+      localOpportunityCount: opportunityCount?.count || 0,
+      lastSyncAgo: status?.last_sync_time ? 
+        Math.floor((Date.now() - status.last_sync_time) / 1000 / 60) + ' 分鐘前' : 
+        '從未同步'
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+    
+  } catch (error) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+}
+
+/**
+ * 強制同步（忽略時間間隔限制）
+ */
+async function handleForceSync(request, env, corsHeaders) {
+  if (request.method !== 'POST') {
+    return new Response(JSON.stringify({ error: '僅支援 POST 請求' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+  
+  try {
+    console.log('🔄 強制同步 Fxiaoke CRM 商機');
+    const syncResult = await syncOpportunitiesToDB(env);
+    
+    return new Response(JSON.stringify({
+      ...syncResult,
+      forced: true
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+    
+  } catch (error) {
+    console.error('強制同步失敗:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      forced: true
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+}
+
+/**
+ * 同步商機到 D1 資料庫
+ */
+async function syncOpportunitiesToDB(env) {
+  const startTime = Date.now();
+  
+  try {
+    // 1. 獲取 Fxiaoke Token
+    const tokenResult = await getFxiaokeToken();
+    if (!tokenResult.success) {
+      throw new Error(tokenResult.error);
+    }
+    
+    const { token, corpId, userId } = tokenResult;
+    console.log('✅ 獲取 Fxiaoke Token 成功');
+    
+    // 2. 獲取所有商機（可能需要分頁）
+    const opportunities = await queryAllOpportunities(token, corpId, userId);
+    console.log(`📊 從 CRM 獲取到 ${opportunities.length} 個商機`);
+    
+    // 3. 批量插入/更新到 D1
+    let insertedCount = 0;
+    let updatedCount = 0;
+    
+    for (const opp of opportunities) {
+      try {
+        // 檢查是否已存在
+        const existing = await env.DB.prepare(
+          'SELECT update_time FROM opportunities WHERE id = ?'
+        ).bind(opp.id).first();
+        
+        const oppData = {
+          id: opp.id,
+          name: opp.name,
+          customer: opp.customer,
+          amount: parseInt(opp.amount?.replace(/[^\d]/g, '') || '0'),
+          stage: opp.stage,
+          create_time: opp.createTime,
+          update_time: opp.updateTime,
+          synced_at: Date.now(),
+          raw_data: JSON.stringify(opp)
+        };
+        
+        if (existing) {
+          // 只有在數據有更新時才更新
+          if (existing.update_time !== opp.updateTime) {
+            await env.DB.prepare(`
+              UPDATE opportunities SET 
+                name = ?, customer = ?, amount = ?, stage = ?, 
+                update_time = ?, synced_at = ?, raw_data = ?
+              WHERE id = ?
+            `).bind(
+              oppData.name, oppData.customer, oppData.amount, oppData.stage,
+              oppData.update_time, oppData.synced_at, oppData.raw_data, oppData.id
+            ).run();
+            updatedCount++;
+          }
+        } else {
+          // 新增記錄
+          await env.DB.prepare(`
+            INSERT INTO opportunities 
+            (id, name, customer, amount, stage, create_time, update_time, synced_at, raw_data)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `).bind(
+            oppData.id, oppData.name, oppData.customer, oppData.amount, oppData.stage,
+            oppData.create_time, oppData.update_time, oppData.synced_at, oppData.raw_data
+          ).run();
+          insertedCount++;
+        }
+        
+      } catch (error) {
+        console.error(`處理商機 ${opp.id} 時出錯:`, error);
+      }
+    }
+    
+    // 4. 更新同步狀態
+    await env.DB.prepare(`
+      INSERT OR REPLACE INTO sync_status 
+      (sync_type, last_sync_time, last_sync_count, status, message)
+      VALUES (?, ?, ?, ?, ?)
+    `).bind(
+      'opportunities',
+      Date.now(),
+      opportunities.length,
+      'success',
+      `成功同步 ${opportunities.length} 個商機 (新增: ${insertedCount}, 更新: ${updatedCount})`
+    ).run();
+    
+    const duration = Date.now() - startTime;
+    console.log(`✅ 同步完成，耗時 ${duration}ms`);
+    
+    return {
+      success: true,
+      syncedCount: opportunities.length,
+      insertedCount,
+      updatedCount,
+      duration,
+      syncTime: new Date().toISOString()
+    };
+    
+  } catch (error) {
+    console.error('同步失敗:', error);
+    
+    try {
+      // 記錄失敗狀態
+      await env.DB.prepare(`
+        INSERT OR REPLACE INTO sync_status 
+        (sync_type, last_sync_time, last_sync_count, status, message)
+        VALUES (?, ?, ?, ?, ?)
+      `).bind(
+        'opportunities',
+        Date.now(),
+        0,
+        'failed',
+        error.message
+      ).run();
+    } catch (dbError) {
+      console.error('記錄同步失敗狀態時出錯:', dbError);
+    }
+    
+    // 返回錯誤結果而不是拋出異常
+    return {
+      success: false,
+      error: error.message,
+      syncedCount: 0,
+      insertedCount: 0,
+      updatedCount: 0,
+      duration: Date.now() - startTime,
+      syncTime: new Date().toISOString()
+    };
+  }
+}
+
+/**
+ * 查詢所有商機（支援分頁）
+ */
+async function queryAllOpportunities(token, corpId, userId) {
+  const CONFIG = {
+    baseUrl: "https://open.fxiaoke.com"
+  };
+  
+  const allOpportunities = [];
+  let offset = 0;
+  const limit = 100; // 每次查詢 100 筆
+  let hasMore = true;
+  
+  while (hasMore) {
+    try {
+      console.log(`🔄 查詢商機，offset: ${offset}, limit: ${limit}`);
+      
+      const response = await fetch(`${CONFIG.baseUrl}/cgi/crm/v2/data/query`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          corpId: corpId,
+          corpAccessToken: token,
+          currentOpenUserId: userId,
+          data: {
+            apiName: "NewOpportunityObj",
+            search_query_info: {
+              limit: limit,
+              offset: offset,
+              orders: [{fieldName: "create_time", isAsc: "false"}]
+            }
+          }
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.errorCode !== 0) {
+        throw new Error(`商機查詢失敗: ${result.errorMessage}`);
+      }
+      
+      const opportunities = result.data?.dataList || [];
+      
+      if (opportunities.length === 0) {
+        hasMore = false;
+        break;
+      }
+      
+      // 轉換格式並添加到總列表
+      const formattedOpportunities = opportunities.map(opp => ({
+        id: opp._id,
+        name: opp.name || '未命名商機',
+        customer: opp.customer_name || opp.account_name || '未知客戶',
+        amount: formatAmount(opp.amount || opp.estimated_amount || 0),
+        stage: opp.stage || '未知階段',
+        createTime: opp.create_time,
+        updateTime: opp.update_time || opp.last_modified_time
+      }));
+      
+      allOpportunities.push(...formattedOpportunities);
+      
+      // 如果返回的數量少於 limit，表示沒有更多數據了
+      if (opportunities.length < limit) {
+        hasMore = false;
+      } else {
+        offset += limit;
+      }
+      
+    } catch (error) {
+      console.error(`查詢第 ${offset} 頁商機時出錯:`, error);
+      hasMore = false;
+      throw error;
+    }
+  }
+  
+  console.log(`✅ 總共獲取到 ${allOpportunities.length} 個商機`);
+  return allOpportunities;
 }
 
 /**
@@ -1863,7 +2260,12 @@ async function handleCRMAPI(request, env, pathParts) {
   
   switch (endpoint) {
     case 'opportunities':
-      return await handleOpportunitiesAPI(request, env, corsHeaders);
+      // 檢查是否為搜尋請求
+      if (pathParts[1] === 'search') {
+        return await handleOpportunitiesSearchAPI(request, env, corsHeaders);
+      } else {
+        return await handleOpportunitiesAPI(request, env, corsHeaders);
+      }
     case 'sales-records':
       return await handleSalesRecordsAPI(request, env, corsHeaders);
     case 'sites':
@@ -1898,6 +2300,13 @@ async function handleOpportunitiesAPI(request, env, corsHeaders) {
   try {
     console.log('開始查詢 Fxiaoke CRM 商機...');
     
+    // 獲取分頁參數
+    const url = new URL(request.url);
+    const offset = parseInt(url.searchParams.get('offset') || '0');
+    const limit = parseInt(url.searchParams.get('limit') || '50');
+    
+    console.log(`分頁參數: offset=${offset}, limit=${limit}`);
+    
     // Step 1: 獲取 Fxiaoke API Token
     const tokenResult = await getFxiaokeToken();
     if (!tokenResult.success) {
@@ -1908,8 +2317,8 @@ async function handleOpportunitiesAPI(request, env, corsHeaders) {
     console.log('✅ Fxiaoke Token 獲取成功');
     
     // Step 2: 查詢商機列表
-    const opportunities = await queryOpportunities(token, corpId, userId);
-    console.log(`✅ 查詢到 ${opportunities.length} 個商機`);
+    const opportunities = await queryOpportunities(token, corpId, userId, offset, limit);
+    console.log(`✅ 查詢到 ${opportunities.length} 個商機 (offset: ${offset}, limit: ${limit})`);
     
     return new Response(JSON.stringify({
       success: true,
@@ -1942,6 +2351,241 @@ async function handleOpportunitiesAPI(request, env, corsHeaders) {
         ...corsHeaders 
       }
     });
+  }
+}
+
+/**
+ * 處理商機搜尋 API 請求 - 混合搜尋策略
+ */
+async function handleOpportunitiesSearchAPI(request, env, corsHeaders) {
+  if (request.method !== 'GET') {
+    return new Response(JSON.stringify({ error: '僅支援 GET 請求' }), {
+      status: 405,
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders 
+      }
+    });
+  }
+  
+  try {
+    // 獲取搜尋參數
+    const url = new URL(request.url);
+    const searchQuery = url.searchParams.get('q');
+    const forceAPI = url.searchParams.get('force_api') === 'true'; // 強制使用 API 搜尋
+    
+    if (!searchQuery || searchQuery.trim() === '') {
+      return new Response(JSON.stringify({ 
+        error: '請提供搜尋關鍵字',
+        success: false 
+      }), {
+        status: 400,
+        headers: { 
+          'Content-Type': 'application/json',
+          ...corsHeaders 
+        }
+      });
+    }
+    
+    console.log('🔍 搜尋請求，關鍵字:', searchQuery, forceAPI ? '(強制 API)' : '(優先本地)');
+    
+    let searchResults = [];
+    let searchSource = 'local';
+    
+    // Step 1: 優先從本地 D1 資料庫搜尋
+    if (!forceAPI) {
+      try {
+        console.log('📦 嘗試從本地 D1 資料庫搜尋...');
+        searchResults = await searchOpportunitiesFromDB(env, searchQuery);
+        
+        if (searchResults.length > 0) {
+          console.log(`✅ 本地搜尋成功，找到 ${searchResults.length} 個商機`);
+          
+          // 記錄搜尋日誌（可選，忽略錯誤）
+          try {
+            await env.DB.prepare(`
+              INSERT INTO search_logs (search_term, results_count, search_source, search_time, user_agent)
+              VALUES (?, ?, ?, ?, ?)
+            `).bind(
+              searchQuery,
+              searchResults.length,
+              'local',
+              Date.now(),
+              request.headers.get('User-Agent') || 'Unknown'
+            ).run();
+          } catch (logError) {
+            console.log('搜尋日誌記錄失敗（忽略）:', logError.message);
+          }
+          
+          return new Response(JSON.stringify({
+            success: true,
+            data: searchResults,
+            count: searchResults.length,
+            query: searchQuery,
+            source: 'local',
+            isDemo: false
+          }), {
+            headers: { 
+              'Content-Type': 'application/json',
+              ...corsHeaders 
+            }
+          });
+        } else {
+          console.log('📭 本地搜尋無結果，準備調用 CRM API...');
+        }
+      } catch (dbError) {
+        console.error('本地搜尋失敗:', dbError);
+        // 繼續嘗試 API 搜尋
+      }
+    }
+    
+    // Step 2: 本地無結果或強制 API，則調用 Fxiaoke API
+    console.log('🌐 調用 Fxiaoke CRM API 搜尋...');
+    
+    // 獲取 Token
+    const tokenResult = await getFxiaokeToken();
+    if (!tokenResult.success) {
+      throw new Error(tokenResult.error);
+    }
+    
+    const { token, corpId, userId } = tokenResult;
+    console.log('✅ Fxiaoke Token 獲取成功');
+    
+    // 執行 API 搜尋
+    searchResults = await searchOpportunities(token, corpId, userId, searchQuery);
+    searchSource = 'api';
+    console.log(`✅ API 搜尋完成，找到 ${searchResults.length} 個符合的商機`);
+    
+    // 如果 API 搜尋有結果，可以考慮更新本地資料庫
+    if (searchResults.length > 0) {
+      // 異步更新本地資料庫（不阻塞回應）
+      updateLocalOpportunities(env, searchResults).catch(error => {
+        console.error('更新本地資料庫失敗:', error);
+      });
+    }
+    
+    // 記錄搜尋日誌（可選，忽略錯誤）
+    try {
+      await env.DB.prepare(`
+        INSERT INTO search_logs (search_term, results_count, search_source, search_time, user_agent)
+        VALUES (?, ?, ?, ?, ?)
+      `).bind(
+        searchQuery,
+        searchResults.length,
+        searchSource,
+        Date.now(),
+        request.headers.get('User-Agent') || 'Unknown'
+      ).run();
+    } catch (logError) {
+      console.log('搜尋日誌記錄失敗（忽略）:', logError.message);
+    }
+    
+    return new Response(JSON.stringify({
+      success: true,
+      data: searchResults,
+      count: searchResults.length,
+      query: searchQuery,
+      source: searchSource,
+      isDemo: false
+    }), {
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders 
+      }
+    });
+    
+  } catch (error) {
+    console.error('搜尋失敗:', error);
+    
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      data: [],
+      count: 0
+    }), {
+      status: 500,
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders 
+      }
+    });
+  }
+}
+
+/**
+ * 從本地 D1 資料庫搜尋商機
+ */
+async function searchOpportunitiesFromDB(env, searchQuery) {
+  try {
+    console.log('🔍 D1 搜尋開始，關鍵字:', searchQuery);
+    const searchTerm = `%${searchQuery.toLowerCase()}%`;
+    
+    // 使用 SQL LIKE 查詢，搜尋名稱和客戶欄位
+    const results = await env.DB.prepare(`
+      SELECT id, name, customer, amount, stage, create_time as createTime, update_time as updateTime
+      FROM opportunities
+      WHERE LOWER(name) LIKE ? OR LOWER(customer) LIKE ?
+      ORDER BY update_time DESC
+      LIMIT 100
+    `).bind(searchTerm, searchTerm).all();
+    
+    console.log('📊 D1 搜尋結果數量:', results.results?.length || 0);
+    
+    if (!results.results) {
+      return [];
+    }
+    
+    // 格式化結果
+    return results.results.map(opp => ({
+      id: opp.id,
+      name: opp.name,
+      customer: opp.customer,
+      amount: `NT$ ${(opp.amount || 0).toLocaleString()}`,
+      stage: opp.stage,
+      createTime: opp.createTime,
+      updateTime: opp.updateTime
+    }));
+    
+  } catch (error) {
+    console.error('D1 資料庫搜尋錯誤:', error);
+    throw error;
+  }
+}
+
+/**
+ * 更新本地商機資料（異步）
+ */
+async function updateLocalOpportunities(env, opportunities) {
+  for (const opp of opportunities) {
+    try {
+      // 檢查是否需要更新
+      const existing = await env.DB.prepare(
+        'SELECT id FROM opportunities WHERE id = ?'
+      ).bind(opp.id).first();
+      
+      if (!existing) {
+        // 新商機，插入資料庫
+        await env.DB.prepare(`
+          INSERT INTO opportunities 
+          (id, name, customer, amount, stage, create_time, update_time, synced_at, raw_data)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(
+          opp.id,
+          opp.name,
+          opp.customer,
+          parseInt(opp.amount?.replace(/[^\d]/g, '') || '0'),
+          opp.stage,
+          opp.createTime,
+          opp.updateTime,
+          Date.now(),
+          JSON.stringify(opp)
+        ).run();
+        
+        console.log(`✅ 新增商機到本地資料庫: ${opp.name}`);
+      }
+    } catch (error) {
+      console.error(`更新商機 ${opp.id} 失敗:`, error);
+    }
   }
 }
 
@@ -2203,7 +2847,7 @@ async function handleMaintenanceOrdersAPI(request, env, corsHeaders) {
 /**
  * 查詢商機列表
  */
-async function queryOpportunities(token, corpId, userId) {
+async function queryOpportunities(token, corpId, userId, offset = 0, limit = 50) {
   const CONFIG = {
     baseUrl: "https://open.fxiaoke.com"
   };
@@ -2221,8 +2865,8 @@ async function queryOpportunities(token, corpId, userId) {
         data: {
           apiName: "NewOpportunityObj",
           search_query_info: {
-            limit: 50,
-            offset: 0,
+            limit: limit,
+            offset: offset,
             orders: [{fieldName: "create_time", isAsc: "false"}]
           }
         }
@@ -2256,6 +2900,78 @@ async function queryOpportunities(token, corpId, userId) {
   } catch (error) {
     console.error('查詢商機錯誤:', error);
     throw error;
+  }
+}
+
+/**
+ * 搜尋商機（支援關鍵字搜尋）
+ */
+async function searchOpportunities(token, corpId, userId, searchQuery) {
+  const CONFIG = {
+    baseUrl: "https://open.fxiaoke.com"
+  };
+  
+  try {
+    console.log(`🔍 向 Fxiaoke CRM 搜尋商機，關鍵字: ${searchQuery}`);
+    
+    // 直接使用回退邏輯（獲取所有商機並篩選），因為 Fxiaoke 搜尋 API 可能不支援
+    console.log('🔄 使用回退策略：獲取所有商機並進行後端篩選');
+    const allOpportunities = await queryOpportunities(token, corpId, userId);
+    console.log(`📊 獲取到 ${allOpportunities.length} 個商機，開始篩選包含 "${searchQuery}" 的商機`);
+    
+    // 顯示前幾個商機名稱供除錯
+    console.log('🔍 前10個商機名稱:');
+    allOpportunities.slice(0, 10).forEach((opp, i) => {
+      console.log(`  ${i + 1}. ${opp.name}`);
+    });
+    
+    // 在後端進行關鍵字篩選
+    const filteredOpportunities = allOpportunities.filter(opp => {
+      const nameMatch = opp.name && opp.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const customerMatch = opp.customer && opp.customer.toLowerCase().includes(searchQuery.toLowerCase());
+      const matched = nameMatch || customerMatch;
+      
+      if (matched) {
+        console.log(`✅ 找到符合條件的商機: ${opp.name} (客戶: ${opp.customer})`);
+      }
+      
+      return matched;
+    });
+    
+    console.log(`✅ 後端篩選完成，找到 ${filteredOpportunities.length} 個符合 "${searchQuery}" 的商機`);
+    return filteredOpportunities;
+    
+  } catch (error) {
+    console.error('CRM 搜尋錯誤:', error);
+    
+    // 錯誤時回退到查詢所有商機並篩選
+    try {
+      console.log(`搜尋失敗，回退到查詢所有商機並篩選，搜尋關鍵字: ${searchQuery}`);
+      const allOpportunities = await queryOpportunities(token, corpId, userId);
+      console.log(`🔍 回退獲取所有商機完成，共 ${allOpportunities.length} 個，開始篩選`);
+      
+      // 顯示前幾個商機供除錯
+      console.log('前5個商機:', allOpportunities.slice(0, 5).map(opp => opp.name));
+      
+      const filteredOpportunities = allOpportunities.filter(opp => {
+        const nameMatch = opp.name && opp.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const customerMatch = opp.customer && opp.customer.toLowerCase().includes(searchQuery.toLowerCase());
+        const matched = nameMatch || customerMatch;
+        
+        if (matched) {
+          console.log(`✅ 回退篩選找到符合條件的商機: ${opp.name} (客戶: ${opp.customer})`);
+        }
+        
+        return matched;
+      });
+      
+      console.log(`✅ 回退篩選完成，找到 ${filteredOpportunities.length} 個符合的商機`);
+      return filteredOpportunities;
+      
+    } catch (fallbackError) {
+      console.error('回退搜尋也失敗:', fallbackError);
+      throw error;
+    }
   }
 }
 

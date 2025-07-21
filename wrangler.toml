@@ -58,6 +58,10 @@ FXIAOKE_BASE_URL = "https://open.fxiaoke.com"
 # JWT_SECRET
 # EMAIL_API_KEY
 
+# Cron Trigger 配置 - 每小時同步 CRM 商機數據
+[triggers]
+crons = ["0 * * * *"]  # 每小時的第0分鐘執行
+
 # 靜態資源配置
 [assets]
 directory = "./frontend"

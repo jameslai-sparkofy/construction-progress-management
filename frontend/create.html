@@ -664,7 +664,15 @@
                 <h3>選擇 CRM 商機</h3>
             </div>
             <div class="modal-body">
-                <input type="text" class="form-input" placeholder="搜尋商機名稱..." style="margin-bottom: 1rem;">
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <input type="text" id="searchInput" class="form-input" placeholder="輸入商機名稱或客戶名稱..." style="flex: 1;">
+                    <button type="button" onclick="performSearch()" style="padding: 0.5rem 1rem; background: #4f46e5; color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;">
+                        🔍 搜尋
+                    </button>
+                    <button type="button" onclick="clearSearch()" style="padding: 0.5rem 1rem; background: #6b7280; color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;">
+                        清除
+                    </button>
+                </div>
                 <div class="crm-list">
                     <!-- 商機列表將由 JavaScript 動態載入 -->
                     <div style="text-align: center; padding: 2rem; color: #6b7280;">
@@ -790,19 +798,120 @@
             `).join('');
         }
 
-        // 設置商機搜尋功能
-        function setupOpportunitySearch(opportunities) {
-            const searchInput = document.querySelector('#crmModal input[type="text"]');
+        // 設置商機搜尋功能 - 手動觸發搜尋
+        let currentOpportunities = []; // 存儲目前的商機列表
+        
+        function setupOpportunitySearch(allOpportunities) {
+            currentOpportunities = allOpportunities; // 儲存完整商機列表
+            console.log('🔧 設置 CRM 搜尋功能（手動觸發模式）');
             
-            searchInput.oninput = function(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                const filteredOpportunities = opportunities.filter(opp => 
-                    opp.name.toLowerCase().includes(searchTerm) ||
-                    opp.customer.toLowerCase().includes(searchTerm)
-                );
+            // 設置 Enter 鍵觸發搜尋
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        performSearch();
+                    }
+                });
+            }
+            
+            console.log('✅ CRM 搜尋功能已設置完成');
+        }
+        
+        // 執行搜尋
+        async function performSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const crmList = document.querySelector('.crm-list');
+            
+            if (!searchInput) {
+                console.error('❌ 找不到搜尋輸入框');
+                return;
+            }
+            
+            const searchTerm = searchInput.value.trim();
+            console.log('🔍 手動搜尋關鍵字:', searchTerm);
+            
+            // 如果搜尋框為空，顯示所有商機
+            if (searchTerm === '') {
+                renderOpportunities(currentOpportunities);
+                console.log('🔄 搜尋框為空，顯示所有商機');
+                return;
+            }
+            
+            try {
+                // 顯示搜尋中狀態
+                crmList.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                        <div style="margin-bottom: 1rem; font-size: 2rem;">🔍</div>
+                        <div>正在搜尋...</div>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">正在 CRM 系統中查找 "${searchTerm}"</div>
+                    </div>
+                `;
                 
-                renderOpportunities(filteredOpportunities);
-            };
+                console.log('🌐 向後端發送搜尋請求:', searchTerm);
+                
+                // 向後端發送搜尋請求
+                const response = await fetch(`/api/crm/opportunities/search?q=${encodeURIComponent(searchTerm)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`搜尋請求失敗: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('🎯 CRM 搜尋結果:', result);
+                
+                if (!result.success) {
+                    throw new Error(result.message || '搜尋失敗');
+                }
+                
+                const searchResults = result.data || [];
+                
+                if (searchResults.length === 0) {
+                    crmList.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                            <div style="margin-bottom: 1rem; font-size: 2rem;">🔍</div>
+                            <div>沒有找到符合 "${searchTerm}" 的商機</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem; color: #9ca3af;">
+                                請嘗試使用其他關鍵字，或點擊「清除」查看所有商機
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // 渲染搜尋結果
+                renderOpportunities(searchResults);
+                console.log(`✅ 搜尋完成，找到 ${searchResults.length} 個商機`);
+                
+            } catch (error) {
+                console.error('❌ CRM 搜尋錯誤:', error);
+                crmList.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #ef4444;">
+                        <div style="margin-bottom: 1rem; font-size: 2rem;">❌</div>
+                        <div>搜尋失敗</div>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem; color: #6b7280;">
+                            ${error.message}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // 清除搜尋
+        function clearSearch() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            
+            // 顯示所有商機
+            renderOpportunities(currentOpportunities);
+            console.log('🔄 已清除搜尋，顯示所有商機');
         }
 
         // HTML 轉義函數

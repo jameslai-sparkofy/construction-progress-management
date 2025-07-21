@@ -30,30 +30,40 @@
   "license": "MIT",
   "dependencies": {
     "@cloudflare/workers-types": "^4.20241230.0",
-    "node-fetch": "^2.7.0"
+    "node-fetch": "^2.7.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
-    "wrangler": "^3.91.0",
-    "@modelcontextprotocol/server-github": "latest",
     "@modelcontextprotocol/server-filesystem": "2025.7.1",
-    "puppeteer-mcp-server": "^0.7.2"
+    "@modelcontextprotocol/server-github": "latest",
+    "puppeteer-mcp-server": "^0.7.2",
+    "wrangler": "^3.91.0"
   },
   "mcpServers": {
     "github": {
       "command": "node",
-      "args": ["./node_modules/@modelcontextprotocol/server-github/dist/index.js"],
+      "args": [
+        "./node_modules/@modelcontextprotocol/server-github/dist/index.js"
+      ],
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": ""
       }
     },
     "filesystem": {
-      "command": "node", 
-      "args": ["./node_modules/@modelcontextprotocol/server-filesystem/dist/index.js"],
-      "args2": ["/mnt/c/claude code/工程進度網頁"]
+      "command": "node",
+      "args": [
+        "./node_modules/@modelcontextprotocol/server-filesystem/dist/index.js"
+      ],
+      "args2": [
+        "/mnt/c/claude code/工程進度網頁"
+      ]
     },
     "puppeteer": {
       "command": "node",
-      "args": ["./node_modules/puppeteer-mcp-server/dist/index.js"]
+      "args": [
+        "./node_modules/puppeteer-mcp-server/dist/index.js"
+      ]
     }
   }
 }

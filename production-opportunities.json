@@ -1,0 +1,457 @@
+{
+  "syncTime": "2025-07-21T14:15:56.702Z",
+  "totalCount": 50,
+  "source": "production-api",
+  "opportunities": [
+    {
+      "id": "687a40e1fec873000180c5b4",
+      "name": "坎城團隊秉和-樂田段-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1752842466082,
+      "updateTime": 1752844757277
+    },
+    {
+      "id": "6878c026e0c51e0001181dc1",
+      "name": "昌銳-海濱段-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1752743974242,
+      "updateTime": 1752744210872
+    },
+    {
+      "id": "68786d22e0c51e00011dd792",
+      "name": "樂居-永昌二街何先生自宅",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1752722722862,
+      "updateTime": 1752722722976
+    },
+    {
+      "id": "68774925e0c51e00018f75df",
+      "name": "晟溢-南興段(驛湛精店墅）-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1752647973427,
+      "updateTime": 1752648059220
+    },
+    {
+      "id": "68774069280bfe0001773d53",
+      "name": "雙橡園-南興段-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1752645737925,
+      "updateTime": 1752649492552
+    },
+    {
+      "id": "687702b7ed2cd300013f071e",
+      "name": "十邑-定泰富櫻翫-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1752629944114,
+      "updateTime": 1752723481410
+    },
+    {
+      "id": "6874f25d280bfe0001751d12",
+      "name": "北督-竹北勝利段-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1752494685646,
+      "updateTime": 1752494699116
+    },
+    {
+      "id": "68746a56e0c51e0001d9671a",
+      "name": "愛菲爾松竹-盤興寬心-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1752459862930,
+      "updateTime": 1752574165757
+    },
+    {
+      "id": "68745938a0544a0001c5e96a",
+      "name": "寬心-日新-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1752455480533,
+      "updateTime": 1752455480671
+    },
+    {
+      "id": "6870daf69d3f1000018dd800",
+      "name": "新聚發-少東-住家",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1752226550438,
+      "updateTime": 1752226550531
+    },
+    {
+      "id": "686fb39d0611de00018a3b93",
+      "name": "誠總-美和-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1752150941857,
+      "updateTime": 1752150941936
+    },
+    {
+      "id": "686f75a983c96600010e2c02",
+      "name": "寬埕-洲際-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1752135082149,
+      "updateTime": 1752135413726
+    },
+    {
+      "id": "686f72110611de0001182a41",
+      "name": "山卓夫-洲際-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1752134162193,
+      "updateTime": 1752134556720
+    },
+    {
+      "id": "686a6fa407514a0001f9309d",
+      "name": "桂田-文商-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1751805860840,
+      "updateTime": 1751805983755
+    },
+    {
+      "id": "6864f1e43036f50001afa36c",
+      "name": "鼎邦-文商-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1751445988931,
+      "updateTime": 1751446129971
+    },
+    {
+      "id": "6864e22f86a32d0001a24053",
+      "name": "新而雅-松韻-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1751441967197,
+      "updateTime": 1751442037950
+    },
+    {
+      "id": "6864b7fea451bf00016ae79e",
+      "name": "宏璟-洲際-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1751431166622,
+      "updateTime": 1752133551206
+    },
+    {
+      "id": "686361f126cb8a00016d0543",
+      "name": "麗寶-逢大-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1751343601818,
+      "updateTime": 1752041276489
+    },
+    {
+      "id": "6863605526cb8a00016bfaa2",
+      "name": "鉅恆-文商-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1751343190108,
+      "updateTime": 1751446917795
+    },
+    {
+      "id": "6863541986a32d0001560f61",
+      "name": "佳晟-興安-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1751340057275,
+      "updateTime": 1751340057413
+    },
+    {
+      "id": "68633de007514a00019fc596",
+      "name": "合新-和平-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1751334368865,
+      "updateTime": 1751335197007
+    },
+    {
+      "id": "686333de055e5500010d8a35",
+      "name": "亞昕-文商-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1751331806291,
+      "updateTime": 1751331806420
+    },
+    {
+      "id": "6863319507514a000174ebc0",
+      "name": "和發-豐中城-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1751331222011,
+      "updateTime": 1751331222115
+    },
+    {
+      "id": "68631f0d07514a00015f29c8",
+      "name": "和發-員富-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1751326478127,
+      "updateTime": 1751326478195
+    },
+    {
+      "id": "68631e33055e550001f193a1",
+      "name": "和峻-豐興-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1751326260050,
+      "updateTime": 1751326260124
+    },
+    {
+      "id": "68631a34055e550001f0d195",
+      "name": "探索-文商-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1751325236241,
+      "updateTime": 1751356499073
+    },
+    {
+      "id": "685e506ca451bf000128f057",
+      "name": "川果-設計師湯雅昀-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1751011437151,
+      "updateTime": 1751011488222
+    },
+    {
+      "id": "685a82a2a451bf0001fd8db7",
+      "name": "芽米-設計師劉冠辰-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1750762146470,
+      "updateTime": 1750934002497
+    },
+    {
+      "id": "6857721ab3e4370001ddd3f6",
+      "name": "盤鈺-田心-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1750561306946,
+      "updateTime": 1750591015536
+    },
+    {
+      "id": "6853dec2fab199000193f045",
+      "name": "曾玉慧自宅設計案",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1750326978270,
+      "updateTime": 1750327150689
+    },
+    {
+      "id": "68510b9ed33a5a0001b9ffa2",
+      "name": "大華-豐原中正-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1750141854293,
+      "updateTime": 1750238372803
+    },
+    {
+      "id": "684a87d057c00a00010ca8bd",
+      "name": "理元-大里仁美-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1749714896249,
+      "updateTime": 1749714896511
+    },
+    {
+      "id": "684a84a264e05a0001c4ad73",
+      "name": "宏普-青芝-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1749714082725,
+      "updateTime": 1750146484472
+    },
+    {
+      "id": "684a655b0f5edf0001424219",
+      "name": "宜園-中義段-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1749706076011,
+      "updateTime": 1751620337833
+    },
+    {
+      "id": "684a33640f5edf0001c0e90a",
+      "name": "大漁-仁美-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1749693285127,
+      "updateTime": 1749693420193
+    },
+    {
+      "id": "684941280f5edf0001ed50d8",
+      "name": "員林中正路餐廳",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1749631272823,
+      "updateTime": 1749631316807
+    },
+    {
+      "id": "6847a32f0f5edf0001f40c42",
+      "name": "佳泰-市鎮北段-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1749525295646,
+      "updateTime": 1749642436479
+    },
+    {
+      "id": "68469587f7ac7e00016919be",
+      "name": "上境-3D*鄭湋霖-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1749456264288,
+      "updateTime": 1749482327549
+    },
+    {
+      "id": "684694fc2a86450001bc313e",
+      "name": "上境-設計師蕭少瑋-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1749456125039,
+      "updateTime": 1749482327457
+    },
+    {
+      "id": "683cf903aa4fc70001badc42",
+      "name": "冠德-環中-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1748826371642,
+      "updateTime": 1748826371756
+    },
+    {
+      "id": "683cf602aa4fc70001b8504a",
+      "name": "亞昕-大仁-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1748825603082,
+      "updateTime": 1748825603191
+    },
+    {
+      "id": "683c0b1b56389c0001a3bfc4",
+      "name": "奕富-南簡-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1748765467588,
+      "updateTime": 1748765467670
+    },
+    {
+      "id": "683c09233bf7c10001e62fb1",
+      "name": "佳美-中山-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1748764963918,
+      "updateTime": 1748764963987
+    },
+    {
+      "id": "683c07f75d19e900012f2aa9",
+      "name": "川平-興農-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1748764663521,
+      "updateTime": 1748764663618
+    },
+    {
+      "id": "683c02fa56389c0001a12159",
+      "name": "永豐盛-仁平2-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1748763386878,
+      "updateTime": 1748763386953
+    },
+    {
+      "id": "683c0288bf7ec000011fffd8",
+      "name": "永豐盛-仁平1-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1748763272321,
+      "updateTime": 1748763272383
+    },
+    {
+      "id": "683bfdfabf7ec000011ea27f",
+      "name": "長慶-文商-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1748762106461,
+      "updateTime": 1750320614255
+    },
+    {
+      "id": "683bfc0df7a5a60001c51ba1",
+      "name": "新業-忠孝-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1748761613744,
+      "updateTime": 1748844816114
+    },
+    {
+      "id": "683bc5629c4c120001f61095",
+      "name": "德鈺-旱溪-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1748747619091,
+      "updateTime": 1748747619190
+    },
+    {
+      "id": "683bb86df7a5a60001b245bf",
+      "name": "大城-碧柳-2025",
+      "customer": "未知客戶",
+      "amount": "NT$ 0",
+      "stage": "未知階段",
+      "createTime": 1748744301859,
+      "updateTime": 1748744301952
+    }
+  ]
+}
