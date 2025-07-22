@@ -963,6 +963,59 @@
             color: #333;
         }
 
+        /* 施工完成區塊 */
+        .completion-section {
+            background: #f8f9ff;
+            border: 2px solid #e3f2fd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            margin-bottom: 15px;
+        }
+
+        .section-header h4 {
+            color: #1976D2;
+            margin: 0;
+            font-size: 1.1em;
+        }
+
+        .completion-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            font-size: 0.9em;
+        }
+
+        .completion-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .completion-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .completion-btn.completed {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .completion-btn.completed .btn-text::before {
+            content: "✓ ";
+        }
+
         .construction-info {
             background: #F5F5F5;
             padding: 15px;
@@ -1424,7 +1477,11 @@
                 </div>
             </div>
 
-            <form class="construction-form" id="constructionForm">
+            <!-- 施工完成區塊 -->
+            <div class="completion-section" id="completionSection">
+                <div class="section-header">
+                    <h4>施工執行</h4>
+                </div>
                 <div class="form-row compact">
                     <div class="form-group small">
                         <label for="constructionDate">施工日期</label>
@@ -1434,11 +1491,19 @@
                         <label for="constructionArea">舖設坪數</label>
                         <input type="number" id="constructionArea" step="0.1" placeholder="自動帶入" required>
                     </div>
+                    <div class="form-group small">
+                        <button type="button" id="completionBtn" class="completion-btn" onclick="markAsCompleted()">
+                            <span class="btn-text">標記完成</span>
+                        </button>
+                    </div>
                 </div>
+            </div>
+
+            <form class="construction-form" id="constructionForm">
                 <div class="form-group">
                     <label for="constructionContractor">施工師父</label>
-                    <input type="text" id="constructionContractor" placeholder="XX公司|人名" style="background: #F5F5F5;">
-                    <small style="color: #666;">格式：公司名稱|師傅姓名</small>
+                    <input type="text" id="constructionContractor" placeholder="工班名|用戶名" style="background: #F5F5F5;">
+                    <small style="color: #666;">對應欄位：field_u1wpv__c</small>
                 </div>
                 
                 <!-- 完工照片 -->
@@ -2401,7 +2466,7 @@
             // 顯示施工位置資訊
             document.getElementById('buildingInfo').textContent = building + '棟';
             document.getElementById('floorInfo').textContent = floor;
-            document.getElementById('unitInfo').textContent = unit + '戶';
+            document.getElementById('unitInfo').textContent = unit;
             
             // 從API或數據源獲取實際坪數（這裡先用模擬數據）
             const mockArea = getMockAreaData(building, floor, unit);
@@ -2429,15 +2494,14 @@
                     // 管理員根據建築找對應工班
                     const contractor = contractors.find(c => c.buildings.includes(building + '棟'));
                     if (contractor) {
-                        const roleText = contractor.role === 'contractor_leader' ? '工班負責人' : '一般成員';
-                        contractorName = `${contractor.contractor}|${roleText}`;
+                        contractorName = `${contractor.contractor}|${contractor.name}`;
                     }
                 } else if (currentUser.role === 'contractor_leader') {
                     // 工班負責人
-                    contractorName = `${currentUser.contractor}|工班負責人`;
+                    contractorName = `${currentUser.contractor}|${currentUser.name}`;
                 } else if (currentUser.role === 'member') {
                     // 一般成員
-                    contractorName = `${currentUser.contractor}|一般成員`;
+                    contractorName = `${currentUser.contractor}|${currentUser.name}`;
                 }
                 document.getElementById('constructionContractor').value = contractorName;
 
@@ -2471,6 +2535,19 @@
                 }
                 clearPhotoPreview('prePhotoPreview');
                 clearPhotoPreview('completionPhotoPreview');
+                
+                // 初始化完成按鈕狀態
+                const btn = document.getElementById('completionBtn');
+                const key = `${building}_${floor}_${unit}`;
+                if (constructionDetails[key] && constructionDetails[key].construction_completed) {
+                    btn.classList.add('completed');
+                    btn.disabled = true;
+                    btn.querySelector('.btn-text').textContent = '已完成';
+                } else {
+                    btn.classList.remove('completed');
+                    btn.disabled = false;
+                    btn.querySelector('.btn-text').textContent = '標記完成';
+                }
             }
 
             // 顯示彈窗
@@ -2481,6 +2558,46 @@
         function closeConstructionModal() {
             document.getElementById('constructionModal').classList.remove('active');
             currentCell = null;
+        }
+
+        // 標記施工完成
+        function markAsCompleted() {
+            if (!currentCell) return;
+            
+            const building = currentCell.dataset.building;
+            const floor = currentCell.dataset.floor;
+            const unit = currentCell.dataset.unit;
+            const key = `${building}_${floor}_${unit}`;
+            
+            // 檢查必填欄位
+            const date = document.getElementById('constructionDate').value;
+            const area = document.getElementById('constructionArea').value;
+            
+            if (!date || !area) {
+                alert('請先填寫施工日期和舖設坪數！');
+                return;
+            }
+            
+            // 更新按鈕狀態
+            const btn = document.getElementById('completionBtn');
+            btn.classList.add('completed');
+            btn.disabled = true;
+            btn.querySelector('.btn-text').textContent = '已完成';
+            
+            // 儲存完成狀態
+            if (!constructionDetails[key]) {
+                constructionDetails[key] = {};
+            }
+            constructionDetails[key].construction_completed = true;
+            constructionDetails[key].completion_date = new Date().toISOString();
+            constructionDetails[key].area = area;
+            constructionDetails[key].date = date;
+            
+            // 更新網格中的狀態（可選：改變顏色表示已完成）
+            currentCell.style.background = '#C8E6C9'; // 淺綠色表示已完成
+            currentCell.textContent = '已完成';
+            
+            alert('施工狀態已標記為完成！');
         }
 
         // 顯示施工細節（給業主看）
