@@ -373,6 +373,27 @@
             border-radius: 8px;
             border: 1px solid #E0E0E0;
             overflow-x: auto;
+            overflow-y: visible;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* 美化滾動條 */
+        .progress-grid-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .progress-grid-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .progress-grid-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        .progress-grid-container::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
         }
 
         .progress-grid {
@@ -400,6 +421,8 @@
             background: #E8F5E8;
             font-weight: 600;
             color: #2E7D32;
+            width: 60px;
+            min-width: 60px;
         }
 
         .progress-grid td {
@@ -870,7 +893,8 @@
             }
 
             .progress-grid .floor-cell {
-                min-width: 35px;
+                width: 45px;
+                min-width: 45px;
             }
         }
 
@@ -913,6 +937,30 @@
             font-weight: 600;
             margin-bottom: 20px;
             color: #1976D2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #666;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .modal-close-btn:hover {
+            background: #f0f0f0;
+            color: #333;
         }
 
         .construction-info {
@@ -1336,7 +1384,8 @@
     <div class="construction-modal" id="constructionModal">
         <div class="construction-modal-content">
             <div class="construction-modal-header">
-                輸入施工資訊
+                <span>輸入施工資訊</span>
+                <button type="button" class="modal-close-btn" onclick="closeConstructionModal()">&times;</button>
             </div>
             <!-- 位置信息區域 -->
             <div class="construction-info" id="constructionInfo">
