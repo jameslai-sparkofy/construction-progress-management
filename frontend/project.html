@@ -803,7 +803,26 @@
             }
 
             .stats-section {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-card h3 {
+                font-size: 0.8em;
+                margin-bottom: 8px;
+            }
+
+            .stat-value {
+                font-size: 1.8em;
+                margin-bottom: 3px;
+            }
+
+            .stat-subtitle {
+                font-size: 0.75em;
             }
 
             .tabs {
@@ -838,6 +857,21 @@
             .progress-grid-container {
                 padding: 10px;
             }
+
+            .progress-grid {
+                min-width: unset;
+                font-size: 0.85em;
+            }
+
+            .progress-grid th,
+            .progress-grid td {
+                padding: 8px 4px;
+                font-size: 0.8em;
+            }
+
+            .progress-grid .floor-cell {
+                min-width: 35px;
+            }
         }
 
         /* 隱藏類 */
@@ -869,6 +903,8 @@
             padding: 30px;
             width: 90%;
             max-width: 500px;
+            max-height: 95vh;
+            overflow-y: auto;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
@@ -901,6 +937,118 @@
 
         .form-row .form-group {
             flex: 1;
+        }
+
+        /* 位置信息樣式 */
+        .location-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .location-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+        }
+
+        .location-item .label {
+            font-weight: 600;
+            color: #666;
+            margin-right: 5px;
+            min-width: 45px;
+        }
+
+        /* 緊湊型表單行 */
+        .form-row.compact {
+            gap: 10px;
+        }
+
+        .form-group.small {
+            flex: 0 0 140px;
+        }
+
+        .form-group.small input {
+            font-size: 0.9em;
+            padding: 8px;
+        }
+
+        /* 施工前備註高亮樣式 */
+        .pre-construction-note {
+            margin: 15px 0;
+        }
+
+        .pre-construction-note label {
+            color: #d91a72;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        /* 照片上傳樣式 */
+        .photo-upload {
+            margin: 15px 0;
+        }
+
+        .photo-upload-area {
+            margin-top: 8px;
+        }
+
+        .upload-placeholder {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            background-color: #fafafa;
+            transition: all 0.3s ease;
+        }
+
+        .upload-placeholder:hover {
+            border-color: #1976D2;
+            background-color: #f0f8ff;
+        }
+
+        .upload-placeholder span {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .photo-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .photo-preview img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid #ddd;
+        }
+
+        /* 響應式調整 */
+        @media (max-width: 600px) {
+            .construction-modal-content {
+                padding: 20px;
+                width: 95%;
+                max-height: 90vh;
+                margin: 20px 0;
+            }
+
+            .location-info {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .form-row.compact {
+                flex-direction: column;
+            }
+
+            .form-group.small {
+                flex: 1;
+            }
         }
     </style>
 </head>
@@ -1190,28 +1338,70 @@
             <div class="construction-modal-header">
                 輸入施工資訊
             </div>
+            <!-- 位置信息區域 -->
             <div class="construction-info" id="constructionInfo">
-                <!-- 動態顯示施工位置資訊 -->
-            </div>
-            <form class="construction-form" id="constructionForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="constructionArea">鋪設坪數</label>
-                        <input type="number" id="constructionArea" step="0.1" placeholder="請輸入坪數" required>
+                <div class="location-info">
+                    <div class="location-item">
+                        <span class="label">棟別：</span><span id="buildingInfo">A棟</span>
                     </div>
-                    <div class="form-group">
+                    <div class="location-item">
+                        <span class="label">樓層：</span><span id="floorInfo">8F</span>
+                    </div>
+                    <div class="location-item">
+                        <span class="label">戶別：</span><span id="unitInfo">A1戶</span>
+                    </div>
+                    <div class="location-item">
+                        <span class="label">坪數：</span><span id="areaInfo">11.57</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 施工前備註 -->
+            <div class="form-group pre-construction-note">
+                <label for="preConstructionNote">施工前特別備註</label>
+                <textarea id="preConstructionNote" rows="2" placeholder="輸入施工前特別注意事項" style="background-color: #ffeaf0; border: 2px solid #ff69b4;"></textarea>
+                <small id="preNotePermissionInfo" style="color: #666; display: none;">僅業主和管理員可編輯此欄位</small>
+            </div>
+            
+            <!-- 施工前照片 -->
+            <div class="form-group photo-upload">
+                <label for="prePhotos">施工前照片</label>
+                <div class="photo-upload-area">
+                    <input type="file" id="prePhotos" accept="image/*" multiple style="display: none;">
+                    <div class="upload-placeholder" onclick="document.getElementById('prePhotos').click()">
+                        <span>📷 點擊上傳施工前照片</span>
+                    </div>
+                    <div id="prePhotoPreview" class="photo-preview"></div>
+                </div>
+            </div>
+
+            <form class="construction-form" id="constructionForm">
+                <div class="form-row compact">
+                    <div class="form-group small">
                         <label for="constructionDate">施工日期</label>
                         <input type="date" id="constructionDate" required>
                     </div>
+                    <div class="form-group small">
+                        <label for="constructionArea">舖設坪數</label>
+                        <input type="number" id="constructionArea" step="0.1" placeholder="自動帶入" required>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label for="constructionContractor">施工師傅</label>
-                    <input type="text" id="constructionContractor" readonly style="background: #F5F5F5;">
-                    <small style="color: #666;">系統將自動填入負責該區域的工班人員</small>
+                    <label for="constructionContractor">施工師父</label>
+                    <input type="text" id="constructionContractor" placeholder="XX公司|人名" style="background: #F5F5F5;">
+                    <small style="color: #666;">格式：公司名稱|師傅姓名</small>
                 </div>
-                <div class="form-group">
-                    <label for="constructionNote">備註 (選填)</label>
-                    <textarea id="constructionNote" rows="3" placeholder="請輸入備註內容"></textarea>
+                
+                <!-- 完工照片 -->
+                <div class="form-group photo-upload">
+                    <label for="completionPhotos">完工照片</label>
+                    <div class="photo-upload-area">
+                        <input type="file" id="completionPhotos" accept="image/*" multiple style="display: none;">
+                        <div class="upload-placeholder" onclick="document.getElementById('completionPhotos').click()">
+                            <span>📷 點擊上傳完工照片</span>
+                        </div>
+                        <div id="completionPhotoPreview" class="photo-preview"></div>
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeConstructionModal()">取消</button>
@@ -1420,6 +1610,34 @@
         let currentUser = null;
         let currentBuilding = 'B';
 
+        // 檢查本地儲存的登入狀態
+        function checkStoredLogin() {
+            const storedUser = localStorage.getItem('currentUser');
+            if (storedUser) {
+                try {
+                    currentUser = JSON.parse(storedUser);
+                    document.getElementById('loginContainer').style.display = 'none';
+                    document.getElementById('mainContent').style.display = 'block';
+                    updateUserInterface();
+                    loadData();
+                    return true;
+                } catch (e) {
+                    localStorage.removeItem('currentUser');
+                }
+            }
+            return false;
+        }
+
+        // 儲存登入狀態
+        function saveUserSession(user) {
+            localStorage.setItem('currentUser', JSON.stringify(user));
+        }
+
+        // 清除登入狀態
+        function clearUserSession() {
+            localStorage.removeItem('currentUser');
+        }
+
         // 登入功能
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -1429,6 +1647,7 @@
             const user = users[phone];
             if (user && user.password === password) {
                 currentUser = { phone, ...user };
+                saveUserSession(currentUser);
                 document.getElementById('loginContainer').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
                 updateUserInterface();
@@ -1441,6 +1660,7 @@
         // 登出功能
         function logout() {
             currentUser = null;
+            clearUserSession();
             document.getElementById('loginContainer').style.display = 'flex';
             document.getElementById('mainContent').style.display = 'none';
             document.getElementById('phone').value = '';
@@ -1710,68 +1930,151 @@
         }
 
         // 載入維修單
-        function loadRepairOrders() {
+        async function loadRepairOrders() {
             const container = document.getElementById('repairOrderList');
-            let filteredOrders = repairOrders;
             
-            // 根據用戶角色篩選
-            if (currentUser.buildings) {
-                filteredOrders = repairOrders.filter(order => 
-                    currentUser.buildings.includes(order.building)
-                );
+            // 顯示載入中狀態
+            container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280;">載入維修單資料中...</div>';
+            
+            try {
+                // 使用專案ID獲取維修單資料
+                const projectId = window.PROJECT_DATA ? window.PROJECT_DATA.id : '';
+                if (!projectId) {
+                    throw new Error('未找到專案ID');
+                }
+                
+                const response = await fetch(`/api/projects/${projectId}/repairs`);
+                const result = await response.json();
+                
+                if (result.success && result.data && result.data.length > 0) {
+                    // 有維修單資料
+                    let filteredOrders = result.data;
+                    
+                    // 根據用戶角色篩選（如果需要的話）
+                    if (currentUser.buildings) {
+                        filteredOrders = result.data.filter(order => 
+                            currentUser.buildings.includes(order.building || '未知建築')
+                        );
+                    }
+                    
+                    container.innerHTML = filteredOrders.map(order => `
+                        <div class="repair-order-item">
+                            <div class="repair-order-info">
+                                <div class="repair-order-title">
+                                    ${order.name || order.title || '維修單'}
+                                    <span class="building-tag">${order.building || '未知建築'}</span>
+                                </div>
+                                <div class="repair-order-details">
+                                    ${order.description || order.detail || '無詳細描述'}
+                                </div>
+                                <div class="repair-order-meta">
+                                    <span>📅 ${order.date || new Date(order.createTime || Date.now()).toLocaleDateString()}</span>
+                                    <span>🏢 ${order.building || '未知建築'} ${order.floor || ''} ${order.unit || ''}戶</span>
+                                    <span>👷 ${order.contractor || '未指派'}</span>
+                                </div>
+                            </div>
+                            <div class="repair-order-status ${order.status === '正常' ? 'status-normal' : 'status-invalid'}">
+                                ${order.status || '待處理'}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    // 沒有維修單資料
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                            <div style="margin-bottom: 1rem; font-size: 2rem;">🔧</div>
+                            <div>目前沒有維修單記錄</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">維修單將會在需要時由系統管理員建立</div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('載入維修單資料失敗:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #dc2626;">
+                        <div style="margin-bottom: 1rem; font-size: 2rem;">❌</div>
+                        <div>載入維修單資料失敗</div>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">請稍後重新載入頁面</div>
+                    </div>
+                `;
             }
-            
-            container.innerHTML = filteredOrders.map(order => `
-                <div class="repair-order-item">
-                    <div class="repair-order-info">
-                        <div class="repair-order-title">
-                            ${order.name}
-                            <span class="building-tag">${order.building}</span>
-                        </div>
-                        <div class="repair-order-details">
-                            ${order.description}
-                        </div>
-                        <div class="repair-order-meta">
-                            <span>📅 ${order.date}</span>
-                            <span>🏢 ${order.building} ${order.floor} ${order.unit}戶</span>
-                            <span>👷 ${order.contractor}</span>
-                        </div>
-                    </div>
-                    <div class="repair-order-status ${order.status === '正常' ? 'status-normal' : 'status-invalid'}">
-                        ${order.status}
-                    </div>
-                </div>
-            `).join('');
         }
 
         // 載入跟進記錄
-        function loadFollowupRecords() {
+        async function loadFollowupRecords() {
             const container = document.getElementById('followupRecordList');
             
-            // 只顯示外部顯示的記錄
-            const externalRecords = followupRecords.filter(record => record.isExternal);
+            // 顯示載入中狀態
+            container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280;">載入跟進記錄中...</div>';
             
-            container.innerHTML = externalRecords.map(record => `
-                <div class="followup-record-item">
-                    <div class="followup-record-header">
-                        <div class="followup-record-title">
-                            ${record.name}
-                            <span class="external-badge">外部顯示</span>
-                            <span class="importance-badge importance-${record.importance === '重要' ? 'high' : 'normal'}">
-                                ${record.importance}
-                            </span>
+            try {
+                // 使用專案ID獲取跟進記錄
+                const projectId = window.PROJECT_DATA ? window.PROJECT_DATA.id : '';
+                if (!projectId) {
+                    throw new Error('未找到專案ID');
+                }
+                
+                const response = await fetch(`/api/projects/${projectId}/followups`);
+                const result = await response.json();
+                
+                if (result.success && result.data && result.data.length > 0) {
+                    // 有跟進記錄資料
+                    const externalRecords = result.data.filter(record => 
+                        record.isExternal || record.is_external_show === 'true' || record.external_show === true
+                    );
+                    
+                    container.innerHTML = externalRecords.map(record => `
+                        <div class="followup-record-item">
+                            <div class="followup-record-header">
+                                <div class="followup-record-title">
+                                    ${record.name || record.title || record.subject || '跟進記錄'}
+                                    <span class="external-badge">外部顯示</span>
+                                    <span class="importance-badge importance-${(record.importance === '重要' || record.priority === 'high') ? 'high' : 'normal'}">
+                                        ${record.importance || record.priority || '一般'}
+                                    </span>
+                                </div>
+                                <div class="followup-record-meta">
+                                    <span>📅 ${record.date || new Date(record.createTime || Date.now()).toLocaleDateString()} ${record.time || ''}</span>
+                                    <span>👤 ${record.creator || record.owner || '系統'}</span>
+                                    <span>📝 ${record.type || record.category || '跟進'}</span>
+                                </div>
+                            </div>
+                            <div class="followup-record-content">
+                                ${record.content || record.description || record.detail || '無內容描述'}
+                            </div>
                         </div>
-                        <div class="followup-record-meta">
-                            <span>📅 ${record.date} ${record.time}</span>
-                            <span>👤 ${record.creator}</span>
-                            <span>📝 ${record.type}</span>
+                    `).join('');
+                    
+                    // 如果沒有外部顯示的記錄，顯示提示
+                    if (externalRecords.length === 0) {
+                        container.innerHTML = `
+                            <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                                <div style="margin-bottom: 1rem; font-size: 2rem;">📝</div>
+                                <div>目前沒有外部顯示的跟進記錄</div>
+                                <div style="font-size: 0.9rem; margin-top: 0.5rem;">跟進記錄將由項目管理員設定外部顯示權限</div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    // 沒有跟進記錄資料
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                            <div style="margin-bottom: 1rem; font-size: 2rem;">📝</div>
+                            <div>目前沒有跟進記錄</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">跟進記錄將在項目進行中陸續更新</div>
                         </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('載入跟進記錄失敗:', error);
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #dc2626;">
+                        <div style="margin-bottom: 1rem; font-size: 2rem;">❌</div>
+                        <div>載入跟進記錄失敗</div>
+                        <div style="font-size: 0.9rem; margin-top: 0.5rem;">請稍後重新載入頁面</div>
                     </div>
-                    <div class="followup-record-content">
-                        ${record.content}
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }
         }
 
         // 載入工班
@@ -2047,12 +2350,13 @@
             currentCell = { building, floor, unit };
 
             // 顯示施工位置資訊
-            const info = document.getElementById('constructionInfo');
-            info.innerHTML = `
-                <div><strong>建築：</strong>${building}棟</div>
-                <div><strong>樓層：</strong>${floor}</div>
-                <div><strong>單位：</strong>${unit}戶</div>
-            `;
+            document.getElementById('buildingInfo').textContent = building + '棟';
+            document.getElementById('floorInfo').textContent = floor;
+            document.getElementById('unitInfo').textContent = unit + '戶';
+            
+            // 從API或數據源獲取實際坪數（這裡先用模擬數據）
+            const mockArea = getMockAreaData(building, floor, unit);
+            document.getElementById('areaInfo').textContent = mockArea;
 
             // 檢查是否已有施工記錄
             const key = `${building}_${floor}_${unit}`;
@@ -2070,21 +2374,54 @@
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('constructionDate').value = today;
 
-                // 自動填入施工師傅名稱
+                // 自動填入施工師傅名稱（格式：公司|角色）
                 let contractorName = '';
                 if (currentUser.role === 'admin') {
                     // 管理員根據建築找對應工班
                     const contractor = contractors.find(c => c.buildings.includes(building + '棟'));
-                    contractorName = contractor ? contractor.name : '';
-                } else if (currentUser.role === 'contractor_leader' || currentUser.role === 'member') {
-                    // 工班負責人和成員都填入自己的名字
-                    contractorName = currentUser.name;
+                    if (contractor) {
+                        const roleText = contractor.role === 'contractor_leader' ? '工班負責人' : '一般成員';
+                        contractorName = `${contractor.contractor}|${roleText}`;
+                    }
+                } else if (currentUser.role === 'contractor_leader') {
+                    // 工班負責人
+                    contractorName = `${currentUser.contractor}|工班負責人`;
+                } else if (currentUser.role === 'member') {
+                    // 一般成員
+                    contractorName = `${currentUser.contractor}|一般成員`;
                 }
                 document.getElementById('constructionContractor').value = contractorName;
 
+                // 施工前注意事項權限控制
+                const preNoteTextarea = document.getElementById('preConstructionNote');
+                const preNoteInfo = document.getElementById('preNotePermissionInfo');
+                
+                if (currentUser.role === 'admin' || currentUser.role === 'owner') {
+                    // 業主和管理員可以編輯
+                    preNoteTextarea.readOnly = false;
+                    preNoteTextarea.placeholder = '輸入施工前特別注意事項';
+                    preNoteInfo.style.display = 'none';
+                } else {
+                    // 工班人員不能編輯，顯示"無"
+                    preNoteTextarea.readOnly = true;
+                    preNoteTextarea.value = '無';
+                    preNoteTextarea.style.background = '#f5f5f5';
+                    preNoteInfo.style.display = 'block';
+                }
+
+                // 預設舖設坪數為工地坪數
+                const mockArea = getMockAreaData(building, floor, unit);
+                document.getElementById('constructionArea').value = mockArea;
+
                 // 清空其他欄位
-                document.getElementById('constructionArea').value = '';
-                document.getElementById('constructionNote').value = '';
+                if (currentUser.role === 'admin' || currentUser.role === 'owner') {
+                    document.getElementById('preConstructionNote').value = '';
+                } else {
+                    // 非管理員保持"無"
+                    document.getElementById('preConstructionNote').value = '無';
+                }
+                clearPhotoPreview('prePhotoPreview');
+                clearPhotoPreview('completionPhotoPreview');
             }
 
             // 顯示彈窗
@@ -2131,7 +2468,9 @@ ${details.note ? `備註：${details.note}` : ''}
             const area = document.getElementById('constructionArea').value;
             const date = document.getElementById('constructionDate').value;
             const contractor = document.getElementById('constructionContractor').value;
-            const note = document.getElementById('constructionNote').value;
+            const preConstructionNote = document.getElementById('preConstructionNote').value;
+            const prePhotos = document.getElementById('prePhotos').files;
+            const completionPhotos = document.getElementById('completionPhotos').files;
 
             // 準備施工記錄數據
             const constructionData = {
@@ -2141,8 +2480,10 @@ ${details.note ? `備註：${details.note}` : ''}
                 area: parseFloat(area),
                 date: date,
                 contractor: contractor,
-                contractorShortName: currentUser.shortName || contractor.slice(-1),
-                note: note,
+                contractorShortName: currentUser.shortName || contractor.split('|')[1] || contractor.slice(-1),
+                preConstructionNote: preConstructionNote, // field_sF6fn__c
+                prePhotos: Array.from(prePhotos), // field_V3d91__c
+                completionPhotos: Array.from(completionPhotos), // field_3Fqof__c
                 status: 'completed'
             };
 
@@ -2176,6 +2517,69 @@ ${details.note ? `備註：${details.note}` : ''}
             }
         });
 
+        // 模擬獲取坪數資料（實際應從API獲取）
+        function getMockAreaData(building, floor, unit) {
+            // 這裡可以從field_tXAko__c獲取實際數據
+            const mockAreas = {
+                'A_8F_A1': '11.57',
+                'A_8F_A2': '10.5',
+                'B_4F_B1': '22.1',
+                'B_12F_B5': '8.3',
+                'C_8F_C6': '15.2'
+            };
+            const key = `${building}_${floor}_${unit}`;
+            return mockAreas[key] || '11.57'; // 預設值
+        }
+
+        // 清除照片預覽
+        function clearPhotoPreview(previewId) {
+            const preview = document.getElementById(previewId);
+            if (preview) {
+                preview.innerHTML = '';
+            }
+        }
+
+        // 處理照片上傳預覽
+        function handlePhotoUpload(inputElement, previewId) {
+            const files = inputElement.files;
+            const preview = document.getElementById(previewId);
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.onclick = function() {
+                            window.open(e.target.result, '_blank');
+                        };
+                        preview.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+
+        // 綁定照片上傳事件
+        document.addEventListener('DOMContentLoaded', function() {
+            // 施工前照片
+            const prePhotos = document.getElementById('prePhotos');
+            if (prePhotos) {
+                prePhotos.addEventListener('change', function() {
+                    handlePhotoUpload(this, 'prePhotoPreview');
+                });
+            }
+            
+            // 完工照片
+            const completionPhotos = document.getElementById('completionPhotos');
+            if (completionPhotos) {
+                completionPhotos.addEventListener('change', function() {
+                    handlePhotoUpload(this, 'completionPhotoPreview');
+                });
+            }
+        });
+
         // 自動填入簡稱和密碼
         function setupAutoFill() {
             const memberNameInput = document.getElementById('memberName');
@@ -2202,9 +2606,12 @@ ${details.note ? `備註：${details.note}` : ''}
 
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
-            // 預設顯示登入頁面
-            document.getElementById('loginContainer').style.display = 'flex';
-            document.getElementById('mainContent').style.display = 'none';
+            // 檢查是否有已儲存的登入狀態
+            if (!checkStoredLogin()) {
+                // 如果沒有儲存的登入狀態，顯示登入頁面
+                document.getElementById('loginContainer').style.display = 'flex';
+                document.getElementById('mainContent').style.display = 'none';
+            }
             document.getElementById('userSwitcher').style.display = 'block';
             
             // 設定自動填入功能
