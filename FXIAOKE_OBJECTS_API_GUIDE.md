@@ -1,6 +1,14 @@
 # Fxiaoke CRM 四大對象 API 連接指南
 *最後更新：2025-07-22*
 
+## 🎯 **這是重要的 API 參考文檔！**
+**每次需要處理 Fxiaoke CRM API 時，請直接參考本文檔，避免重複調試**
+
+## ⚡ **核心重點（5秒速覽）**
+- **標準 v2 API**: 商機 + 銷售記錄 → `/cgi/crm/v2/data/query` + `apiName`
+- **自定義 API**: 案場 + 維修單 → `/cgi/crm/custom/v2/data/query` + `dataObjectApiName`
+- **響應結構**: 標準 API 用 `result.data.dataList`，自定義 API 用 `result.dataList`
+
 ## 概述
 本文檔記錄興安西工程進度管理系統中四個核心對象的 Fxiaoke CRM API 連接方式，包括 API 端點、參數結構和欄位對應關係。
 

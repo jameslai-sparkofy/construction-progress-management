@@ -1,17 +1,30 @@
 # Claude Code 工作狀態記錄
 *最後更新：2025-07-22*
 
+## 🚨 **重要提醒：每次重新開始工作時請先閱讀以下文件**
+
+### 📋 **必讀文檔（避免重複調試）**
+1. **首先閱讀**: `FXIAOKE_OBJECTS_API_GUIDE.md`
+   - **包含所有四大對象的完整 API 連接方式**
+   - 商機 (v2 API) + 案場 (custom API) + 維修單 (custom API) + 銷售記錄 (v2 API)
+   - 詳細的 API 結構差異、欄位對應、測試指令
+   - **避免重複調試 API 連接問題**
+
+2. **參考文檔**: `API_USAGE_GUIDE.md` - 完整的 API 使用指南和憑證記錄
+
+### ⚡ **快速上手檢查清單**
+- [ ] 閱讀 `FXIAOKE_OBJECTS_API_GUIDE.md` 了解四大對象 API
+- [ ] 檢查生產網址：https://progress.yes-ceramics.com
+- [ ] 確認同步狀態：`curl "https://progress.yes-ceramics.com/api/sync/status"`
+- [ ] 查看數據統計：商機489筆 + 案場3943筆 + 維修單5筆 + 銷售記錄3600筆
+
+---
+
 ## 專案概述
 - **專案名稱**：興安西工程進度管理系統
 - **技術棧**：HTML/JS 前端 + Cloudflare Workers 後端 + Fxiaoke CRM API + D1 資料庫
 - **架構**：混合搜尋架構（本地 D1 + API 回退）+ 多租戶系統
 - **生產網址**：https://progress.yes-ceramics.com
-
-## 🔗 重要文檔連結
-- **`FXIAOKE_OBJECTS_API_GUIDE.md`** - Fxiaoke CRM 四大對象 API 連接指南
-  - 商機、案場、維修單、銷售記錄的完整 API 結構
-  - 包含欄位對應、測試指令和故障排除
-- **`API_USAGE_GUIDE.md`** - 完整的 API 使用指南和憑證記錄
 
 ## 目前進度狀況 (100%完成！🎉)
 
