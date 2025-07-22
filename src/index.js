@@ -71,6 +71,12 @@ export default {
       // 執行案場同步
       const siteSync = await syncSitesToDB(env);
       
+      // 執行維修單同步
+      const maintenanceSync = await syncMaintenanceOrdersToDB(env);
+      
+      // 執行銷售記錄同步
+      const salesSync = await syncSalesRecordsToDB(env);
+      
       console.log('✅ 定時同步完成:', {
         opportunities: {
           syncedCount: opportunitySync.syncedCount,
@@ -79,6 +85,14 @@ export default {
         sites: {
           syncedCount: siteSync.syncedCount,
           totalCount: siteSync.totalCount
+        },
+        maintenance_orders: {
+          syncedCount: maintenanceSync.syncedCount,
+          totalCount: maintenanceSync.totalCount
+        },
+        sales_records: {
+          syncedCount: salesSync.syncedCount,
+          totalCount: salesSync.totalCount
         },
         timestamp: new Date().toISOString()
       });
@@ -3646,7 +3660,7 @@ async function querySalesRecords(token, corpId, userId, limit = 100, offset = 0)
   console.log(`📡 API查詢銷售記錄: limit=${limit}, offset=${offset}`);
   
   try {
-    const response = await fetch(`${CONFIG.baseUrl}/cgi/crm/custom/v2/data/query`, {
+    const response = await fetch(`${CONFIG.baseUrl}/cgi/crm/v2/data/query`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -3656,7 +3670,7 @@ async function querySalesRecords(token, corpId, userId, limit = 100, offset = 0)
         corpAccessToken: token,
         currentOpenUserId: userId,
         data: {
-          dataObjectApiName: "ActiveRecordObj",
+          apiName: "ActiveRecordObj",
           search_query_info: {
             limit: limit,
             offset: offset,
@@ -3673,12 +3687,12 @@ async function querySalesRecords(token, corpId, userId, limit = 100, offset = 0)
       throw new Error(`銷售記錄查詢失敗: ${result.errorMessage}`);
     }
     
-    if (!result.dataList || result.dataList.length === 0) {
+    if (!result.data?.dataList || result.data.dataList.length === 0) {
       console.log('🔍 沒有找到銷售記錄資料');
       return [];
     }
     
-    const salesRecords = result.dataList.map(record => ({
+    const salesRecords = result.data.dataList.map(record => ({
       id: record._id,
       name: record.name || '未命名記錄',
       record_type: record.active_record_type || '',

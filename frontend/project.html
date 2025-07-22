@@ -1289,11 +1289,11 @@
             <!-- 主要標籤導航 -->
             <div class="tab-navigation">
                 <div class="tabs">
-                    <button class="tab active" onclick="switchTab('progress')">📊 施工進度</button>
-                    <button class="tab" onclick="switchTab('repairs')" id="repairsTab">📝 維修單</button>
-                    <button class="tab" onclick="switchTab('followups')">📑 跟進記錄</button>
-                    <button class="tab" onclick="switchTab('contractors')" id="contractorsTab">👷 工班管理</button>
-                    <button class="tab" onclick="switchTab('settings')" id="settingsTab">⚙️ 設定</button>
+                    <button class="tab active" onclick="switchTab('progress', event)">📊 施工進度</button>
+                    <button class="tab" onclick="switchTab('repairs', event)" id="repairsTab">📝 維修單</button>
+                    <button class="tab" onclick="switchTab('followups', event)">📑 跟進記錄</button>
+                    <button class="tab" onclick="switchTab('contractors', event)" id="contractorsTab">👷 工班管理</button>
+                    <button class="tab" onclick="switchTab('settings', event)" id="settingsTab">⚙️ 設定</button>
                 </div>
             </div>
 
@@ -1980,7 +1980,7 @@
         });
 
         // 標籤切換
-        function switchTab(tabName) {
+        function switchTab(tabName, event) {
             // 隱藏所有標籤內容
             document.querySelectorAll('.tab-panel').forEach(panel => {
                 panel.classList.remove('active');
@@ -1994,8 +1994,16 @@
             // 顯示選中的標籤內容
             document.getElementById(tabName + '-panel').classList.add('active');
             
-            // 設定選中的標籤為active
-            event.target.classList.add('active');
+            // 安全地設定選中的標籤為active
+            if (event && event.target) {
+                event.target.classList.add('active');
+            } else {
+                // 備用方案：通過 tabName 找到對應的標籤
+                const activeTab = document.querySelector(`[onclick*="switchTab('${tabName}')"]`);
+                if (activeTab) {
+                    activeTab.classList.add('active');
+                }
+            }
         }
 
         // 建築切換
@@ -2497,35 +2505,44 @@
         // 儲存當前點擊的單元格資訊
         let currentCell = null;
 
-        // 處理單元格點擊
+        // 處理單元格點擊 - 安全版本
         function handleCellClick(building, floor, unit) {
-            // 檢查權限 - 業主只能查看不能編輯
-            if (currentUser.role === 'owner') {
-                // 顯示施工細節
-                showConstructionDetails(building, floor, unit);
-                return;
-            }
-
-            // 檢查是否負責該建築 - 同工班的成員都可以編輯
-            if (currentUser.role === 'contractor_leader' || currentUser.role === 'member') {
-                if (currentUser.buildings && !currentUser.buildings.includes(building + '棟')) {
-                    // 不同工班只能查看進度，不能看細節
-                    alert('您只能查看此建築的進度，無法編輯');
+            try {
+                console.log('🔧 handleCellClick 執行:', { building, floor, unit });
+                
+                // 檢查權限 - 業主只能查看不能編輯
+                if (currentUser.role === 'owner') {
+                    console.log('👤 業主權限，顯示施工細節');
+                    showConstructionDetails(building, floor, unit);
                     return;
                 }
-            }
 
-            // 儲存當前單元格資訊
-            currentCell = { building, floor, unit };
+                // 檢查是否負責該建築 - 同工班的成員都可以編輯
+                if (currentUser.role === 'contractor_leader' || currentUser.role === 'member') {
+                    if (currentUser.buildings && !currentUser.buildings.includes(building + '棟')) {
+                        alert('您只能查看此建築的進度，無法編輯');
+                        return;
+                    }
+                }
 
-            // 顯示施工位置資訊
-            document.getElementById('buildingInfo').textContent = building + '棟';
-            document.getElementById('floorInfo').textContent = floor;
-            document.getElementById('unitInfo').textContent = unit;
-            
-            // 從API或數據源獲取實際坪數（這裡先用模擬數據）
-            const mockArea = getMockAreaData(building, floor, unit);
-            document.getElementById('areaInfo').textContent = mockArea;
+                // 儲存當前單元格資訊
+                currentCell = { building, floor, unit };
+
+                // 安全地顯示施工位置資訊
+                const buildingInfoEl = document.getElementById('buildingInfo');
+                const floorInfoEl = document.getElementById('floorInfo');
+                const unitInfoEl = document.getElementById('unitInfo');
+                const areaInfoEl = document.getElementById('areaInfo');
+                
+                if (buildingInfoEl) buildingInfoEl.textContent = building + '棟';
+                if (floorInfoEl) floorInfoEl.textContent = floor;
+                if (unitInfoEl) unitInfoEl.textContent = unit;
+                
+                // 從API或數據源獲取實際坪數
+                const mockArea = getMockAreaData(building, floor, unit);
+                if (areaInfoEl) areaInfoEl.textContent = mockArea;
+                
+                console.log('✅ 基本資訊設定完成');
 
             // 檢查是否已有施工記錄
             const key = `${building}_${floor}_${unit}`;
@@ -2595,16 +2612,32 @@
                 const key = `${building}_${floor}_${unit}`;
                 const isCompleted = constructionDetails[key] && constructionDetails[key].construction_completed;
                 
-                // 設定單選按鈕狀態
-                document.querySelector('input[name="constructionCompleted"][value="false"]').checked = !isCompleted;
-                document.querySelector('input[name="constructionCompleted"][value="true"]').checked = isCompleted;
+                // 安全地設定單選按鈕狀態
+                const falseRadio = document.querySelector('input[name="constructionCompleted"][value="false"]');
+                const trueRadio = document.querySelector('input[name="constructionCompleted"][value="true"]');
+                
+                if (falseRadio) falseRadio.checked = !isCompleted;
+                if (trueRadio) trueRadio.checked = isCompleted;
                 
                 // 根據狀態啟用/禁用欄位
                 toggleConstructionFields();
             }
 
-            // 顯示彈窗
-            document.getElementById('constructionModal').classList.add('active');
+                // 安全地顯示彈窗
+                const modal = document.getElementById('constructionModal');
+                if (modal) {
+                    modal.classList.add('active');
+                    console.log('✅ 模態框已顯示');
+                } else {
+                    console.error('❌ 找不到 constructionModal 元素');
+                    alert('無法開啟施工資訊彈窗，請重新整理頁面');
+                }
+                
+            } catch (error) {
+                console.error('❌ handleCellClick 執行錯誤:', error.message);
+                console.error('錯誤堆疊:', error.stack);
+                alert('開啟施工資訊時發生錯誤：' + error.message);
+            }
         }
 
         // 關閉施工輸入彈窗
