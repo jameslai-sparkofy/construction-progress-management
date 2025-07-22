@@ -66,11 +66,20 @@ export default {
     
     try {
       // 執行商機同步
-      const syncResult = await syncOpportunitiesToDB(env);
+      const opportunitySync = await syncOpportunitiesToDB(env);
+      
+      // 執行案場同步
+      const siteSync = await syncSitesToDB(env);
       
       console.log('✅ 定時同步完成:', {
-        syncedCount: syncResult.syncedCount,
-        totalCount: syncResult.totalCount,
+        opportunities: {
+          syncedCount: opportunitySync.syncedCount,
+          totalCount: opportunitySync.totalCount
+        },
+        sites: {
+          syncedCount: siteSync.syncedCount,
+          totalCount: siteSync.totalCount
+        },
         timestamp: new Date().toISOString()
       });
       
@@ -1884,10 +1893,16 @@ async function handleSyncAPI(request, env, pathParts) {
       return await handleSyncStatus(request, env, corsHeaders);
     case 'force':
       return await handleForceSync(request, env, corsHeaders);
+    case 'sites':
+      return await handleSitesSync(request, env, corsHeaders);
+    case 'maintenance-orders':
+      return await handleMaintenanceOrdersSync(request, env, corsHeaders);
+    case 'sales-records':
+      return await handleSalesRecordsSync(request, env, corsHeaders);
     default:
       return new Response(JSON.stringify({ 
         error: '同步 API 端點不存在',
-        available: ['opportunities', 'status', 'force']
+        available: ['opportunities', 'status', 'force', 'sites', 'maintenance-orders', 'sales-records']
       }), {
         status: 404,
         headers: { 
@@ -2730,7 +2745,7 @@ async function handleSalesRecordsAPI(request, env, corsHeaders) {
     }
     
     const { token, corpId, userId } = tokenResult;
-    const salesRecords = await querySalesRecords(token, corpId, userId);
+    const salesRecords = await querySalesRecords(token, corpId, userId, 100, 0);
     
     return new Response(JSON.stringify({
       success: true,
@@ -2975,69 +2990,11 @@ async function searchOpportunities(token, corpId, userId, searchQuery) {
   }
 }
 
-/**
- * 查詢銷售記錄列表
- */
-async function querySalesRecords(token, corpId, userId) {
-  const CONFIG = {
-    baseUrl: "https://open.fxiaoke.com"
-  };
-  
-  try {
-    const response = await fetch(`${CONFIG.baseUrl}/cgi/crm/v2/data/query`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        corpId: corpId,
-        corpAccessToken: token,
-        currentOpenUserId: userId,
-        data: {
-          apiName: "ActiveRecordObj",
-          search_query_info: {
-            limit: 100,
-            offset: 0,
-            orders: [{fieldName: "create_time", isAsc: "false"}]
-          }
-        }
-      })
-    });
-    
-    const result = await response.json();
-    console.log('銷售記錄查詢原始響應:', JSON.stringify(result, null, 2));
-    
-    if (result.errorCode !== 0) {
-      throw new Error(`銷售記錄查詢失敗: ${result.errorMessage}`);
-    }
-    
-    if (!result.data?.dataList) {
-      return [];
-    }
-    
-    // 轉換為前端需要的格式
-    const salesRecords = result.data.dataList.map(record => ({
-      id: record._id,
-      opportunityId: record.opportunity_id || record.opp_id,
-      content: record.content || record.description || '無內容',
-      type: record.type || '跟進記錄',
-      createTime: record.create_time,
-      updateTime: record.update_time || record.last_modified_time,
-      createdBy: record.created_by_name || record.created_by,
-      raw: record
-    }));
-    
-    return salesRecords;
-    
-  } catch (error) {
-    throw new Error(`銷售記錄查詢失敗: ${error.message}`);
-  }
-}
 
 /**
  * 查詢案場列表（自定義對象）
  */
-async function querySites(token, corpId, userId) {
+async function querySites(token, corpId, userId, limit = 100, offset = 0) {
   const CONFIG = {
     baseUrl: "https://open.fxiaoke.com"
   };
@@ -3055,8 +3012,8 @@ async function querySites(token, corpId, userId) {
         data: {
           dataObjectApiName: "object_8W9cb__c",
           search_query_info: {
-            limit: 50,
-            offset: 0,
+            limit: limit,
+            offset: offset,
             orders: [{fieldName: "create_time", isAsc: "false"}]
           }
         }
@@ -3096,7 +3053,7 @@ async function querySites(token, corpId, userId) {
 /**
  * 查詢維修單列表（自定義對象）
  */
-async function queryMaintenanceOrders(token, corpId, userId) {
+async function queryMaintenanceOrders(token, corpId, userId, limit = 100, offset = 0) {
   const CONFIG = {
     baseUrl: "https://open.fxiaoke.com"
   };
@@ -3234,4 +3191,607 @@ function getDemoOpportunities() {
       updateTime: '2024-07-17T00:00:00Z'
     }
   ];
+}
+
+/**
+ * 處理案場同步 API
+ */
+async function handleSitesSync(request, env, corsHeaders) {
+  if (request.method !== 'POST') {
+    return new Response(JSON.stringify({ error: '僅支援 POST 請求' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+
+  try {
+    const syncResult = await syncSitesToDB(env);
+    
+    return new Response(JSON.stringify({
+      success: true,
+      message: '案場同步完成',
+      syncedCount: syncResult.syncedCount,
+      totalCount: syncResult.totalCount,
+      timestamp: new Date().toISOString()
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+    
+  } catch (error) {
+    console.error('案場同步失敗:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      syncedCount: 0
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+}
+
+/**
+ * 同步案場資料到 D1 資料庫
+ */
+async function syncSitesToDB(env) {
+  console.log('🏗️ 開始同步案場資料到 D1...');
+  
+  try {
+    const tokenResult = await getFxiaokeToken();
+    if (!tokenResult.success) {
+      throw new Error(`獲取 Token 失敗: ${tokenResult.error}`);
+    }
+    
+    const { token, corpId, userId } = tokenResult;
+    
+    // 分批同步案場 (每次100個)
+    let syncedCount = 0;
+    let totalCount = 0;
+    let offset = 0;
+    const limit = 100;
+    let hasMore = true;
+    
+    while (hasMore) {
+      console.log(`🔄 同步案場資料 offset=${offset}, limit=${limit}`);
+      
+      // 使用現有的 querySites 函數，支援分頁
+      const sitesData = await querySites(token, corpId, userId, limit, offset);
+      
+      if (!sitesData || sitesData.length === 0) {
+        hasMore = false;
+        break;
+      }
+      
+      totalCount += sitesData.length;
+      
+      const insertedCount = await insertSitesToD1(env, sitesData);
+      syncedCount += insertedCount;
+      
+      if (sitesData.length < limit) {
+        hasMore = false;
+      } else {
+        offset += limit;
+      }
+      
+      console.log(`✅ 已同步 ${syncedCount}/${totalCount} 個案場`);
+    }
+    
+    // 更新同步狀態
+    await env.DB.prepare(`
+      INSERT OR REPLACE INTO sync_status 
+      (sync_type, last_sync_time, last_sync_count, status, message)
+      VALUES (?, ?, ?, ?, ?)
+    `).bind(
+      'sites',
+      Date.now(),
+      syncedCount,
+      'completed',
+      `成功同步 ${syncedCount}/${totalCount} 個案場`
+    ).run();
+    
+    console.log(`🎉 案場同步完成: ${syncedCount}/${totalCount}`);
+    
+    return {
+      syncedCount,
+      totalCount,
+      success: true
+    };
+    
+  } catch (error) {
+    console.error('❌ 案場同步失敗:', error);
+    throw error;
+  }
+}
+
+/**
+ * 查詢真實案場資料
+ */
+async function queryRealSites(token, corpId, userId, limit = 100, offset = 0) {
+  const CONFIG = {
+    baseUrl: "https://open.fxiaoke.com"
+  };
+  
+  console.log(`📡 API查詢案場: limit=${limit}, offset=${offset}`);
+  
+  try {
+    const response = await fetch(`${CONFIG.baseUrl}/cgi/crm/custom/v2/data/query`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        corpId: corpId,
+        corpAccessToken: token,
+        currentOpenUserId: userId,
+        data: {
+          dataObjectApiName: "object_8W9cb__c",
+          search_query_info: {
+            limit: limit,
+            offset: offset,
+            orders: [{ fieldName: "create_time", isAsc: "false" }]
+          }
+        }
+      })
+    });
+    
+    const result = await response.json();
+    console.log('案場查詢響應:', JSON.stringify(result, null, 2));
+    
+    if (result.errorCode !== 0) {
+      throw new Error(`案場查詢失敗: ${result.errorMessage}`);
+    }
+    
+    if (!result.dataList || result.dataList.length === 0) {
+      console.log('🔍 沒有找到案場資料');
+      return [];
+    }
+    
+    const sites = result.dataList.map(site => ({
+      id: site._id,
+      name: site.name || '未命名案場',
+      building: site.field_WD7k1__c || '',
+      floor: site.field_Q6Svh__c || 0,
+      unit: site.field_XuJP2__c || '',
+      site_type: site.field_dxr31__c || '',
+      stage: site.field_z9H6O__c || '',
+      construction_completed: site.construction_completed__c || 0,
+      opportunity_id: site.field_1P96q__c || '',
+      owner: site.owner || '',
+      create_time: site.create_time || 0,
+      last_modified_time: site.last_modified_time || 0,
+      raw_data: JSON.stringify(site)
+    }));
+    
+    console.log(`✅ 成功查詢到 ${sites.length} 個案場`);
+    return sites;
+    
+  } catch (error) {
+    throw new Error(`案場查詢失敗: ${error.message}`);
+  }
+}
+
+/**
+ * 批量插入案場到 D1 資料庫
+ */
+async function insertSitesToD1(env, sitesData) {
+  if (!sitesData || sitesData.length === 0) {
+    return 0;
+  }
+  
+  console.log(`💾 準備插入 ${sitesData.length} 個案場到 D1`);
+  
+  try {
+    const currentTime = Date.now();
+    
+    // 使用事務批量插入，適應現有格式
+    const statements = sitesData.map(site => {
+      // 從現有格式提取欄位
+      const rawData = site.raw || {};
+      return env.DB.prepare(`
+        INSERT OR REPLACE INTO sites (
+          id, name, opportunity_id, address, status, building_type, 
+          floor_info, room_info, create_time, update_time, synced_at, raw_data
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        site.id,
+        site.name,
+        rawData.field_1P96q__c || '', // 商機關聯
+        '', // address - 暫時空白
+        site.status || '', // 狀態
+        rawData.field_WD7k1__c || '', // 棟別 -> building_type
+        `${rawData.field_Q6Svh__c || 0}F`, // 樓層 -> floor_info
+        rawData.field_XuJP2__c || '', // 戶別 -> room_info
+        site.createTime || rawData.create_time || 0,
+        rawData.last_modified_time || 0,
+        currentTime,
+        JSON.stringify(rawData)
+      );
+    });
+    
+    const results = await env.DB.batch(statements);
+    
+    console.log(`✅ 成功插入 ${sitesData.length} 個案場到 D1`);
+    return sitesData.length;
+    
+  } catch (error) {
+    console.error('❌ D1插入失敗:', error);
+    throw new Error(`D1插入失敗: ${error.message}`);
+  }
+}
+
+/**
+ * 處理維修單同步 API
+ */
+async function handleMaintenanceOrdersSync(request, env, corsHeaders) {
+  if (request.method !== 'POST') {
+    return new Response(JSON.stringify({ error: '僅支援 POST 請求' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+
+  try {
+    const syncResult = await syncMaintenanceOrdersToDB(env);
+    
+    return new Response(JSON.stringify({
+      success: true,
+      message: '維修單同步完成',
+      syncedCount: syncResult.syncedCount,
+      totalCount: syncResult.totalCount,
+      timestamp: new Date().toISOString()
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+    
+  } catch (error) {
+    console.error('維修單同步失敗:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      syncedCount: 0
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+}
+
+/**
+ * 處理銷售記錄同步 API
+ */
+async function handleSalesRecordsSync(request, env, corsHeaders) {
+  if (request.method !== 'POST') {
+    return new Response(JSON.stringify({ error: '僅支援 POST 請求' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+
+  try {
+    const syncResult = await syncSalesRecordsToDB(env);
+    
+    return new Response(JSON.stringify({
+      success: true,
+      message: '銷售記錄同步完成',
+      syncedCount: syncResult.syncedCount,
+      totalCount: syncResult.totalCount,
+      timestamp: new Date().toISOString()
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+    
+  } catch (error) {
+    console.error('銷售記錄同步失敗:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      syncedCount: 0
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+}
+
+/**
+ * 同步維修單到 D1 資料庫
+ */
+async function syncMaintenanceOrdersToDB(env) {
+  console.log('🔧 開始同步維修單資料到 D1...');
+  
+  try {
+    const tokenResult = await getFxiaokeToken();
+    if (!tokenResult.success) {
+      throw new Error(`獲取 Token 失敗: ${tokenResult.error}`);
+    }
+    
+    const { token, corpId, userId } = tokenResult;
+    
+    let syncedCount = 0;
+    let totalCount = 0;
+    let offset = 0;
+    const limit = 100;
+    let hasMore = true;
+    
+    while (hasMore) {
+      console.log(`🔄 同步維修單資料 offset=${offset}, limit=${limit}`);
+      
+      const maintenanceData = await queryMaintenanceOrders(token, corpId, userId, limit, offset);
+      
+      if (!maintenanceData || maintenanceData.length === 0) {
+        hasMore = false;
+        break;
+      }
+      
+      totalCount += maintenanceData.length;
+      
+      const insertedCount = await insertMaintenanceOrdersToD1(env, maintenanceData);
+      syncedCount += insertedCount;
+      
+      if (maintenanceData.length < limit) {
+        hasMore = false;
+      } else {
+        offset += limit;
+      }
+      
+      console.log(`✅ 已同步 ${syncedCount}/${totalCount} 個維修單`);
+    }
+    
+    // 更新同步狀態
+    await env.DB.prepare(`
+      INSERT OR REPLACE INTO sync_status 
+      (sync_type, last_sync_time, last_sync_count, status, message)
+      VALUES (?, ?, ?, ?, ?)
+    `).bind(
+      'maintenance_orders',
+      Date.now(),
+      syncedCount,
+      'completed',
+      `成功同步 ${syncedCount}/${totalCount} 個維修單`
+    ).run();
+    
+    console.log(`🎉 維修單同步完成: ${syncedCount}/${totalCount}`);
+    
+    return {
+      syncedCount,
+      totalCount,
+      success: true
+    };
+    
+  } catch (error) {
+    console.error('❌ 維修單同步失敗:', error);
+    throw error;
+  }
+}
+
+/**
+ * 同步銷售記錄到 D1 資料庫
+ */
+async function syncSalesRecordsToDB(env) {
+  console.log('💰 開始同步銷售記錄資料到 D1...');
+  
+  try {
+    const tokenResult = await getFxiaokeToken();
+    if (!tokenResult.success) {
+      throw new Error(`獲取 Token 失敗: ${tokenResult.error}`);
+    }
+    
+    const { token, corpId, userId } = tokenResult;
+    
+    let syncedCount = 0;
+    let totalCount = 0;
+    let offset = 0;
+    const limit = 100;
+    let hasMore = true;
+    
+    while (hasMore) {
+      console.log(`🔄 同步銷售記錄資料 offset=${offset}, limit=${limit}`);
+      
+      const salesData = await querySalesRecords(token, corpId, userId, limit, offset);
+      
+      if (!salesData || salesData.length === 0) {
+        hasMore = false;
+        break;
+      }
+      
+      totalCount += salesData.length;
+      
+      const insertedCount = await insertSalesRecordsToD1(env, salesData);
+      syncedCount += insertedCount;
+      
+      if (salesData.length < limit) {
+        hasMore = false;
+      } else {
+        offset += limit;
+      }
+      
+      console.log(`✅ 已同步 ${syncedCount}/${totalCount} 個銷售記錄`);
+    }
+    
+    // 更新同步狀態
+    await env.DB.prepare(`
+      INSERT OR REPLACE INTO sync_status 
+      (sync_type, last_sync_time, last_sync_count, status, message)
+      VALUES (?, ?, ?, ?, ?)
+    `).bind(
+      'sales_records',
+      Date.now(),
+      syncedCount,
+      'completed',
+      `成功同步 ${syncedCount}/${totalCount} 個銷售記錄`
+    ).run();
+    
+    console.log(`🎉 銷售記錄同步完成: ${syncedCount}/${totalCount}`);
+    
+    return {
+      syncedCount,
+      totalCount,
+      success: true
+    };
+    
+  } catch (error) {
+    console.error('❌ 銷售記錄同步失敗:', error);
+    throw error;
+  }
+}
+
+/**
+ * 查詢銷售記錄
+ */
+async function querySalesRecords(token, corpId, userId, limit = 100, offset = 0) {
+  const CONFIG = {
+    baseUrl: "https://open.fxiaoke.com"
+  };
+  
+  console.log(`📡 API查詢銷售記錄: limit=${limit}, offset=${offset}`);
+  
+  try {
+    const response = await fetch(`${CONFIG.baseUrl}/cgi/crm/custom/v2/data/query`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        corpId: corpId,
+        corpAccessToken: token,
+        currentOpenUserId: userId,
+        data: {
+          dataObjectApiName: "ActiveRecordObj",
+          search_query_info: {
+            limit: limit,
+            offset: offset,
+            orders: [{ fieldName: "create_time", isAsc: "false" }]
+          }
+        }
+      })
+    });
+    
+    const result = await response.json();
+    console.log('銷售記錄查詢響應:', JSON.stringify(result, null, 2));
+    
+    if (result.errorCode !== 0) {
+      throw new Error(`銷售記錄查詢失敗: ${result.errorMessage}`);
+    }
+    
+    if (!result.dataList || result.dataList.length === 0) {
+      console.log('🔍 沒有找到銷售記錄資料');
+      return [];
+    }
+    
+    const salesRecords = result.dataList.map(record => ({
+      id: record._id,
+      name: record.name || '未命名記錄',
+      record_type: record.active_record_type || '',
+      content: record.active_record_content || '',
+      interactive_type: record.interactive_types || '',
+      location: record.field_aN2iY__c || '',
+      opportunity_id: record.related_opportunity_id || '', // 可能為空
+      create_time: record.create_time || 0,
+      update_time: record.last_modified_time || 0,
+      raw_data: JSON.stringify(record)
+    }));
+    
+    console.log(`✅ 成功查詢到 ${salesRecords.length} 個銷售記錄`);
+    return salesRecords;
+    
+  } catch (error) {
+    throw new Error(`銷售記錄查詢失敗: ${error.message}`);
+  }
+}
+
+/**
+ * 批量插入維修單到 D1
+ */
+async function insertMaintenanceOrdersToD1(env, maintenanceData) {
+  if (!maintenanceData || maintenanceData.length === 0) {
+    return 0;
+  }
+  
+  console.log(`💾 準備插入 ${maintenanceData.length} 個維修單到 D1`);
+  
+  try {
+    const currentTime = Date.now();
+    
+    const statements = maintenanceData.map(order => {
+      const rawData = order.raw || {};
+      return env.DB.prepare(`
+        INSERT OR REPLACE INTO maintenance_orders (
+          id, name, opportunity_id, site_id, status, issue_type, description,
+          maintenance_date, technician, contractor, cost, completion_status,
+          create_time, update_time, synced_at, raw_data
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        order.id,
+        order.orderNumber || order.name || '',
+        order.opportunityId || '',
+        order.building || '',
+        order.status || '',
+        order.issue || '',
+        order.issue || '',
+        '',
+        '',
+        order.contractor || '',
+        0,
+        0,
+        order.createTime || rawData.create_time || 0,
+        rawData.update_time || 0,
+        currentTime,
+        JSON.stringify(rawData)
+      );
+    });
+    
+    const results = await env.DB.batch(statements);
+    
+    console.log(`✅ 成功插入 ${maintenanceData.length} 個維修單到 D1`);
+    return maintenanceData.length;
+    
+  } catch (error) {
+    console.error('❌ 維修單D1插入失敗:', error);
+    throw new Error(`維修單D1插入失敗: ${error.message}`);
+  }
+}
+
+/**
+ * 批量插入銷售記錄到 D1
+ */
+async function insertSalesRecordsToD1(env, salesData) {
+  if (!salesData || salesData.length === 0) {
+    return 0;
+  }
+  
+  console.log(`💾 準備插入 ${salesData.length} 個銷售記錄到 D1`);
+  
+  try {
+    const currentTime = Date.now();
+    
+    const statements = salesData.map(record => {
+      return env.DB.prepare(`
+        INSERT OR REPLACE INTO sales_records (
+          id, name, opportunity_id, record_type, content, interactive_type,
+          location, create_time, update_time, synced_at, raw_data
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        record.id,
+        record.name,
+        record.opportunity_id || null, // 注意：可能為空
+        record.record_type,
+        record.content,
+        record.interactive_type,
+        record.location,
+        record.create_time,
+        record.update_time,
+        currentTime,
+        record.raw_data
+      );
+    });
+    
+    const results = await env.DB.batch(statements);
+    
+    console.log(`✅ 成功插入 ${salesData.length} 個銷售記錄到 D1`);
+    return salesData.length;
+    
+  } catch (error) {
+    console.error('❌ 銷售記錄D1插入失敗:', error);
+    throw new Error(`銷售記錄D1插入失敗: ${error.message}`);
+  }
 }
