@@ -1,11 +1,17 @@
 # Claude Code 工作狀態記錄
-*最後更新：2025-07-21*
+*最後更新：2025-07-22*
 
 ## 專案概述
 - **專案名稱**：興安西工程進度管理系統
 - **技術棧**：HTML/JS 前端 + Cloudflare Workers 後端 + Fxiaoke CRM API + D1 資料庫
 - **架構**：混合搜尋架構（本地 D1 + API 回退）+ 多租戶系統
 - **生產網址**：https://progress.yes-ceramics.com
+
+## 🔗 重要文檔連結
+- **`FXIAOKE_OBJECTS_API_GUIDE.md`** - Fxiaoke CRM 四大對象 API 連接指南
+  - 商機、案場、維修單、銷售記錄的完整 API 結構
+  - 包含欄位對應、測試指令和故障排除
+- **`API_USAGE_GUIDE.md`** - 完整的 API 使用指南和憑證記錄
 
 ## 目前進度狀況 (100%完成！🎉)
 
@@ -74,10 +80,13 @@ Cloudflare Workers API (/api/crm/opportunities/search)
 ```
 
 ### 📊 **系統數據統計**
-- **總商機數**：489個 (超出預期的480個)
-- **D1 資料庫大小**：200KB+
+- **商機 (opportunities)**：489個
+- **案場 (sites)**：3,943個 (超出預期的3,000個)
+- **維修單 (maintenance_orders)**：5個
+- **銷售記錄 (sales_records)**：3,600個
+- **D1 資料庫大小**：33MB+ (包含四大對象)
 - **搜尋響應時間**：本地 < 50ms，API 回退 < 5s
-- **同步頻率**：每小時自動同步
+- **同步頻率**：每小時自動同步四種對象
 - **支援搜尋語言**：中文、英文、數字
 
 ### ❌ 未完成 (可選功能)
@@ -134,13 +143,20 @@ puppeteer-mcp-server@0.7.2
 - **Mac**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 
 ## 核心API端點列表
+### 數據查詢
 - **商機列表**：`GET /api/crm/opportunities?offset=0&limit=100`
+- **案場列表**：`GET /api/crm/sites?offset=0&limit=100`
 - **混合搜尋**：`GET /api/crm/opportunities/search?q=關鍵字`
-- **手動同步**：`POST /api/sync/opportunities`
+
+### 同步功能
+- **商機同步**：`POST /api/sync/opportunities`
+- **案場同步**：`POST /api/sync/sites`
+- **維修單同步**：`POST /api/sync/maintenance-orders`
+- **銷售記錄同步**：`POST /api/sync/sales-records`
 - **同步狀態**：`GET /api/sync/status`
 
 ## 下次工作建議
-1. **GitHub 程式碼上傳** (當前任務)
+1. **四大對象系統完成** ✅ (已完成)
 2. **Email 認證系統** (可選)
 3. **系統監控和日誌** (可選)
 
