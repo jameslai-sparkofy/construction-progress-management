@@ -173,6 +173,9 @@ async function handleAdminDashboard(request, env) {
 async function handleAPI(request, env, pathParts) {
   const endpoint = pathParts[0];
   
+  // 調試日誌 - 檢查部署狀態
+  console.log('🔧 handleAPI 調試:', { endpoint, pathParts, timestamp: new Date().toISOString() });
+  
   switch (endpoint) {
     case 'projects':
       return await handleProjectsAPI(request, env, pathParts.slice(1));
@@ -184,6 +187,17 @@ async function handleAPI(request, env, pathParts) {
       return await handleCRMAPI(request, env, pathParts.slice(1));
     case 'progress':
       return await handleProgressAPI(request, env, pathParts.slice(1));
+    case 'test-progress':
+      return new Response(JSON.stringify({ 
+        message: 'Progress API route is working',
+        pathParts: pathParts,
+        endpoint: endpoint,
+        method: request.method 
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+      break;
     case 'test-ip':
       return await handleTestIP(request, env);
     default:
