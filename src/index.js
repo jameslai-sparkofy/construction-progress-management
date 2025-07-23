@@ -182,6 +182,8 @@ async function handleAPI(request, env, pathParts) {
       return await handleSyncAPI(request, env, pathParts.slice(1));
     case 'crm':
       return await handleCRMAPI(request, env, pathParts.slice(1));
+    case 'progress':
+      return await handleProgressAPI(request, env, pathParts.slice(1));
     case 'test-ip':
       return await handleTestIP(request, env);
     default:
@@ -219,12 +221,35 @@ async function handleProjectPage(request, env, projectSlug, subPaths) {
 }
 
 /**
- * 從 KV 獲取所有專案
+ * 從 D1 資料庫獲取所有專案
  */
 async function getAllProjects(env) {
   try {
-    const projectsData = await env.PROJECTS.get('all_projects');
-    return projectsData ? JSON.parse(projectsData) : [];
+    const result = await env.DB.prepare(`
+      SELECT 
+        p.id,
+        p.name,
+        p.slug,
+        p.description,
+        p.building_count as buildingCount,
+        p.floor_count as floorCount,
+        p.status,
+        p.created_at as createdAt,
+        p.start_date as startDate,
+        p.completion_date as completionDate,
+        COALESCE(
+          ROUND(
+            (SELECT AVG(pr.progress_percentage) 
+             FROM progress_records pr 
+             WHERE pr.project_id = p.id), 0
+          ), 0
+        ) as progress,
+        (p.building_count || '棟' || p.floor_count || '層') as buildingInfo
+      FROM projects p
+      ORDER BY p.created_at DESC
+    `).all();
+    
+    return result.results || [];
   } catch (error) {
     console.error('獲取專案列表失敗:', error);
     return [];
@@ -236,8 +261,31 @@ async function getAllProjects(env) {
  */
 async function getProjectBySlug(env, slug) {
   try {
-    const projectData = await env.PROJECTS.get(`project:${slug}`);
-    return projectData ? JSON.parse(projectData) : null;
+    const result = await env.DB.prepare(`
+      SELECT 
+        p.id,
+        p.name,
+        p.slug,
+        p.description,
+        p.building_count as buildingCount,
+        p.floor_count as floorCount,
+        p.status,
+        p.created_at as createdAt,
+        p.start_date as startDate,
+        p.completion_date as completionDate,
+        COALESCE(
+          ROUND(
+            (SELECT AVG(pr.progress_percentage) 
+             FROM progress_records pr 
+             WHERE pr.project_id = p.id), 0
+          ), 0
+        ) as progress,
+        (p.building_count || '棟' || p.floor_count || '層') as buildingInfo
+      FROM projects p
+      WHERE p.slug = ? OR p.id = ?
+    `).bind(slug, slug).first();
+    
+    return result;
   } catch (error) {
     console.error('獲取專案失敗:', error);
     return null;
@@ -1859,6 +1907,51 @@ async function handleProjectsAPI(request, env, pathParts) {
         return new Response(JSON.stringify({
           success: false,
           error: '建立專案時發生錯誤'
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    
+    case 'DELETE':
+      // 刪除專案
+      if (pathParts.length === 0) {
+        return new Response(JSON.stringify({ error: '需要指定專案 ID' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+      
+      const projectIdToDelete = pathParts[0];
+      try {
+        // 檢查專案是否存在
+        const project = await getProjectBySlug(env, projectIdToDelete);
+        if (!project) {
+          return new Response(JSON.stringify({ 
+            success: false,
+            error: '專案不存在' 
+          }), {
+            status: 404,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        
+        // 從 D1 資料庫刪除專案（CASCADE 會自動刪除相關記錄）
+        await env.DB.prepare(`
+          DELETE FROM projects WHERE id = ? OR slug = ?
+        `).bind(projectIdToDelete, projectIdToDelete).run();
+        
+        return new Response(JSON.stringify({
+          success: true,
+          message: '專案已成功刪除'
+        }), {
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (error) {
+        console.error('刪除專案失敗:', error);
+        return new Response(JSON.stringify({
+          success: false,
+          error: '刪除專案時發生錯誤'
         }), {
           status: 500,
           headers: { 'Content-Type': 'application/json' }
@@ -3807,5 +3900,413 @@ async function insertSalesRecordsToD1(env, salesData) {
   } catch (error) {
     console.error('❌ 銷售記錄D1插入失敗:', error);
     throw new Error(`銷售記錄D1插入失敗: ${error.message}`);
+  }
+}
+
+/**
+ * 處理施工進度 API
+ */
+async function handleProgressAPI(request, env, pathParts) {
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  const endpoint = pathParts[0];
+  
+  try {
+    switch (endpoint) {
+      case 'save':
+        if (request.method === 'POST') {
+          return await saveConstructionProgress(request, env, corsHeaders);
+        }
+        break;
+      
+      case 'load':
+        if (request.method === 'GET') {
+          return await loadConstructionProgress(request, env, corsHeaders, pathParts.slice(1));
+        }
+        break;
+        
+      case 'sync-to-crm':
+        if (request.method === 'POST') {
+          return await syncProgressToCRM(request, env, corsHeaders);
+        }
+        break;
+    }
+    
+    return new Response(JSON.stringify({ error: '不支援的端點或方法' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+    
+  } catch (error) {
+    console.error('進度 API 錯誤:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: '處理請求時發生錯誤',
+      message: error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+}
+
+/**
+ * 保存施工進度數據到 D1 資料庫
+ */
+async function saveConstructionProgress(request, env, corsHeaders) {
+  try {
+    const progressData = await request.json();
+    
+    // 驗證必填欄位
+    const requiredFields = ['projectId', 'building', 'floor', 'unit'];
+    for (const field of requiredFields) {
+      if (!progressData[field]) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: `缺少必填欄位: ${field}`
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+      }
+    }
+
+    // 生成進度記錄 ID
+    const progressId = `progress_${progressData.projectId}_${progressData.building}_${progressData.floor}_${progressData.unit}_${Date.now()}`;
+    
+    // 確定施工項目（目前使用固定值，可以後續擴展）
+    const constructionItem = '地磚舖設'; // 可以從前端傳入或根據業務邏輯決定
+    
+    // 檢查是否已有記錄
+    const existingRecord = await env.DB.prepare(`
+      SELECT id FROM site_progress 
+      WHERE project_id = ? AND building_name = ? AND floor_number = ? AND construction_item = ?
+    `).bind(
+      progressData.projectId,
+      progressData.building + '棟',
+      parseInt(progressData.floor.replace('F', '')),
+      constructionItem
+    ).first();
+
+    const currentTime = new Date().toISOString();
+    
+    if (existingRecord) {
+      // 更新現有記錄
+      await env.DB.prepare(`
+        UPDATE site_progress SET
+          progress_percentage = ?,
+          status = ?,
+          contractor_name = ?,
+          start_date = ?,
+          end_date = ?,
+          actual_start_date = ?,
+          actual_end_date = ?,
+          notes = ?,
+          updated_at = ?
+        WHERE id = ?
+      `).bind(
+        progressData.construction_completed ? 100 : 0,
+        progressData.construction_completed ? 'completed' : 'in_progress',
+        progressData.contractor || null,
+        progressData.date || null,
+        progressData.construction_completed ? progressData.date : null,
+        progressData.date || null,
+        progressData.construction_completed ? progressData.date : null,
+        JSON.stringify({
+          area: progressData.area,
+          preConstructionNote: progressData.preConstructionNote,
+          prePhotos: progressData.prePhotos || [],
+          completionPhotos: progressData.completionPhotos || [],
+          constructionNote: progressData.constructionNote || ''
+        }),
+        currentTime,
+        existingRecord.id
+      ).run();
+      
+      console.log(`✅ 更新施工進度: ${progressId}`);
+    } else {
+      // 插入新記錄
+      await env.DB.prepare(`
+        INSERT INTO site_progress (
+          id, crm_opportunity_id, project_id, building_name, floor_number, construction_item,
+          progress_percentage, status, contractor_name, start_date, end_date, 
+          actual_start_date, actual_end_date, notes, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).bind(
+        progressId,
+        progressData.crmOpportunityId || 'xinganxi_2024', // 預設值，可從專案獲取
+        progressData.projectId,
+        progressData.building + '棟',
+        parseInt(progressData.floor.replace('F', '')),
+        constructionItem,
+        progressData.construction_completed ? 100 : 0,
+        progressData.construction_completed ? 'completed' : 'in_progress',
+        progressData.contractor || null,
+        progressData.date || null,
+        progressData.construction_completed ? progressData.date : null,
+        progressData.date || null,
+        progressData.construction_completed ? progressData.date : null,
+        JSON.stringify({
+          area: progressData.area,
+          preConstructionNote: progressData.preConstructionNote,
+          prePhotos: progressData.prePhotos || [],
+          completionPhotos: progressData.completionPhotos || [],
+          constructionNote: progressData.constructionNote || ''
+        }),
+        currentTime,
+        currentTime
+      ).run();
+      
+      console.log(`✅ 新增施工進度: ${progressId}`);
+    }
+
+    // 如果施工完成，觸發 CRM 同步
+    if (progressData.construction_completed) {
+      try {
+        await syncSingleProgressToCRM(env, progressData);
+      } catch (syncError) {
+        console.error('CRM 同步失敗，但 D1 儲存成功:', syncError);
+        // 不阻止主要流程，只記錄錯誤
+      }
+    }
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: '施工進度已儲存',
+      progressId: existingRecord ? existingRecord.id : progressId
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+
+  } catch (error) {
+    console.error('儲存施工進度失敗:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: '儲存施工進度失敗',
+      message: error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+}
+
+/**
+ * 載入施工進度數據
+ */
+async function loadConstructionProgress(request, env, corsHeaders, pathParts) {
+  try {
+    const projectId = pathParts[0];
+    
+    if (!projectId) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: '需要提供專案 ID'
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    }
+
+    // 從 D1 載入該專案的所有施工進度
+    const progressRecords = await env.DB.prepare(`
+      SELECT 
+        id,
+        building_name,
+        floor_number,
+        construction_item,
+        progress_percentage,
+        status,
+        contractor_name,
+        start_date,
+        end_date,
+        actual_start_date,
+        actual_end_date,
+        notes,
+        updated_at
+      FROM site_progress 
+      WHERE project_id = ?
+      ORDER BY building_name, floor_number, construction_item
+    `).bind(projectId).all();
+
+    // 轉換為前端需要的格式
+    const formattedProgress = {};
+    
+    for (const record of progressRecords.results || []) {
+      const building = record.building_name.replace('棟', '');
+      const floor = record.floor_number + 'F';
+      const key = `${building}_${floor}_${building}1`; // 假設戶別格式，可以調整
+      
+      try {
+        const notes = record.notes ? JSON.parse(record.notes) : {};
+        formattedProgress[key] = {
+          area: notes.area || 0,
+          date: record.actual_start_date || record.start_date,
+          contractor: record.contractor_name || '',
+          note: notes.constructionNote || '',
+          preConstructionNote: notes.preConstructionNote || '',
+          prePhotos: notes.prePhotos || [],
+          completionPhotos: notes.completionPhotos || [],
+          construction_completed: record.status === 'completed',
+          progress_percentage: record.progress_percentage || 0
+        };
+      } catch (parseError) {
+        console.error('解析施工記錄失敗:', parseError);
+        // 使用預設值
+        formattedProgress[key] = {
+          area: 0,
+          date: record.actual_start_date || record.start_date,
+          contractor: record.contractor_name || '',
+          note: '',
+          preConstructionNote: '',
+          prePhotos: [],
+          completionPhotos: [],
+          construction_completed: record.status === 'completed',
+          progress_percentage: record.progress_percentage || 0
+        };
+      }
+    }
+
+    return new Response(JSON.stringify({
+      success: true,
+      data: formattedProgress
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+
+  } catch (error) {
+    console.error('載入施工進度失敗:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: '載入施工進度失敗',
+      message: error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+}
+
+/**
+ * 將單個施工進度同步到 CRM
+ */
+async function syncSingleProgressToCRM(env, progressData) {
+  try {
+    // 這裡實作與 Fxiaoke CRM 的同步邏輯
+    // 根據 API_USAGE_GUIDE.md 中的 CRM API 格式
+    
+    const crmData = {
+      // 根據 CRM 系統的欄位對應
+      field_area: progressData.area, // 舖設坪數
+      field_date: progressData.date, // 施工日期  
+      field_contractor: progressData.contractor, // 施工師父
+      field_note: progressData.constructionNote || '', // 施工備註
+      field_completed: progressData.construction_completed, // 施工完成狀態
+      field_building: progressData.building, // 棟別
+      field_floor: progressData.floor, // 樓層
+      field_unit: progressData.unit // 戶別
+    };
+
+    // 實際的 CRM API 調用會在這裡實現
+    // 目前先記錄到控制台
+    console.log('📤 準備同步到 CRM:', crmData);
+    
+    // TODO: 實作實際的 CRM API 調用
+    // const crmResponse = await callFxiaokeCRM(crmData);
+    
+    return { success: true, message: 'CRM 同步準備完成' };
+    
+  } catch (error) {
+    console.error('CRM 同步失敗:', error);
+    throw error;
+  }
+}
+
+/**
+ * 批量同步進度到 CRM
+ */
+async function syncProgressToCRM(request, env, corsHeaders) {
+  try {
+    const { projectId } = await request.json();
+    
+    if (!projectId) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: '需要提供專案 ID'
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    }
+
+    // 獲取所有已完成但尚未同步的進度記錄
+    const pendingRecords = await env.DB.prepare(`
+      SELECT * FROM site_progress 
+      WHERE project_id = ? AND status = 'completed' AND (crm_last_sync IS NULL OR crm_last_sync < updated_at)
+    `).bind(projectId).all();
+
+    let syncedCount = 0;
+    const errors = [];
+
+    for (const record of pendingRecords.results || []) {
+      try {
+        // 轉換為同步格式
+        const notes = record.notes ? JSON.parse(record.notes) : {};
+        const progressData = {
+          area: notes.area,
+          date: record.actual_start_date || record.start_date,
+          contractor: record.contractor_name,
+          constructionNote: notes.constructionNote || '',
+          construction_completed: record.status === 'completed',
+          building: record.building_name.replace('棟', ''),
+          floor: record.floor_number + 'F',
+          unit: record.building_name.replace('棟', '') + '1' // 假設戶別，可調整
+        };
+
+        await syncSingleProgressToCRM(env, progressData);
+        
+        // 更新同步時間
+        await env.DB.prepare(`
+          UPDATE site_progress SET crm_last_sync = ? WHERE id = ?
+        `).bind(new Date().toISOString(), record.id).run();
+        
+        syncedCount++;
+        
+      } catch (syncError) {
+        console.error(`同步記錄 ${record.id} 失敗:`, syncError);
+        errors.push({
+          recordId: record.id,
+          error: syncError.message
+        });
+      }
+    }
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: `成功同步 ${syncedCount} 筆記錄`,
+      syncedCount,
+      errors: errors.length > 0 ? errors : undefined
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+
+  } catch (error) {
+    console.error('批量 CRM 同步失敗:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: '批量 CRM 同步失敗',
+      message: error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
   }
 }

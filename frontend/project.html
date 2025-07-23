@@ -2550,15 +2550,21 @@
 
             if (existingDetails) {
                 // 有記錄，載入現有資料
-                document.getElementById('constructionArea').value = existingDetails.area;
-                document.getElementById('constructionDate').value = existingDetails.date;
-                document.getElementById('constructionContractor').value = existingDetails.contractor;
-                document.getElementById('constructionNote').value = existingDetails.note || '';
+                const areaEl = document.getElementById('constructionArea');
+                const dateEl = document.getElementById('constructionDate');
+                const contractorEl = document.getElementById('constructionContractor');
+                const noteEl = document.getElementById('constructionNote');
+                
+                if (areaEl) areaEl.value = existingDetails.area;
+                if (dateEl) dateEl.value = existingDetails.date;
+                if (contractorEl) contractorEl.value = existingDetails.contractor;
+                if (noteEl) noteEl.value = existingDetails.note || '';
             } else {
                 // 無記錄，設定預設值
                 // 設定預設日期為今天
                 const today = new Date().toISOString().split('T')[0];
-                document.getElementById('constructionDate').value = today;
+                const dateEl = document.getElementById('constructionDate');
+                if (dateEl) dateEl.value = today;
 
                 // 自動填入施工師傅名稱（格式：公司|角色）
                 let contractorName = '';
@@ -2575,35 +2581,41 @@
                     // 一般成員
                     contractorName = `${currentUser.contractor}|${currentUser.name}`;
                 }
-                document.getElementById('constructionContractor').value = contractorName;
+                const contractorEl = document.getElementById('constructionContractor');
+                if (contractorEl) contractorEl.value = contractorName;
 
                 // 施工前注意事項權限控制
                 const preNoteTextarea = document.getElementById('preConstructionNote');
                 const preNoteInfo = document.getElementById('preNotePermissionInfo');
                 
-                if (currentUser.role === 'admin' || currentUser.role === 'owner') {
-                    // 業主和管理員可以編輯
-                    preNoteTextarea.readOnly = false;
-                    preNoteTextarea.placeholder = '輸入施工前特別注意事項';
-                    preNoteInfo.style.display = 'none';
-                } else {
-                    // 工班人員不能編輯，顯示"無"
-                    preNoteTextarea.readOnly = true;
-                    preNoteTextarea.value = '無';
-                    preNoteTextarea.style.background = '#f5f5f5';
-                    preNoteInfo.style.display = 'block';
+                if (preNoteTextarea) {
+                    if (currentUser.role === 'admin' || currentUser.role === 'owner') {
+                        // 業主和管理員可以編輯
+                        preNoteTextarea.readOnly = false;
+                        preNoteTextarea.placeholder = '輸入施工前特別注意事項';
+                        if (preNoteInfo) preNoteInfo.style.display = 'none';
+                    } else {
+                        // 工班人員不能編輯，顯示"無"
+                        preNoteTextarea.readOnly = true;
+                        preNoteTextarea.value = '無';
+                        preNoteTextarea.style.background = '#f5f5f5';
+                        if (preNoteInfo) preNoteInfo.style.display = 'block';
+                    }
                 }
 
                 // 預設舖設坪數為工地坪數
                 const mockArea = getMockAreaData(building, floor, unit);
-                document.getElementById('constructionArea').value = mockArea;
+                const areaEl = document.getElementById('constructionArea');
+                if (areaEl) areaEl.value = mockArea;
 
                 // 清空其他欄位
                 if (currentUser.role === 'admin' || currentUser.role === 'owner') {
-                    document.getElementById('preConstructionNote').value = '';
+                    const preNoteEl = document.getElementById('preConstructionNote');
+                    if (preNoteEl) preNoteEl.value = '';
                 } else {
                     // 非管理員保持"無"
-                    document.getElementById('preConstructionNote').value = '無';
+                    const preNoteEl = document.getElementById('preConstructionNote');
+                    if (preNoteEl) preNoteEl.value = '無';
                 }
                 clearPhotoPreview('prePhotoPreview');
                 clearPhotoPreview('completionPhotoPreview');
@@ -2648,7 +2660,10 @@
 
         // 切換施工欄位啟用/禁用
         function toggleConstructionFields() {
-            const isCompleted = document.querySelector('input[name="constructionCompleted"]:checked').value === 'true';
+            const completedRadio = document.querySelector('input[name="constructionCompleted"]:checked');
+            if (!completedRadio) return; // 如果沒有選中的單選按鈕，直接返回
+            
+            const isCompleted = completedRadio.value === 'true';
             
             const dateField = document.getElementById('constructionDate');
             const areaField = document.getElementById('constructionArea');
@@ -2656,24 +2671,32 @@
             
             if (isCompleted) {
                 // 啟用編輯
-                dateField.disabled = false;
-                areaField.disabled = false;
-                contractorField.disabled = false;
-                
-                // 清除預設樣式，使其可編輯
-                dateField.style.background = 'white';
-                areaField.style.background = 'white';
-                contractorField.style.background = 'white';
+                if (dateField) {
+                    dateField.disabled = false;
+                    dateField.style.background = 'white';
+                }
+                if (areaField) {
+                    areaField.disabled = false;
+                    areaField.style.background = 'white';
+                }
+                if (contractorField) {
+                    contractorField.disabled = false;
+                    contractorField.style.background = 'white';
+                }
             } else {
                 // 禁用編輯
-                dateField.disabled = true;
-                areaField.disabled = true;
-                contractorField.disabled = true;
-                
-                // 設定預設樣式
-                dateField.style.background = '#f5f5f5';
-                areaField.style.background = '#f5f5f5';
-                contractorField.style.background = '#f5f5f5';
+                if (dateField) {
+                    dateField.disabled = true;
+                    dateField.style.background = '#f5f5f5';
+                }
+                if (areaField) {
+                    areaField.disabled = true;
+                    areaField.style.background = '#f5f5f5';
+                }
+                if (contractorField) {
+                    contractorField.disabled = true;
+                    contractorField.style.background = '#f5f5f5';
+                }
             }
         }
 
@@ -2727,9 +2750,18 @@ ${details.note ? `備註：${details.note}` : ''}
             
             // 只有在施工完成為"是"時才包含施工詳細資料
             if (isCompleted) {
-                const area = document.getElementById('constructionArea').value;
-                const date = document.getElementById('constructionDate').value;
-                const contractor = document.getElementById('constructionContractor').value;
+                const areaEl = document.getElementById('constructionArea');
+                const dateEl = document.getElementById('constructionDate');
+                const contractorEl = document.getElementById('constructionContractor');
+                
+                if (!areaEl || !dateEl || !contractorEl) {
+                    alert('找不到施工資訊輸入欄位，請重新整理頁面');
+                    return;
+                }
+                
+                const area = areaEl.value;
+                const date = dateEl.value;
+                const contractor = contractorEl.value;
                 
                 // 驗證必填欄位
                 if (!area || !date || !contractor) {
@@ -2769,9 +2801,18 @@ ${details.note ? `備註：${details.note}` : ''}
                     }
                 }
 
-                // 儲存施工細節
+                // 儲存施工細節到本地（保持向後兼容）
                 const key = `${currentCell.building}_${currentCell.floor}_${currentCell.unit}`;
                 constructionDetails[key] = { ...constructionDetails[key], ...constructionData };
+
+                // 儲存到 D1 資料庫
+                try {
+                    await saveToDatabase(constructionData);
+                    console.log('✅ 施工資料已儲存到資料庫');
+                } catch (dbError) {
+                    console.error('❌ 資料庫儲存失敗:', dbError);
+                    alert('資料庫儲存失敗，但本地暫存成功。請檢查網路連接。');
+                }
 
                 // 刷新進度網格
                 loadProgressGrid();
@@ -2846,6 +2887,99 @@ ${details.note ? `備註：${details.note}` : ''}
                 });
             }
         });
+
+        // 儲存施工資料到 D1 資料庫
+        async function saveToDatabase(constructionData) {
+            try {
+                // 獲取專案ID
+                const projectId = window.PROJECT_DATA ? window.PROJECT_DATA.id : '';
+                if (!projectId) {
+                    throw new Error('未找到專案ID');
+                }
+
+                // 準備API請求數據
+                const requestData = {
+                    projectId: projectId,
+                    building: constructionData.building,
+                    floor: constructionData.floor,
+                    unit: constructionData.unit,
+                    construction_completed: constructionData.construction_completed,
+                    preConstructionNote: constructionData.preConstructionNote || '',
+                    // 處理照片文件（如果需要的話）
+                    prePhotos: constructionData.prePhotos ? constructionData.prePhotos.length : 0,
+                    completionPhotos: constructionData.completionPhotos ? constructionData.completionPhotos.length : 0
+                };
+
+                // 如果施工完成，包含施工詳細資料
+                if (constructionData.construction_completed) {
+                    requestData.area = constructionData.area;
+                    requestData.date = constructionData.date;
+                    requestData.contractor = constructionData.contractor;
+                    requestData.contractorShortName = constructionData.contractorShortName;
+                    requestData.status = constructionData.status;
+                }
+
+                // 發送請求到 API
+                const response = await fetch('/api/progress/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP錯誤: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('✅ 資料庫儲存成功:', result);
+                    
+                    // 如果需要，可以在這裡觸發CRM同步
+                    if (constructionData.construction_completed && result.shouldSync) {
+                        try {
+                            await syncToCRM(requestData);
+                        } catch (syncError) {
+                            console.warn('⚠️ CRM同步失敗（不影響本地儲存）:', syncError);
+                        }
+                    }
+                    
+                    return result;
+                } else {
+                    throw new Error(result.message || '儲存失敗');
+                }
+                
+            } catch (error) {
+                console.error('❌ saveToDatabase 錯誤:', error);
+                throw new Error(`資料庫儲存失敗: ${error.message}`);
+            }
+        }
+
+        // 同步到 CRM
+        async function syncToCRM(data) {
+            try {
+                const response = await fetch('/api/progress/sync-to-crm', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    console.log('✅ CRM同步成功:', result);
+                } else {
+                    throw new Error(result.message || 'CRM同步失敗');
+                }
+            } catch (error) {
+                console.error('❌ CRM同步錯誤:', error);
+                throw error;
+            }
+        }
 
         // 自動填入簡稱和密碼
         function setupAutoFill() {
