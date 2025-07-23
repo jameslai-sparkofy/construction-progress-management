@@ -414,6 +414,114 @@
             display: block;
         }
 
+        /* Report Modal */
+        .report-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .report-modal.show {
+            display: flex;
+        }
+
+        .report-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .report-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .close-modal:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .report-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .report-stat {
+            background: #f8fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .report-stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2563eb;
+            display: block;
+        }
+
+        .report-stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .header-content {
@@ -443,6 +551,16 @@
 
             .action-btn {
                 width: 100%;
+            }
+
+            .report-content {
+                margin: 1rem;
+                max-width: calc(100% - 2rem);
+                padding: 1.5rem;
+            }
+
+            .report-stats {
+                grid-template-columns: 1fr 1fr;
             }
         }
     </style>
@@ -596,6 +714,19 @@
         </div>
     </div>
 
+    <!-- Report Modal -->
+    <div class="report-modal" id="reportModal">
+        <div class="report-content">
+            <div class="report-header">
+                <h2 class="report-title" id="reportTitle">專案進度報表</h2>
+                <button class="close-modal" onclick="closeReportModal()">×</button>
+            </div>
+            <div id="reportBody">
+                <!-- 報表內容將在這裡動態載入 -->
+            </div>
+        </div>
+    </div>
+
     <script>
         // 全域變數儲存專案數據
         let allProjects = [];
@@ -653,7 +784,7 @@
 
         // 渲染專案列表
         function renderProjects() {
-            const activeTab = document.querySelector('.tab.active').textContent.trim().split(' ')[0];
+            const activeTab = document.querySelector('.tab.active').textContent.trim().split(/\s+/)[0];
             let statusFilter = '';
             
             if (activeTab === '施工中') statusFilter = 'construction';
@@ -791,18 +922,157 @@
         function editProject(projectId) {
             const project = allProjects.find(p => p.id === projectId);
             if (project) {
-                alert(`編輯專案: ${project.name}`);
-                // TODO: 實作編輯功能
+                // 導向專案管理頁面進行編輯
+                window.location.href = `/${projectId}/`;
+            } else {
+                alert('找不到指定的專案');
             }
         }
 
         // View report
-        function viewReport(projectId) {
+        async function viewReport(projectId) {
             const project = allProjects.find(p => p.id === projectId);
-            if (project) {
-                alert(`查看報表: ${project.name}`);
-                // TODO: 實作報表功能
+            if (!project) {
+                alert('找不到指定的專案');
+                return;
             }
+
+            try {
+                // 顯示載入中
+                showReportModal(project, null, true);
+                
+                // 獲取專案詳細進度數據
+                const response = await fetch(`/api/progress/load/${projectId}`);
+                let progressData = null;
+                
+                if (response.ok) {
+                    progressData = await response.json();
+                }
+                
+                // 顯示報表
+                showReportModal(project, progressData, false);
+                
+            } catch (error) {
+                console.error('載入報表數據失敗:', error);
+                alert('載入報表數據失敗，請稍後再試');
+            }
+        }
+
+        // Show report modal
+        function showReportModal(project, progressData, isLoading) {
+            const modal = document.getElementById('reportModal');
+            const title = document.getElementById('reportTitle');
+            const body = document.getElementById('reportBody');
+            
+            title.textContent = `${project.name} - 進度報表`;
+            
+            if (isLoading) {
+                body.innerHTML = `
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                    </div>
+                `;
+            } else {
+                // 生成報表內容
+                body.innerHTML = generateReportContent(project, progressData);
+            }
+            
+            modal.classList.add('show');
+        }
+
+        // Close report modal
+        function closeReportModal() {
+            const modal = document.getElementById('reportModal');
+            modal.classList.remove('show');
+        }
+
+        // Generate report content
+        function generateReportContent(project, progressData) {
+            const totalProgress = project.progress || 0;
+            const startDate = project.startDate || '未設定';
+            const status = getStatusText(project.status);
+            
+            // 基本統計
+            let totalUnits = 0;
+            let completedUnits = 0;
+            let inProgressUnits = 0;
+            let pendingUnits = 0;
+            
+            // 如果有詳細進度數據，計算實際統計
+            if (progressData && progressData.length > 0) {
+                totalUnits = progressData.length;
+                progressData.forEach(item => {
+                    if (item.construction_completed === 1) {
+                        completedUnits++;
+                    } else if (item.progress_percentage > 0) {
+                        inProgressUnits++;
+                    } else {
+                        pendingUnits++;
+                    }
+                });
+            } else {
+                // 使用預設估算
+                totalUnits = estimateProjectUnits(project);
+                completedUnits = Math.floor(totalUnits * totalProgress / 100);
+                inProgressUnits = Math.floor(totalUnits * 0.2);
+                pendingUnits = totalUnits - completedUnits - inProgressUnits;
+            }
+            
+            return `
+                <div class="report-stats">
+                    <div class="report-stat">
+                        <span class="report-stat-value">${totalProgress}%</span>
+                        <div class="report-stat-label">總體進度</div>
+                    </div>
+                    <div class="report-stat">
+                        <span class="report-stat-value">${totalUnits}</span>
+                        <div class="report-stat-label">總單位數</div>
+                    </div>
+                    <div class="report-stat">
+                        <span class="report-stat-value" style="color: #10b981;">${completedUnits}</span>
+                        <div class="report-stat-label">已完成</div>
+                    </div>
+                    <div class="report-stat">
+                        <span class="report-stat-value" style="color: #f59e0b;">${inProgressUnits}</span>
+                        <div class="report-stat-label">進行中</div>
+                    </div>
+                    <div class="report-stat">
+                        <span class="report-stat-value" style="color: #ef4444;">${pendingUnits}</span>
+                        <div class="report-stat-label">待開始</div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <h3 style="color: #374151; margin-bottom: 1rem;">專案資訊</h3>
+                    <div style="background: #f8fafc; padding: 1rem; border-radius: 8px;">
+                        <div style="margin-bottom: 0.5rem;"><strong>專案狀態：</strong>${status}</div>
+                        <div style="margin-bottom: 0.5rem;"><strong>開工日期：</strong>${formatDate(startDate)}</div>
+                        <div style="margin-bottom: 0.5rem;"><strong>建築規模：</strong>${project.buildingInfo || '未設定'}</div>
+                        <div><strong>最後更新：</strong>${new Date().toLocaleDateString('zh-TW')}</div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button onclick="window.open('/${project.id}/', '_blank')" 
+                            style="background: #2563eb; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 500;">
+                        查看詳細進度
+                    </button>
+                </div>
+            `;
+        }
+
+        // Estimate project units based on building info
+        function estimateProjectUnits(project) {
+            const buildingInfo = project.buildingInfo || '';
+            // 簡單的估算邏輯，可以根據實際需求調整
+            const floorMatch = buildingInfo.match(/(\d+)層/);
+            const buildingMatch = buildingInfo.match(/(\d+)棟/);
+            
+            const floors = floorMatch ? parseInt(floorMatch[1]) : 15;
+            const buildings = buildingMatch ? parseInt(buildingMatch[1]) : 3;
+            const unitsPerFloor = 6; // 假設每層6戶
+            
+            return floors * buildings * unitsPerFloor;
         }
 
         // Delete project
@@ -863,6 +1133,13 @@
             } else {
                 emptyState.style.display = 'none';
                 activeContent.querySelector('.table-container').style.display = 'block';
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('reportModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeReportModal();
             }
         });
     </script>

@@ -2029,9 +2029,35 @@
         }
 
         // 載入施工進度網格
-        function loadProgressGrid() {
+        async function loadProgressGrid() {
+            console.log('🔄 開始載入施工進度網格...');
+            
+            // 首先從 D1 資料庫載入已保存的進度數據
+            await loadProgressFromDatabase();
+            
+            console.log('📊 当前建筑物数据:', currentBuilding, progressData[currentBuilding]);
             const building = progressData[currentBuilding];
-            if (!building) return;
+            if (!building) {
+                console.warn('⚠️ 未找到建築物數據:', currentBuilding);
+                // 如果當前建築不存在，切換到第一個可用的建築
+                const availableBuildings = Object.keys(progressData);
+                if (availableBuildings.length > 0) {
+                    currentBuilding = availableBuildings[0];
+                    console.log('🔄 切換到第一個可用建築:', currentBuilding);
+                    const newBuilding = progressData[currentBuilding];
+                    if (newBuilding) {
+                        // 遞迴呼叫，但加上保護機制
+                        if (!loadProgressGrid._recursionDepth) loadProgressGrid._recursionDepth = 0;
+                        if (loadProgressGrid._recursionDepth < 3) {
+                            loadProgressGrid._recursionDepth++;
+                            await loadProgressGrid();
+                            loadProgressGrid._recursionDepth--;
+                            return;
+                        }
+                    }
+                }
+                return;
+            }
             
             const grid = document.getElementById('progressGrid');
             
@@ -2538,9 +2564,14 @@
                 if (floorInfoEl) floorInfoEl.textContent = floor;
                 if (unitInfoEl) unitInfoEl.textContent = unit;
                 
-                // 從API或數據源獲取實際坪數
-                const mockArea = getMockAreaData(building, floor, unit);
-                if (areaInfoEl) areaInfoEl.textContent = mockArea;
+                // 從API獲取實際坪數
+                if (areaInfoEl) areaInfoEl.textContent = '載入中...';
+                getRealAreaData(building, floor, unit).then(area => {
+                    if (areaInfoEl) areaInfoEl.textContent = area;
+                }).catch(error => {
+                    console.error('載入坪數失敗:', error);
+                    if (areaInfoEl) areaInfoEl.textContent = '載入失敗';
+                });
                 
                 console.log('✅ 基本資訊設定完成');
 
@@ -2604,9 +2635,14 @@
                 }
 
                 // 預設舖設坪數為工地坪數
-                const mockArea = getMockAreaData(building, floor, unit);
                 const areaEl = document.getElementById('constructionArea');
-                if (areaEl) areaEl.value = mockArea;
+                if (areaEl) areaEl.value = '載入中...';
+                getRealAreaData(building, floor, unit).then(area => {
+                    if (areaEl) areaEl.value = area;
+                }).catch(error => {
+                    console.error('載入施工面積失敗:', error);
+                    if (areaEl) areaEl.value = '0.00';
+                });
 
                 // 清空其他欄位
                 if (currentUser.role === 'admin' || currentUser.role === 'owner') {
@@ -2825,18 +2861,64 @@ ${details.note ? `備註：${details.note}` : ''}
             }
         });
 
-        // 模擬獲取坪數資料（實際應從API獲取）
+        // 從案場數據獲取真實坪數（從API數據中的field_tXAko__c欄位）
+        async function getRealAreaData(building, floor, unit) {
+            try {
+                console.log(`🔍 獲取坪數資料: ${building}棟 ${floor} ${unit}`);
+                
+                // 構造正確的樓層格式（前端顯示10F，但API中是10.0F）
+                let apiFloor = floor;
+                if (floor.endsWith('F') && !floor.includes('.')) {
+                    const floorNum = floor.replace('F', '');
+                    apiFloor = `${floorNum}.0F`;
+                }
+                
+                // 從API獲取案場數據
+                const response = await fetch('/api/crm/sites/db?opportunity_id=650fe201d184e50001102aee');
+                if (!response.ok) {
+                    console.warn('⚠️ 無法獲取案場數據，使用預設值');
+                    return '0.00';
+                }
+                
+                const result = await response.json();
+                if (!result.success || !result.data) {
+                    console.warn('⚠️ 案場數據格式錯誤');
+                    return '0.00';
+                }
+                
+                // 尋找對應的案場記錄
+                const site = result.data.find(s => 
+                    s.building_type === building && 
+                    s.floor_info === apiFloor && 
+                    s.room_info === unit
+                );
+                
+                if (site && site.raw_data) {
+                    try {
+                        const rawData = JSON.parse(site.raw_data);
+                        const area = rawData.field_tXAko__c; // 工地坪數
+                        if (area) {
+                            console.log(`✅ 找到坪數資料: ${area}`);
+                            return area;
+                        }
+                    } catch (e) {
+                        console.warn('⚠️ 無法解析案場原始數據:', e);
+                    }
+                }
+                
+                console.warn(`⚠️ 未找到 ${building}棟 ${apiFloor} ${unit} 的坪數資料`);
+                return '0.00';
+                
+            } catch (error) {
+                console.error('❌ 獲取坪數資料時發生錯誤:', error);
+                return '0.00';
+            }
+        }
+        
+        // 向後兼容的同步版本（用於不支持async的地方）
         function getMockAreaData(building, floor, unit) {
-            // 這裡可以從field_tXAko__c獲取實際數據
-            const mockAreas = {
-                'A_8F_A1': '11.57',
-                'A_8F_A2': '10.5',
-                'B_4F_B1': '22.1',
-                'B_12F_B5': '8.3',
-                'C_8F_C6': '15.2'
-            };
-            const key = `${building}_${floor}_${unit}`;
-            return mockAreas[key] || '11.57'; // 預設值
+            console.warn('⚠️ 使用同步版本獲取坪數，建議改用getRealAreaData');
+            return '載入中...';
         }
 
         // 清除照片預覽
@@ -3005,8 +3087,265 @@ ${details.note ? `備註：${details.note}` : ''}
             });
         }
 
+        // 載入案場數據並動態構建 progressData
+        async function loadSitesData(projectId) {
+            try {
+                console.log('🏗️ 開始載入案場數據...');
+                
+                // 直接從D1資料庫查詢興安西的案場數據
+                const response = await fetch('/api/crm/sites/db?opportunity_id=650fe201d184e50001102aee');
+                if (!response.ok) {
+                    console.error('❌ 載入案場數據失敗:', response.status);
+                    return;
+                }
+                
+                const sitesResult = await response.json();
+                console.log('📊 API回應:', sitesResult);
+                
+                if (!sitesResult.success || !sitesResult.data) {
+                    console.error('❌ 案場數據格式錯誤:', sitesResult);
+                    return;
+                }
+                
+                // 直接使用查詢結果
+                const xinganxiSites = sitesResult.data;
+                
+                console.log(`🎯 找到 ${xinganxiSites.length} 個興安西案場`);
+                
+                // 重新構建 progressData
+                const newProgressData = {};
+                
+                xinganxiSites.forEach(site => {
+                    const building = site.building_type || 'A'; // 棟別
+                    const floorNumber = parseInt(site.floor_info?.replace('F', '')) || 0; // 樓層數字
+                    const floorStr = `${floorNumber}F`; // 樓層字串
+                    const unit = site.room_info || 'A1'; // 戶別
+                    
+                    // 初始化建築物數據
+                    if (!newProgressData[building]) {
+                        newProgressData[building] = {
+                            name: `${building}棟`,
+                            contractor: '築愛家', // 預設工班
+                            floors: [],
+                            units: [],
+                            progress: {}
+                        };
+                    }
+                    
+                    // 添加樓層
+                    if (!newProgressData[building].floors.includes(floorStr)) {
+                        newProgressData[building].floors.push(floorStr);
+                    }
+                    
+                    // 添加戶別
+                    if (!newProgressData[building].units.includes(unit)) {
+                        newProgressData[building].units.push(unit);
+                    }
+                    
+                    // 初始化進度數據
+                    if (!newProgressData[building].progress[floorStr]) {
+                        newProgressData[building].progress[floorStr] = {};
+                    }
+                    
+                    // 設定預設進度狀態
+                    newProgressData[building].progress[floorStr][unit] = 'pending';
+                });
+                
+                // 排序樓層和戶別
+                Object.keys(newProgressData).forEach(building => {
+                    newProgressData[building].floors.sort((a, b) => {
+                        const aNum = parseInt(a.replace('F', ''));
+                        const bNum = parseInt(b.replace('F', ''));
+                        return aNum - bNum;
+                    });
+                    
+                    newProgressData[building].units.sort();
+                });
+                
+                // 安全地更新 progressData，避免遞迴問題
+                // 先保存 currentBuilding 的狀態
+                const originalBuilding = currentBuilding;
+                
+                // 清除舊數據並設置新數據
+                for (const key in progressData) {
+                    delete progressData[key];
+                }
+                Object.assign(progressData, newProgressData);
+                
+                // 確保 currentBuilding 仍然有效，否則設置為第一個可用建築
+                if (!progressData[originalBuilding] && Object.keys(progressData).length > 0) {
+                    currentBuilding = Object.keys(progressData)[0];
+                    console.log('🔄 已切換當前建築至:', currentBuilding);
+                }
+                
+                console.log('✅ progressData 已更新:', progressData);
+                
+                // 更新建築物標籤，確保包含所有新發現的建築物
+                updateBuildingTabs();
+                
+            } catch (error) {
+                console.error('❌ 載入案場數據時發生錯誤:', error);
+            }
+        }
+
+        // 更新建築物標籤
+        function updateBuildingTabs() {
+            console.log('🏢 更新建築物標籤...');
+            
+            const buildingTabsContainer = document.querySelector('.building-tabs');
+            if (!buildingTabsContainer) {
+                console.warn('⚠️ 未找到建築物標籤容器');
+                return;
+            }
+            
+            // 防止重複更新
+            if (updateBuildingTabs._updating) {
+                console.log('⚠️ 建築物標籤正在更新中，跳過');
+                return;
+            }
+            updateBuildingTabs._updating = true;
+            
+            // 清除現有標籤
+            buildingTabsContainer.innerHTML = '';
+            
+            // 根據 progressData 動態生成標籤
+            const buildings = Object.keys(progressData);
+            buildings.forEach((building, index) => {
+                const buildingData = progressData[building];
+                if (!buildingData || !buildingData.floors) {
+                    console.warn('⚠️ 建築物數據不完整:', building, buildingData);
+                    return;
+                }
+                
+                const tab = document.createElement('button');
+                tab.className = `building-tab${building === currentBuilding ? ' active' : ''}`;
+                tab.id = `building${building}`;
+                tab.textContent = `${building}棟 (${buildingData.floors.length}層)`;
+                tab.onclick = () => switchBuilding(building);
+                
+                buildingTabsContainer.appendChild(tab);
+            });
+            
+            console.log('✅ 建築物標籤已更新');
+            updateBuildingTabs._updating = false;
+        }
+
+        // 從 D1 資料庫載入施工進度數據
+        async function loadProgressFromDatabase() {
+            try {
+                // 獲取專案ID
+                const projectId = window.PROJECT_DATA ? window.PROJECT_DATA.id : '';
+                if (!projectId) {
+                    console.warn('⚠️ 無法載入進度數據：未找到專案ID');
+                    return;
+                }
+
+                // 首先載入案場數據來動態構建 progressData
+                await loadSitesData(projectId);
+
+                // 調用 API 載入進度數據
+                const response = await fetch(`/api/progress/load/${projectId}`);
+                if (!response.ok) {
+                    console.error('❌ 載入進度數據失敗:', response.status);
+                    return;
+                }
+
+                const result = await response.json();
+                if (result.success && result.data) {
+                    // 將 D1 數據整合到本地數據結構中
+                    for (const building in result.data) {
+                        if (result.data[building]) {
+                            // 標準化建築名稱：移除"棟"字，統一使用 A、B、C
+                            const normalizedBuilding = building.replace('棟', '');
+                            
+                            for (const floor in result.data[building]) {
+                                if (result.data[building][floor]) {
+                                    for (const unit in result.data[building][floor]) {
+                                        const progressInfo = result.data[building][floor][unit];
+                                        if (progressInfo) {
+                                            // 更新 constructionDetails - 使用標準化的建築名稱
+                                            const key = `${normalizedBuilding}_${floor}_${unit}`;
+                                            constructionDetails[key] = {
+                                                ...constructionDetails[key],
+                                                area: progressInfo.area,
+                                                date: progressInfo.date,
+                                                contractor: progressInfo.contractor,
+                                                contractorShortName: progressInfo.contractorShortName || progressInfo.contractor?.split('|')[1] || progressInfo.contractor?.slice(-1) || '',
+                                                status: progressInfo.status,
+                                                preConstructionNote: progressInfo.preConstructionNote,
+                                                construction_completed: progressInfo.construction_completed
+                                            };
+
+                                            // 更新 progressData 狀態 - 使用標準化的建築名稱
+                                            if (progressData[normalizedBuilding] && progressData[normalizedBuilding].progress[floor]) {
+                                                progressData[normalizedBuilding].progress[floor][unit] = 
+                                                    progressInfo.construction_completed ? 'completed' : 'in-progress';
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    console.log('✅ 進度數據載入成功');
+                } else {
+                    console.log('ℹ️ 沒有找到已保存的進度數據');
+                }
+            } catch (error) {
+                console.error('❌ 載入進度數據時發生錯誤:', error);
+            }
+        }
+
+        // 初始化項目數據
+        function initializeProjectData() {
+            try {
+                // 從 URL 路徑獲取項目 ID (格式: /{projectId}/)
+                const pathParts = window.location.pathname.split('/').filter(Boolean);
+                if (pathParts.length > 0) {
+                    const projectSlug = pathParts[0];
+                    // 解析項目 slug (格式: projectName-token)
+                    const [projectName, token] = projectSlug.split('-');
+                    
+                    if (projectName && token) {
+                        // 設置全域項目數據
+                        window.PROJECT_DATA = {
+                            id: projectSlug,
+                            name: projectName,
+                            token: token
+                        };
+                        
+                        console.log('✅ 項目數據初始化成功:', window.PROJECT_DATA);
+                        return true;
+                    }
+                }
+                
+                console.error('❌ 無法從 URL 獲取項目 ID');
+                // 設置預設項目數據用於測試
+                window.PROJECT_DATA = {
+                    id: 'xinganxi-abc123def456',
+                    name: 'xinganxi',
+                    token: 'abc123def456'
+                };
+                console.log('⚠️ 使用預設項目數據:', window.PROJECT_DATA);
+                return false;
+                
+            } catch (error) {
+                console.error('❌ 初始化項目數據失敗:', error);
+                // 設置預設項目數據
+                window.PROJECT_DATA = {
+                    id: 'xinganxi-abc123def456',
+                    name: 'xinganxi', 
+                    token: 'abc123def456'
+                };
+                return false;
+            }
+        }
+
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
+            // 從 URL 獲取項目 ID 並設置到全域變數
+            initializeProjectData();
+            
             // 檢查是否有已儲存的登入狀態
             if (!checkStoredLogin()) {
                 // 如果沒有儲存的登入狀態，顯示登入頁面

@@ -249,8 +249,8 @@ async function getAllProjects(env) {
         p.floor_count as floorCount,
         p.status,
         p.created_at as createdAt,
-        p.start_date as startDate,
-        p.completion_date as completionDate,
+        NULL as startDate,
+        NULL as completionDate,
         COALESCE(
           ROUND(
             (SELECT AVG(pr.progress_percentage) 
@@ -285,8 +285,8 @@ async function getProjectBySlug(env, slug) {
         p.floor_count as floorCount,
         p.status,
         p.created_at as createdAt,
-        p.start_date as startDate,
-        p.completion_date as completionDate,
+        NULL as startDate,
+        NULL as completionDate,
         COALESCE(
           ROUND(
             (SELECT AVG(pr.progress_percentage) 
@@ -353,6 +353,26 @@ async function createNewProject(env, projectData) {
 
     // 儲存專案到 KV
     await env.PROJECTS.put(`project:${projectId}`, JSON.stringify(project));
+    
+    // 儲存專案到 D1 資料庫
+    await env.DB.prepare(`
+      INSERT INTO projects (
+        id, crm_opportunity_id, name, slug, token, description, 
+        building_count, floor_count, status, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      projectId,
+      projectData.crmOpportunityId || '',
+      project.name,
+      project.slug,
+      token,
+      project.description,
+      project.buildingCount,
+      project.floorCount,
+      project.status,
+      project.created,
+      project.lastUpdated
+    ).run();
     
     // 更新專案列表
     await updateProjectsList(env, project);
@@ -2405,7 +2425,12 @@ async function handleCRMAPI(request, env, pathParts) {
     case 'sales-records':
       return await handleSalesRecordsAPI(request, env, corsHeaders);
     case 'sites':
-      return await handleSitesAPI(request, env, corsHeaders);
+      // 檢查是否為從D1查詢案場
+      if (pathParts[1] === 'db') {
+        return await handleSitesFromDBAPI(request, env, corsHeaders);
+      } else {
+        return await handleSitesAPI(request, env, corsHeaders);
+      }
     case 'maintenance-orders':
       return await handleMaintenanceOrdersAPI(request, env, corsHeaders);
     default:
@@ -3514,7 +3539,7 @@ async function insertSitesToD1(env, sitesData) {
           floor_info, room_info, create_time, update_time, synced_at, raw_data
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
-        site.id,
+        site.id || site._id,
         site.name,
         rawData.field_1P96q__c || '', // 商機關聯
         '', // address - 暫時空白
@@ -3537,6 +3562,55 @@ async function insertSitesToD1(env, sitesData) {
   } catch (error) {
     console.error('❌ D1插入失敗:', error);
     throw new Error(`D1插入失敗: ${error.message}`);
+  }
+}
+
+/**
+ * 處理從D1資料庫查詢案場 API
+ */
+async function handleSitesFromDBAPI(request, env, corsHeaders) {
+  if (request.method !== 'GET') {
+    return new Response(JSON.stringify({ error: '僅支援 GET 請求' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+  
+  try {
+    const url = new URL(request.url);
+    const opportunityId = url.searchParams.get('opportunity_id');
+    
+    let query = 'SELECT * FROM sites';
+    let params = [];
+    
+    if (opportunityId) {
+      query += ' WHERE opportunity_id = ?';
+      params.push(opportunityId);
+    }
+    
+    query += ' ORDER BY building_type, CAST(REPLACE(floor_info, "F", "") AS INTEGER), room_info';
+    
+    const stmt = env.DB.prepare(query);
+    const result = await stmt.bind(...params).all();
+    
+    return new Response(JSON.stringify({
+      success: true,
+      data: result.results || [],
+      count: result.results?.length || 0
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+    
+  } catch (error) {
+    console.error('❌ 從D1查詢案場數據失敗:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      data: []
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
   }
 }
 
@@ -4005,8 +4079,8 @@ async function saveConstructionProgress(request, env, corsHeaders) {
       WHERE project_id = ? AND building_name = ? AND floor_number = ? AND construction_item = ?
     `).bind(
       progressData.projectId,
-      progressData.building + '棟',
-      parseInt(progressData.floor.replace('F', '')),
+      progressData.building,
+      typeof progressData.floor === 'string' ? parseInt(progressData.floor.replace('F', '')) : parseInt(progressData.floor),
       constructionItem
     ).first();
 
@@ -4036,6 +4110,7 @@ async function saveConstructionProgress(request, env, corsHeaders) {
         progressData.construction_completed ? progressData.date : null,
         JSON.stringify({
           area: progressData.area,
+          unit: progressData.unit, // 保存戶別信息
           preConstructionNote: progressData.preConstructionNote,
           prePhotos: progressData.prePhotos || [],
           completionPhotos: progressData.completionPhotos || [],
@@ -4058,8 +4133,8 @@ async function saveConstructionProgress(request, env, corsHeaders) {
         progressId,
         progressData.crmOpportunityId || 'xinganxi_2024', // 預設值，可從專案獲取
         progressData.projectId,
-        progressData.building + '棟',
-        parseInt(progressData.floor.replace('F', '')),
+        progressData.building,
+        typeof progressData.floor === 'string' ? parseInt(progressData.floor.replace('F', '')) : parseInt(progressData.floor),
         constructionItem,
         progressData.construction_completed ? 100 : 0,
         progressData.construction_completed ? 'completed' : 'in_progress',
@@ -4070,6 +4145,7 @@ async function saveConstructionProgress(request, env, corsHeaders) {
         progressData.construction_completed ? progressData.date : null,
         JSON.stringify({
           area: progressData.area,
+          unit: progressData.unit, // 保存戶別信息
           preConstructionNote: progressData.preConstructionNote,
           prePhotos: progressData.prePhotos || [],
           completionPhotos: progressData.completionPhotos || [],
@@ -4082,14 +4158,14 @@ async function saveConstructionProgress(request, env, corsHeaders) {
       console.log(`✅ 新增施工進度: ${progressId}`);
     }
 
-    // 如果施工完成，觸發 CRM 同步
-    if (progressData.construction_completed) {
-      try {
-        await syncSingleProgressToCRM(env, progressData);
-      } catch (syncError) {
-        console.error('CRM 同步失敗，但 D1 儲存成功:', syncError);
-        // 不阻止主要流程，只記錄錯誤
-      }
+    // D1 有變動就自動同步到 FXIAOKE（不管完成狀態如何）
+    try {
+      console.log('🔄 觸發 D1 → FXIAOKE 即時同步...');
+      await syncSingleProgressToCRM(env, progressData);
+      console.log('✅ D1 → FXIAOKE 同步成功');
+    } catch (syncError) {
+      console.error('❌ CRM 同步失敗，但 D1 儲存成功:', syncError);
+      // 不阻止主要流程，只記錄錯誤
     }
 
     return new Response(JSON.stringify({
@@ -4151,17 +4227,32 @@ async function loadConstructionProgress(request, env, corsHeaders, pathParts) {
       ORDER BY building_name, floor_number, construction_item
     `).bind(projectId).all();
 
-    // 轉換為前端需要的格式
+    // 轉換為前端需要的格式 - 按建築/樓層/戶別分組
     const formattedProgress = {};
     
     for (const record of progressRecords.results || []) {
-      const building = record.building_name.replace('棟', '');
+      const building = record.building_name;
       const floor = record.floor_number + 'F';
-      const key = `${building}_${floor}_${building}1`; // 假設戶別格式，可以調整
+      // 從 notes 中解析戶別信息，如果沒有則使用預設格式
+      let unit = '';
+      try {
+        const notes = record.notes ? JSON.parse(record.notes) : {};
+        unit = notes.unit || `${building}1`; // 預設戶別格式
+      } catch (e) {
+        unit = `${building}1`; // 解析失敗時使用預設格式
+      }
+      
+      // 確保有正確的建築分組結構
+      if (!formattedProgress[building]) {
+        formattedProgress[building] = {};
+      }
+      if (!formattedProgress[building][floor]) {
+        formattedProgress[building][floor] = {};
+      }
       
       try {
         const notes = record.notes ? JSON.parse(record.notes) : {};
-        formattedProgress[key] = {
+        formattedProgress[building][floor][unit] = {
           area: notes.area || 0,
           date: record.actual_start_date || record.start_date,
           contractor: record.contractor_name || '',
@@ -4175,7 +4266,7 @@ async function loadConstructionProgress(request, env, corsHeaders, pathParts) {
       } catch (parseError) {
         console.error('解析施工記錄失敗:', parseError);
         // 使用預設值
-        formattedProgress[key] = {
+        formattedProgress[building][floor][unit] = {
           area: 0,
           date: record.actual_start_date || record.start_date,
           contractor: record.contractor_name || '',
@@ -4214,32 +4305,87 @@ async function loadConstructionProgress(request, env, corsHeaders, pathParts) {
  */
 async function syncSingleProgressToCRM(env, progressData) {
   try {
-    // 這裡實作與 Fxiaoke CRM 的同步邏輯
-    // 根據 API_USAGE_GUIDE.md 中的 CRM API 格式
+    console.log('🔄 開始同步施工進度到 FXIAOKE CRM...');
     
+    // 獲取 FXIAOKE Token
+    const tokenResult = await getFxiaokeToken();
+    if (!tokenResult.success) {
+      throw new Error(`獲取 FXIAOKE Token 失敗: ${tokenResult.error}`);
+    }
+
+    const { token, corpId, userId } = tokenResult;
+    console.log('✅ FXIAOKE Token 獲取成功');
+
+    // 準備同步到案場對象 (object_8W9cb__c) 的數據
     const crmData = {
-      // 根據 CRM 系統的欄位對應
-      field_area: progressData.area, // 舖設坪數
-      field_date: progressData.date, // 施工日期  
-      field_contractor: progressData.contractor, // 施工師父
-      field_note: progressData.constructionNote || '', // 施工備註
-      field_completed: progressData.construction_completed, // 施工完成狀態
-      field_building: progressData.building, // 棟別
-      field_floor: progressData.floor, // 樓層
-      field_unit: progressData.unit // 戶別
+      // 根據案場對象的欄位結構
+      construction_completed__c: progressData.construction_completed ? 1 : 0, // 施工完成狀態
+      field_area__c: progressData.area, // 舖設坪數 (需要確認欄位名)
+      field_date__c: progressData.date, // 施工日期 (需要確認欄位名)
+      field_contractor__c: progressData.contractor, // 施工師父 (需要確認欄位名)
+      field_progress_note__c: progressData.preConstructionNote || '', // 施工備註
+      field_building__c: progressData.building, // 棟別
+      field_floor__c: progressData.floor, // 樓層
+      field_unit__c: progressData.unit, // 戶別
+      last_modified_time: Date.now()
     };
 
-    // 實際的 CRM API 調用會在這裡實現
-    // 目前先記錄到控制台
-    console.log('📤 準備同步到 CRM:', crmData);
+    console.log('📤 準備同步數據到 CRM:', crmData);
+
+    const CONFIG = { baseUrl: "https://open.fxiaoke.com" };
     
-    // TODO: 實作實際的 CRM API 調用
-    // const crmResponse = await callFxiaokeCRM(crmData);
-    
-    return { success: true, message: 'CRM 同步準備完成' };
+    // 方案1: 創建施工跟進記錄到跟進記錄對象 (ActiveRecordObj)
+    // 因為案場對象的更新需要具體的記錄ID，這裡選擇創建跟進記錄
+    const recordData = {
+      related_object: "object_8W9cb__c", // 關聯到案場對象
+      name: `施工進度更新 - ${progressData.building}${progressData.floor}${progressData.unit}`,
+      content: `
+建築：${progressData.building}
+樓層：${progressData.floor}  
+戶別：${progressData.unit}
+舖設坪數：${progressData.area} 坪
+施工日期：${progressData.date}
+施工師父：${progressData.contractor}
+完成狀態：${progressData.construction_completed ? '已完成' : '進行中'}
+施工備註：${progressData.preConstructionNote || '無'}
+      `.trim(),
+      external_display: "顯示", // 根據需求顯示
+      create_time: Date.now()
+    };
+
+    console.log('📤 創建施工跟進記錄:', recordData);
+
+    // 調用 FXIAOKE 銷售記錄 API (ActiveRecordObj)
+    const response = await fetch(`${CONFIG.baseUrl}/cgi/crm/v2/data/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        corpId: corpId,
+        corpAccessToken: token,
+        currentOpenUserId: userId,
+        data: {
+          apiName: "ActiveRecordObj", // 銷售記錄對象
+          dataObjectList: [recordData]
+        }
+      })
+    });
+
+    const result = await response.json();
+    console.log('📡 CRM API 響應:', result);
+
+    if (result.errorCode !== 0) {
+      throw new Error(`CRM 同步失敗: ${result.errorMessage}`);
+    }
+
+    console.log('✅ 施工進度已成功同步到 FXIAOKE CRM');
+    return { 
+      success: true, 
+      message: 'CRM 同步成功',
+      crmResponse: result
+    };
     
   } catch (error) {
-    console.error('CRM 同步失敗:', error);
+    console.error('❌ CRM 同步失敗:', error);
     throw error;
   }
 }
@@ -4280,9 +4426,9 @@ async function syncProgressToCRM(request, env, corsHeaders) {
           contractor: record.contractor_name,
           constructionNote: notes.constructionNote || '',
           construction_completed: record.status === 'completed',
-          building: record.building_name.replace('棟', ''),
+          building: record.building_name,
           floor: record.floor_number + 'F',
-          unit: record.building_name.replace('棟', '') + '1' // 假設戶別，可調整
+          unit: record.building_name + '1' // 假設戶別，可調整
         };
 
         await syncSingleProgressToCRM(env, progressData);
