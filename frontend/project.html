@@ -1192,6 +1192,104 @@
                 flex: 1;
             }
         }
+
+        /* Loading 對話框樣式 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .loading-dialog {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 16px;
+            color: #333;
+            margin: 0;
+        }
+
+        /* 成功/錯誤對話框樣式 */
+        .result-dialog {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .result-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .result-icon.success {
+            color: #28a745;
+        }
+
+        .result-icon.error {
+            color: #dc3545;
+        }
+
+        .result-message {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .result-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+
+        .result-button:hover {
+            background: #0056b3;
+        }
+
+        .result-button.error {
+            background: #dc3545;
+        }
+
+        .result-button.error:hover {
+            background: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -1495,6 +1593,9 @@
                     </div>
                     <div class="location-item">
                         <span class="label">坪數：</span><span id="areaInfo">11.57</span>
+                    </div>
+                    <div class="location-item">
+                        <span class="label">ID：</span><span id="siteIdInfo">XXXX</span>
                     </div>
                 </div>
             </div>
@@ -2559,18 +2660,29 @@
                 const floorInfoEl = document.getElementById('floorInfo');
                 const unitInfoEl = document.getElementById('unitInfo');
                 const areaInfoEl = document.getElementById('areaInfo');
+                const siteIdInfoEl = document.getElementById('siteIdInfo');
                 
                 if (buildingInfoEl) buildingInfoEl.textContent = building + '棟';
                 if (floorInfoEl) floorInfoEl.textContent = floor;
                 if (unitInfoEl) unitInfoEl.textContent = unit;
                 
-                // 從API獲取實際坪數
+                // 從API獲取實際坪數和案場ID
                 if (areaInfoEl) areaInfoEl.textContent = '載入中...';
+                if (siteIdInfoEl) siteIdInfoEl.textContent = '載入中...';
+                
                 getRealAreaData(building, floor, unit).then(area => {
                     if (areaInfoEl) areaInfoEl.textContent = area;
                 }).catch(error => {
                     console.error('載入坪數失敗:', error);
                     if (areaInfoEl) areaInfoEl.textContent = '載入失敗';
+                });
+                
+                // 獲取案場ID
+                getSiteId(building, floor, unit).then(siteId => {
+                    if (siteIdInfoEl) siteIdInfoEl.textContent = siteId;
+                }).catch(error => {
+                    console.error('載入案場ID失敗:', error);
+                    if (siteIdInfoEl) siteIdInfoEl.textContent = '載入失敗';
                 });
                 
                 console.log('✅ 基本資訊設定完成');
@@ -2812,13 +2924,15 @@ ${details.note ? `備註：${details.note}` : ''}
                 constructionData.status = 'completed';
             }
 
+            // 顯示 loading 畫面
+            showLoadingDialog('正在提交施工記錄...');
+            
             try {
-                // 這裡應該調用實際的API
-                // await updateConstructionRecord(constructionData);
-                
-                // 模擬API調用成功
                 console.log('施工記錄提交:', constructionData);
-                alert('施工記錄已成功提交！');
+
+                // 儲存到 D1 資料庫
+                await saveToDatabase(constructionData);
+                console.log('✅ 施工資料已儲存到資料庫');
 
                 // 更新本地進度數據
                 const buildingData = progressData[currentCell.building];
@@ -2841,14 +2955,9 @@ ${details.note ? `備註：${details.note}` : ''}
                 const key = `${currentCell.building}_${currentCell.floor}_${currentCell.unit}`;
                 constructionDetails[key] = { ...constructionDetails[key], ...constructionData };
 
-                // 儲存到 D1 資料庫
-                try {
-                    await saveToDatabase(constructionData);
-                    console.log('✅ 施工資料已儲存到資料庫');
-                } catch (dbError) {
-                    console.error('❌ 資料庫儲存失敗:', dbError);
-                    alert('資料庫儲存失敗，但本地暫存成功。請檢查網路連接。');
-                }
+                // 隱藏 loading 畫面並顯示成功訊息
+                hideLoadingDialog();
+                showSuccessDialog('施工記錄已成功提交！');
 
                 // 刷新進度網格
                 loadProgressGrid();
@@ -2857,9 +2966,67 @@ ${details.note ? `備註：${details.note}` : ''}
                 closeConstructionModal();
             } catch (error) {
                 console.error('提交施工記錄失敗:', error);
-                alert('提交失敗，請稍後重試');
+                // 隱藏 loading 畫面並顯示錯誤訊息
+                hideLoadingDialog();
+                showErrorDialog('提交失敗：' + (error.message || '請稍後重試'));
             }
         });
+
+        // 獲取案場ID
+        async function getSiteId(building, floor, unit) {
+            try {
+                console.log(`🔍 獲取案場ID: ${building}棟 ${floor} ${unit}`);
+                
+                // 構造正確的樓層格式（前端顯示10F，但API中是10.0F）
+                let apiFloor = floor;
+                if (floor.endsWith('F') && !floor.includes('.')) {
+                    const floorNum = floor.replace('F', '');
+                    apiFloor = `${floorNum}.0F`;
+                }
+                
+                // 獲取當前專案的商機ID
+                const currentOpportunityId = window.currentProject?.opportunityId || '650fe201d184e50001102aee';
+                
+                // 從API獲取案場數據
+                const response = await fetch(`/api/crm/sites/db?opportunity_id=${currentOpportunityId}`);
+                if (!response.ok) {
+                    console.warn('⚠️ 無法獲取案場數據');
+                    return 'N/A';
+                }
+                
+                const result = await response.json();
+                if (!result.success || !result.data) {
+                    console.warn('⚠️ 案場數據格式錯誤');
+                    return 'N/A';
+                }
+                
+                // 尋找對應的案場記錄 - 支援多種欄位格式
+                const site = result.data.find(s => {
+                    const buildingMatch = s.building_type === building || s.building === building;
+                    const floorMatch = s.floor_info === apiFloor || s.floor_info === floor || 
+                                      s.floor === parseInt(floor.replace('F', ''));
+                    const unitMatch = s.room_info === unit || s.unit === unit;
+                    
+                    console.log(`🔍 比對案場: building=${s.building_type}/${s.building} floor=${s.floor_info}/${s.floor} unit=${s.room_info}/${s.unit}`);
+                    console.log(`📝 查找條件: building=${building} floor=${floor}/${apiFloor} unit=${unit}`);
+                    
+                    return buildingMatch && floorMatch && unitMatch;
+                });
+                
+                if (site && (site._id || site.id)) {
+                    const siteId = site._id || site.id;
+                    console.log(`✅ 找到案場ID: ${siteId}`);
+                    return siteId;
+                }
+                
+                console.warn(`⚠️ 未找到 ${building}棟 ${apiFloor} ${unit} 的案場ID`);
+                return 'N/A';
+                
+            } catch (error) {
+                console.error('❌ 獲取案場ID時發生錯誤:', error);
+                return 'ERROR';
+            }
+        }
 
         // 從案場數據獲取真實坪數（從API數據中的field_tXAko__c欄位）
         async function getRealAreaData(building, floor, unit) {
@@ -2979,6 +3146,26 @@ ${details.note ? `備註：${details.note}` : ''}
                     throw new Error('未找到專案ID');
                 }
 
+                // 處理照片轉換為 base64
+                const prePhotoBase64 = [];
+                const completionPhotoBase64 = [];
+                
+                // 轉換施工前照片
+                if (constructionData.prePhotos && constructionData.prePhotos.length > 0) {
+                    for (const file of constructionData.prePhotos) {
+                        const base64 = await fileToBase64(file);
+                        prePhotoBase64.push(base64);
+                    }
+                }
+                
+                // 轉換完工照片
+                if (constructionData.completionPhotos && constructionData.completionPhotos.length > 0) {
+                    for (const file of constructionData.completionPhotos) {
+                        const base64 = await fileToBase64(file);
+                        completionPhotoBase64.push(base64);
+                    }
+                }
+                
                 // 準備API請求數據
                 const requestData = {
                     projectId: projectId,
@@ -2987,9 +3174,9 @@ ${details.note ? `備註：${details.note}` : ''}
                     unit: constructionData.unit,
                     construction_completed: constructionData.construction_completed,
                     preConstructionNote: constructionData.preConstructionNote || '',
-                    // 處理照片文件（如果需要的話）
-                    prePhotos: constructionData.prePhotos ? constructionData.prePhotos.length : 0,
-                    completionPhotos: constructionData.completionPhotos ? constructionData.completionPhotos.length : 0
+                    // 傳送實際的照片數據而不只是數量
+                    prePhotos: prePhotoBase64,
+                    completionPhotos: completionPhotoBase64
                 };
 
                 // 如果施工完成，包含施工詳細資料
@@ -3011,8 +3198,14 @@ ${details.note ? `備註：${details.note}` : ''}
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `HTTP錯誤: ${response.status}`);
+                    let errorMessage = `HTTP錯誤: ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.message || errorMessage;
+                    } catch (e) {
+                        // 無法解析錯誤響應，使用默認錯誤訊息
+                    }
+                    throw new Error(errorMessage);
                 }
 
                 const result = await response.json();
@@ -3036,10 +3229,27 @@ ${details.note ? `備註：${details.note}` : ''}
                 
             } catch (error) {
                 console.error('❌ saveToDatabase 錯誤:', error);
-                throw new Error(`資料庫儲存失敗: ${error.message}`);
+                // 如果錯誤已經是清楚的訊息，直接使用；否則包裝
+                if (error.message.includes('資料庫儲存失敗') || 
+                    error.message.includes('HTTP錯誤') ||
+                    error.message.includes('未找到專案ID')) {
+                    throw error;
+                } else {
+                    throw new Error(`資料庫儲存失敗: ${error.message}`);
+                }
             }
         }
 
+        // 將文件轉換為 base64
+        async function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+        
         // 同步到 CRM
         async function syncToCRM(data) {
             try {
@@ -3339,6 +3549,76 @@ ${details.note ? `備註：${details.note}` : ''}
                 };
                 return false;
             }
+        }
+
+        // Loading 對話框函數
+        function showLoadingDialog(message) {
+            // 移除可能存在的舊對話框
+            hideLoadingDialog();
+            hideResultDialog();
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'loading-overlay';
+            overlay.id = 'loadingOverlay';
+            
+            overlay.innerHTML = `
+                <div class="loading-dialog">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">${message}</p>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+        }
+        
+        function hideLoadingDialog() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+        
+        function showSuccessDialog(message) {
+            showResultDialog(message, 'success');
+        }
+        
+        function showErrorDialog(message) {
+            showResultDialog(message, 'error');
+        }
+        
+        function showResultDialog(message, type) {
+            // 移除可能存在的舊對話框
+            hideResultDialog();
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'loading-overlay';
+            overlay.id = 'resultOverlay';
+            
+            const icon = type === 'success' ? '✓' : '✗';
+            const buttonClass = type === 'error' ? 'error' : '';
+            
+            overlay.innerHTML = `
+                <div class="result-dialog">
+                    <div class="result-icon ${type}">${icon}</div>
+                    <p class="result-message">${message}</p>
+                    <button class="result-button ${buttonClass}" onclick="handleResultDialogClose()">
+                        確定
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+        }
+        
+        function hideResultDialog() {
+            const overlay = document.getElementById('resultOverlay');
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+        
+        function handleResultDialogClose() {
+            hideResultDialog();
         }
 
         // 初始化
