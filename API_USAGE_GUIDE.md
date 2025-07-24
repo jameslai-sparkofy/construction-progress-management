@@ -184,6 +184,73 @@ LIMIT 100;
 2. 如果本地無結果，回退到 CRM API 搜尋
 3. 支援強制 API 搜尋: `?force_api=true`
 
+## CRM 數據寫入功能
+
+### 案場對象更新 (自定義對象)
+案場對象 API Name: `object_8W9cb__c`
+
+#### 完整更新流程
+```javascript
+// 1. 獲取企業訪問令牌
+const tokenResponse = await fetch(`${CONFIG.baseUrl}/cgi/corpAccessToken/get/V2`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        appId: CONFIG.appId,
+        appSecret: CONFIG.appSecret,
+        permanentCode: CONFIG.permanentCode
+    })
+});
+
+// 2. 獲取用戶信息
+const userResponse = await fetch(`${CONFIG.baseUrl}/cgi/user/getByMobile`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        corpId: corpId,
+        corpAccessToken: token,
+        mobile: "17675662629"
+    })
+});
+
+// 3. 更新案場自定義欄位
+const updateResponse = await fetch(`${CONFIG.baseUrl}/cgi/crm/custom/v2/data/update`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        corpAccessToken: token,
+        corpId: corpId,
+        currentOpenUserId: userId,
+        data: {
+            object_data: {
+                dataObjectApiName: "object_8W9cb__c",  // 案場對象
+                _id: "案場ID",
+                field_u1wpv__c: "更新的值"  // 自定義欄位
+            }
+        },
+        triggerWorkFlow: false  // 不觸發工作流
+    })
+});
+```
+
+#### 測試記錄 (2025-07-24)
+- **測試案場ID**: `6621c7a2eb4c7f0001817f67`
+- **更新欄位**: `field_u1wpv__c`
+- **更新值**: `TEST`
+- **結果**: ✅ 成功 (`errorCode: 0, errorMessage: "OK"`)
+
+#### 測試腳本
+完整測試腳本已保存為 `test_crm_update.js`，包含：
+- Token 獲取
+- 用戶驗證
+- 案場欄位更新
+- 錯誤處理
+
+### API 端點說明
+- **自定義對象更新**: `POST /cgi/crm/custom/v2/data/update`
+- **標準對象更新**: `POST /cgi/crm/v2/data/update`
+- **頻次限制**: 100次/20秒
+
 ## 常用指令記錄
 
 ```bash
@@ -201,6 +268,9 @@ npx wrangler d1 execute construction_progress --env production --command "SELECT
 
 # 觸發定時同步 (測試用)
 curl -X POST "https://progress.yes-ceramics.com/api/sync/opportunities"
+
+# 測試 CRM 寫入功能
+node test_crm_update.js
 ```
 
 ## 注意事項

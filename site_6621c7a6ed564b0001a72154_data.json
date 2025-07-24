@@ -1,0 +1,183 @@
+{
+  "shift_time__c": "築愛家有限公司",
+  "created_by__r": {
+    "picAddr": "N_202310_05_4c8f70e1b83f488e99c8626b438418d1",
+    "description": "",
+    "dept": "1003",
+    "empNum": "00002",
+    "modifyTime": 1733371988316,
+    "post": "",
+    "createTime": 1693202085819,
+    "phone": "",
+    "name": "賴俊穎",
+    "nickname": "賴俊穎",
+    "tenantId": "781014",
+    "id": "1000",
+    "email": "",
+    "status": 0
+  },
+  "owner_department_id": "1003",
+  "total_num": 3942,
+  "owner_department": "管理部",
+  "field_k7e6q__c__r": "勝興-興安西段-A棟多戶",
+  "lock_status": "0",
+  "data_own_department__r": {
+    "deptName": "管理部",
+    "leaderUserId": "1000",
+    "deptId": "1003",
+    "deptType": "dept",
+    "parentId": "999999",
+    "status": 0
+  },
+  "create_time": 1713489830130,
+  "field_1P96q__c__r": "勝興-興安西-2024",
+  "field_npLvn__c__relation_ids": "67ca709b7afff800016b9343",
+  "version": "10",
+  "created_by": [
+    "FSUID_F8E5C73533927249281F06800BC975AA"
+  ],
+  "relevant_team": [
+    {
+      "teamMemberEmployee": [
+        "FSUID_F8E5C73533927249281F06800BC975AA"
+      ],
+      "teamMemberType": "0",
+      "teamMemberRole": "1",
+      "teamMemberPermissionType": "2",
+      "teamMemberDeptCascade": "0"
+    }
+  ],
+  "data_own_department": [
+    "1003"
+  ],
+  "field_B2gh1__c": "17.85",
+  "name": "24-04-19-1051",
+  "field_i2Q1g__c": "-0.30",
+  "_id": "6621c7a6ed564b0001a72154",
+  "data_own_department__l": [
+    {
+      "parentId": "999999",
+      "deptId": "1003",
+      "deptName": "管理部",
+      "leaderUserId": "1000",
+      "status": 0,
+      "deptType": "dept"
+    }
+  ],
+  "field_WD7k1__c": "A",
+  "field_npLvn__c": "67ca709b7afff800016b9343",
+  "lock_status__r": "未锁定",
+  "is_deleted": false,
+  "owner__l": [
+    {
+      "id": "1000",
+      "tenantId": "781014",
+      "name": "賴俊穎",
+      "picAddr": "N_202310_05_4c8f70e1b83f488e99c8626b438418d1",
+      "email": "",
+      "nickname": "賴俊穎",
+      "phone": "",
+      "description": "",
+      "status": 0,
+      "createTime": 1693202085819,
+      "modifyTime": 1733371988316,
+      "dept": "1003",
+      "post": "",
+      "empNum": "00002"
+    }
+  ],
+  "field_npLvn__c__r": "勝興-興安西段-A棟多戶-築愛家",
+  "relevant_team__r": "賴俊穎",
+  "shift_time__c__v": "66ff5c7270343b0001f80476",
+  "field_23Z5i__c__r": "已完工",
+  "owner__r": {
+    "picAddr": "N_202310_05_4c8f70e1b83f488e99c8626b438418d1",
+    "description": "",
+    "dept": "1003",
+    "empNum": "00002",
+    "modifyTime": 1733371988316,
+    "post": "",
+    "createTime": 1693202085819,
+    "phone": "",
+    "name": "賴俊穎",
+    "nickname": "賴俊穎",
+    "tenantId": "781014",
+    "id": "1000",
+    "email": "",
+    "status": 0
+  },
+  "owner": [
+    "FSUID_F8E5C73533927249281F06800BC975AA"
+  ],
+  "field_k7e6q__c__relation_ids": "68786fa95450af000105de5e",
+  "last_modified_time": 1752731883366,
+  "life_status": "normal",
+  "last_modified_by__l": [
+    {
+      "id": "1082",
+      "tenantId": "781014",
+      "name": "葉韋伶",
+      "picAddr": "",
+      "email": "",
+      "nickname": "葉韋伶",
+      "supervisorId": "1069",
+      "phone": "",
+      "description": "",
+      "status": 0,
+      "createTime": 1718069682972,
+      "modifyTime": 1733371777953,
+      "dept": "1000",
+      "post": "",
+      "empNum": "00017"
+    }
+  ],
+  "created_by__l": [
+    {
+      "id": "1000",
+      "tenantId": "781014",
+      "name": "賴俊穎",
+      "picAddr": "N_202310_05_4c8f70e1b83f488e99c8626b438418d1",
+      "email": "",
+      "nickname": "賴俊穎",
+      "phone": "",
+      "description": "",
+      "status": 0,
+      "createTime": 1693202085819,
+      "modifyTime": 1733371988316,
+      "dept": "1003",
+      "post": "",
+      "empNum": "00002"
+    }
+  ],
+  "field_k7e6q__c": "68786fa95450af000105de5e",
+  "last_modified_by": [
+    "FSUID_79BE7C04DA8D1C5EADB903953B8E5026"
+  ],
+  "field_Q6Svh__c": "10.0",
+  "record_type": "default__c",
+  "last_modified_by__r": {
+    "picAddr": "",
+    "description": "",
+    "dept": "1000",
+    "supervisorId": "1069",
+    "empNum": "00017",
+    "modifyTime": 1733371777953,
+    "post": "",
+    "createTime": 1718069682972,
+    "phone": "",
+    "name": "葉韋伶",
+    "nickname": "葉韋伶",
+    "tenantId": "781014",
+    "id": "1082",
+    "email": "",
+    "status": 0
+  },
+  "field_23Z5i__c": [
+    "6v4969CkY"
+  ],
+  "field_XuJP2__c": "A1",
+  "life_status__r": "正常",
+  "field_1P96q__c": "650fe201d184e50001102aee",
+  "field_1P96q__c__relation_ids": "650fe201d184e50001102aee",
+  "field_tXAko__c": "17.55"
+}

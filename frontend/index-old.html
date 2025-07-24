@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>專案管理總覽 - 興安建設管理系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.blue {
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        .stat-icon.green {
+            background: #d1fae5;
+            color: #10b981;
+        }
+
+        .stat-icon.yellow {
+            background: #fef3c7;
+            color: #f59e0b;
+        }
+
+        .stat-icon.purple {
+            background: #ede9fe;
+            color: #8b5cf6;
+        }
+
+        .stat-content h3 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-content p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 3px solid transparent;
+            position: relative;
+        }
+
+        .tab:hover {
+            background: #f3f4f6;
+        }
+
+        .tab.active {
+            color: #4f46e5;
+            background: white;
+            border-bottom-color: #4f46e5;
+        }
+
+        .tab-count {
+            display: inline-block;
+            margin-left: 0.5rem;
+            padding: 0.125rem 0.5rem;
+            background: #e5e7eb;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .tab.active .tab-count {
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .projects-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .projects-table th {
+            background: #f9fafb;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .projects-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .projects-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .project-name {
+            font-weight: 600;
+            color: #1f2937;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .project-name:hover {
+            color: #4f46e5;
+            text-decoration: underline;
+        }
+
+        .project-url {
+            font-size: 0.875rem;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .copy-btn {
+            padding: 0.5rem;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .copy-btn:hover {
+            background: #e5e7eb;
+            transform: scale(1.1);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-fill.high {
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+
+        .progress-fill.medium {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+        }
+
+        .progress-text {
+            font-weight: 600;
+            color: #1f2937;
+            min-width: 45px;
+            text-align: right;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-badge.construction {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-badge.maintenance {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-badge.completed {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.5rem 0.75rem;
+            background: transparent;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .action-btn:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+        /* Button */
+        .btn-new-project {
+            background: #4f46e5;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-new-project:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+        }
+
+        /* Search and Filter */
+        .search-filter-bar {
+            padding: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6b7280;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .tabs {
+                overflow-x: auto;
+            }
+
+            .tab {
+                white-space: nowrap;
+            }
+
+            .search-filter-bar {
+                flex-direction: column;
+            }
+
+            .search-box {
+                max-width: 100%;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .action-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1>專案管理總覽</h1>
+            <div class="header-actions">
+                <div class="user-info">
+                    <span>👤</span>
+                    <span>管理員</span>
+                </div>
+                <button class="btn-new-project" onclick="window.location.href='create.html'">
+                    <span>➕</span>
+                    <span>新增專案</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon blue">🏢</div>
+                <div class="stat-content">
+                    <h3>12</h3>
+                    <p>總專案數</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">🚧</div>
+                <div class="stat-content">
+                    <h3>7</h3>
+                    <p>施工中</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon yellow">🔧</div>
+                <div class="stat-content">
+                    <h3>2</h3>
+                    <p>維修中</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple">✅</div>
+                <div class="stat-content">
+                    <h3>3</h3>
+                    <p>已完成</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs Container -->
+        <div class="tabs-container">
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('construction')">
+                    施工中
+                    <span class="tab-count">7</span>
+                </div>
+                <div class="tab" onclick="switchTab('maintenance')">
+                    維修中
+                    <span class="tab-count">2</span>
+                </div>
+                <div class="tab" onclick="switchTab('completed')">
+                    已完成
+                    <span class="tab-count">3</span>
+                </div>
+            </div>
+
+            <!-- Search and Filter Bar -->
+            <div class="search-filter-bar">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" placeholder="搜尋專案名稱...">
+                </div>
+            </div>
+
+            <!-- Tab Content - Construction -->
+            <div class="tab-content active" id="construction-content">
+                <div class="table-container">
+                    <table class="projects-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%">專案名稱</th>
+                                <th style="width: 15%">開工日期</th>
+                                <th style="width: 15%">建築規模</th>
+                                <th style="width: 20%">進度</th>
+                                <th style="width: 10%">狀態</th>
+                                <th style="width: 10%">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 專案數據將由 JavaScript 動態載入 -->
+                                        <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/xinganxi-abc123def456/')" title="複製專案連結">🔗</button>
+                                    </div>
+                                </td>
+                                <td>2024/01/15</td>
+                                <td>3棟15層</td>
+                                <td>
+                                    <div class="progress-container">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill high" style="width: 72%"></div>
+                                        </div>
+                                        <div class="progress-text">72%</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge construction">
+                                        <span>●</span>
+                                        施工中
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn" onclick="editProject('興安西工程')">編輯</button>
+                                        <button class="action-btn" onclick="viewReport('興安西工程')">報表</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <a href="/shizhennan-xyz789uvw012/" class="project-name">市鎮南住宅大樓</a>
+                                        <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/shizhennan-xyz789uvw012/')" title="複製專案連結">🔗</button>
+                                    </div>
+                                </td>
+                                <td>2024/02/01</td>
+                                <td>2棟20層</td>
+                                <td>
+                                    <div class="progress-container">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill medium" style="width: 45%"></div>
+                                        </div>
+                                        <div class="progress-text">45%</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge construction">
+                                        <span>●</span>
+                                        施工中
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn" onclick="editProject('市鎮南住宅大樓')">編輯</button>
+                                        <button class="action-btn" onclick="viewReport('市鎮南住宅大樓')">報表</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <a href="/riverside-pqr678stu901/" class="project-name">河岸景觀宅</a>
+                                        <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/riverside-pqr678stu901/')" title="複製專案連結">🔗</button>
+                                    </div>
+                                </td>
+                                <td>2023/11/20</td>
+                                <td>2棟18層</td>
+                                <td>
+                                    <div class="progress-container">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill high" style="width: 88%"></div>
+                                        </div>
+                                        <div class="progress-text">88%</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge construction">
+                                        <span>●</span>
+                                        施工中
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn" onclick="editProject('河岸景觀宅')">編輯</button>
+                                        <button class="action-btn" onclick="viewReport('河岸景觀宅')">報表</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <a href="/citycenter-vwx234yz567/" class="project-name">都心豪宅</a>
+                                        <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/citycenter-vwx234yz567/')" title="複製專案連結">🔗</button>
+                                    </div>
+                                </td>
+                                <td>2024/03/10</td>
+                                <td>1棟28層</td>
+                                <td>
+                                    <div class="progress-container">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: 15%"></div>
+                                        </div>
+                                        <div class="progress-text">15%</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge construction">
+                                        <span>●</span>
+                                        施工中
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn" onclick="editProject('都心豪宅')">編輯</button>
+                                        <button class="action-btn" onclick="viewReport('都心豪宅')">報表</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <a href="/techpark-jkl012mno345/" class="project-name">科技園區辦公大樓</a>
+                                        <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/techpark-jkl012mno345/')" title="複製專案連結">🔗</button>
+                                    </div>
+                                </td>
+                                <td>2024/04/01</td>
+                                <td>1棟25層</td>
+                                <td>
+                                    <div class="progress-container">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill" style="width: 5%"></div>
+                                        </div>
+                                        <div class="progress-text">5%</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge construction">
+                                        <span>●</span>
+                                        施工中
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn" onclick="editProject('科技園區辦公大樓')">編輯</button>
+                                        <button class="action-btn" onclick="viewReport('科技園區辦公大樓')">報表</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <a href="/lakeside-mno456pqr789/" class="project-name">湖畔別墅</a>
+                                        <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/lakeside-mno456pqr789/')" title="複製專案連結">🔗</button>
+                                    </div>
+                                </td>
+                                <td>2024/05/20</td>
+                                <td>12戶透天</td>
+                                <td>
+                                    <div class="progress-container">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill medium" style="width: 32%"></div>
+                                        </div>
+                                        <div class="progress-text">32%</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge construction">
+                                        <span>●</span>
+                                        施工中
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn" onclick="editProject('湖畔別墅')">編輯</button>
+                                        <button class="action-btn" onclick="viewReport('湖畔別墅')">報表</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <a href="/station-stu012vwx345/" class="project-name">站前廣場大樓</a>
+                                        <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/station-stu012vwx345/')" title="複製專案連結">🔗</button>
+                                    </div>
+                                </td>
+                                <td>2023/08/15</td>
+                                <td>2棟22層</td>
+                                <td>
+                                    <div class="progress-container">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill high" style="width: 93%"></div>
+                                        </div>
+                                        <div class="progress-text">93%</div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="status-badge construction">
+                                        <span>●</span>
+                                        施工中
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn" onclick="editProject('站前廣場大樓')">編輯</button>
+                                        <button class="action-btn" onclick="viewReport('站前廣場大樓')">報表</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Content - Maintenance -->
+            <div class="tab-content" id="maintenance-content">
+                <div class="table-container">
+                    <table class="projects-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%">專案名稱</th>
+                                <th style="width: 15%">完工日期</th>
+                                <th style="width: 15%">建築規模</th>
+                                <th style="width: 20%">維修項目</th>
+                                <th style="width: 10%">狀態</th>
+                                <th style="width: 10%">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <a href="/xinyi-abc789def012/" class="project-name">信義商辦大樓</a>
+                                        <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/xinyi-abc789def012/')" title="複製專案連結">🔗</button>
+                                    </div>
+                                </td>
+                                <td>2022/12/20</td>
+                                <td>1棟35層</td>
+                                <td>外牆修繕、電梯更新</td>
+                                <td>
+                                    <span class="status-badge maintenance">
+                                        <span>🔧</span>
+                                        維修中
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn" onclick="editProject('信義商辦大樓')">編輯</button>
+                                        <button class="action-btn" onclick="viewReport('信義商辦大樓')">報表</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <a href="/qingpu-ghi345jkl678/" class="project-name">青埔住宅</a>
+                                        <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/qingpu-ghi345jkl678/')" title="複製專案連結">🔗</button>
+                                    </div>
+                                </td>
+                                <td>2021/08/15</td>
+                                <td>3棟25層</td>
+                                <td>防水工程、管線更新</td>
+                                <td>
+                                    <span class="status-badge maintenance">
+                                        <span>🔧</span>
+                                        維修中
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn" onclick="editProject('青埔住宅')">編輯</button>
+                                        <button class="action-btn" onclick="viewReport('青埔住宅')">報表</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab Content - Completed -->
+            <div class="tab-content" id="completed-content">
+                <div class="table-container">
+                    <table class="projects-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 30%">專案名稱</th>
+                                <th style="width: 15%">完工日期</th>
+                                <th style="width: 15%">建築規模</th>
+                                <th style="width: 20%">工期</th>
+                                <th style="width: 10%">狀態</th>
+                                <th style="width: 10%">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <a href="/cuihu-def456ghi789/" class="project-name">翠湖天地</a>
+                                        <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/cuihu-def456ghi789/')" title="複製專案連結">🔗</button>
+                                    </div>
+                                </td>
+                                <td>2023/12/15</td>
+                                <td>1棟12層</td>
+                                <td>280天</td>
+                                <td>
+                                    <span class="status-badge completed">
+                                        <span>✓</span>
+                                        已完成
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn" onclick="viewArchive('翠湖天地')">歸檔</button>
+                                        <button class="action-btn" onclick="viewReport('翠湖天地')">報表</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <a href="/neihu-mno789pqr012/" class="project-name">內湖科技園</a>
+                                        <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/neihu-mno789pqr012/')" title="複製專案連結">🔗</button>
+                                    </div>
+                                </td>
+                                <td>2023/06/30</td>
+                                <td>2棟20層</td>
+                                <td>450天</td>
+                                <td>
+                                    <span class="status-badge completed">
+                                        <span>✓</span>
+                                        已完成
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn" onclick="viewArchive('內湖科技園')">歸檔</button>
+                                        <button class="action-btn" onclick="viewReport('內湖科技園')">報表</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                        <a href="/nangang-stu345vwx678/" class="project-name">南港車站共構宅</a>
+                                        <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/nangang-stu345vwx678/')" title="複製專案連結">🔗</button>
+                                    </div>
+                                </td>
+                                <td>2022/11/10</td>
+                                <td>1棟40層</td>
+                                <td>720天</td>
+                                <td>
+                                    <span class="status-badge completed">
+                                        <span>✓</span>
+                                        已完成
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn" onclick="viewArchive('南港車站共構宅')">歸檔</button>
+                                        <button class="action-btn" onclick="viewReport('南港車站共構宅')">報表</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Empty State (for no results) -->
+            <div class="empty-state" style="display: none;">
+                <div class="empty-state-icon">🔍</div>
+                <h3>找不到符合的專案</h3>
+                <p>請嘗試其他搜尋關鍵字</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全域變數儲存專案數據
+        let allProjects = [];
+        let filteredProjects = [];
+
+        // 頁面載入時獲取專案數據
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadProjects();
+        });
+
+        // 從 API 載入專案數據
+        async function loadProjects() {
+            try {
+                const response = await fetch('/api/projects');
+                if (response.ok) {
+                    allProjects = await response.json();
+                    renderProjects();
+                    updateStatistics();
+                } else {
+                    console.error('無法載入專案數據');
+                    // 如果 API 失敗，使用預設數據
+                    allProjects = getDefaultProjects();
+                    renderProjects();
+                    updateStatistics();
+                }
+            } catch (error) {
+                console.error('載入專案時發生錯誤:', error);
+                // 使用預設數據
+                allProjects = getDefaultProjects();
+                renderProjects();
+                updateStatistics();
+            }
+        }
+
+        // 更新統計數字
+        function updateStatistics() {
+            const stats = {
+                total: allProjects.length,
+                construction: allProjects.filter(p => p.status === 'construction').length,
+                maintenance: allProjects.filter(p => p.status === 'maintenance').length,
+                completed: allProjects.filter(p => p.status === 'completed').length
+            };
+
+            // 更新統計卡片
+            document.querySelector('.stat-card:nth-child(1) h3').textContent = stats.total;
+            document.querySelector('.stat-card:nth-child(2) h3').textContent = stats.construction;
+            document.querySelector('.stat-card:nth-child(3) h3').textContent = stats.maintenance;
+            document.querySelector('.stat-card:nth-child(4) h3').textContent = stats.completed;
+
+            // 更新標籤數字
+            document.querySelectorAll('.tab-count')[0].textContent = stats.construction;
+            document.querySelectorAll('.tab-count')[1].textContent = stats.maintenance;
+            document.querySelectorAll('.tab-count')[2].textContent = stats.completed;
+        }
+
+        // 渲染專案列表
+        function renderProjects() {
+            const activeTab = document.querySelector('.tab.active').textContent.trim().split(' ')[0];
+            let statusFilter = '';
+            
+            if (activeTab === '施工中') statusFilter = 'construction';
+            else if (activeTab === '維修中') statusFilter = 'maintenance';
+            else if (activeTab === '已完成') statusFilter = 'completed';
+
+            filteredProjects = allProjects.filter(p => p.status === statusFilter);
+            
+            const tbody = document.querySelector('.tab-content.active tbody');
+            tbody.innerHTML = '';
+
+            if (filteredProjects.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem; color: #666;">
+                            目前沒有${activeTab}的專案
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            filteredProjects.forEach(project => {
+                const row = createProjectRow(project);
+                tbody.appendChild(row);
+            });
+        }
+
+        // 建立專案列表行
+        function createProjectRow(project) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <a href="/${project.id}/" class="project-name">${project.name}</a>
+                        <button class="copy-btn" onclick="copyURL('https://progress.yes-ceramics.com/${project.id}/')" title="複製專案連結">🔗</button>
+                    </div>
+                </td>
+                <td>${formatDate(project.startDate)}</td>
+                <td>${project.buildingInfo || '-'}</td>
+                <td>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill ${getProgressClass(project.progress)}" style="width: ${project.progress}%"></div>
+                        </div>
+                        <div class="progress-text">${project.progress}%</div>
+                    </div>
+                </td>
+                <td>
+                    <span class="status-badge ${project.status}">
+                        <span>●</span>
+                        ${getStatusText(project.status)}
+                    </span>
+                </td>
+                <td>
+                    <div class="actions">
+                        <button class="action-btn" onclick="editProject('${project.id}')">編輯</button>
+                        <button class="action-btn" onclick="viewReport('${project.id}')">報表</button>
+                        <button class="action-btn" onclick="deleteProject('${project.id}')" style="background-color: #ff4444; color: white;">刪除</button>
+                    </div>
+                </td>
+            `;
+            return tr;
+        }
+
+        // 格式化日期
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        // 取得進度等級
+        function getProgressClass(progress) {
+            if (progress >= 70) return 'high';
+            if (progress >= 40) return 'medium';
+            return 'low';
+        }
+
+        // 取得狀態文字
+        function getStatusText(status) {
+            const statusMap = {
+                'construction': '施工中',
+                'maintenance': '維修中',
+                'completed': '已完成'
+            };
+            return statusMap[status] || status;
+        }
+
+        // 預設專案數據（當 API 失敗時使用）
+        function getDefaultProjects() {
+            return [
+                {
+                    id: 'xinganxi-abc123def456',
+                    name: '興安西工程',
+                    startDate: '2024-01-15',
+                    buildingInfo: '3棟15層',
+                    progress: 72,
+                    status: 'construction'
+                }
+            ];
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Update tab active state
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.closest('.tab').classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName + '-content').classList.add('active');
+            
+            // 重新渲染專案列表
+            renderProjects();
+        }
+
+        // Copy URL
+        function copyURL(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✓';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 1000);
+            });
+        }
+
+        // Enter project - removed popup behavior
+        // Projects now link directly via <a> tags
+
+        // Edit project
+        function editProject(projectId) {
+            const project = allProjects.find(p => p.id === projectId);
+            if (project) {
+                alert(`編輯專案: ${project.name}`);
+                // TODO: 實作編輯功能
+            }
+        }
+
+        // View report
+        function viewReport(projectId) {
+            const project = allProjects.find(p => p.id === projectId);
+            if (project) {
+                alert(`查看報表: ${project.name}`);
+                // TODO: 實作報表功能
+            }
+        }
+
+        // Delete project
+        async function deleteProject(projectId) {
+            const project = allProjects.find(p => p.id === projectId);
+            if (!project) return;
+
+            if (confirm(`確定要刪除專案「${project.name}」嗎？此操作無法復原。`)) {
+                try {
+                    const response = await fetch(`/api/projects/${projectId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        alert('專案已成功刪除');
+                        // 從本地數據中移除
+                        allProjects = allProjects.filter(p => p.id !== projectId);
+                        renderProjects();
+                        updateStatistics();
+                    } else {
+                        const error = await response.json();
+                        alert(`刪除失敗: ${error.message || '未知錯誤'}`);
+                    }
+                } catch (error) {
+                    console.error('刪除專案時發生錯誤:', error);
+                    alert('刪除專案時發生錯誤，請稍後再試');
+                }
+            }
+        }
+
+        // View archive
+        function viewArchive(projectName) {
+            alert(`查看歸檔: ${projectName}`);
+        }
+
+        // Search functionality
+        document.querySelector('.search-input').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const activeContent = document.querySelector('.tab-content.active');
+            const rows = activeContent.querySelectorAll('tbody tr');
+            let hasResults = false;
+
+            rows.forEach(row => {
+                const projectName = row.querySelector('.project-name');
+                if (projectName && projectName.textContent.toLowerCase().includes(searchTerm)) {
+                    row.style.display = '';
+                    hasResults = true;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Show/hide empty state
+            const emptyState = document.querySelector('.empty-state');
+            if (!hasResults && searchTerm) {
+                emptyState.style.display = 'block';
+                activeContent.querySelector('.table-container').style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                activeContent.querySelector('.table-container').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
