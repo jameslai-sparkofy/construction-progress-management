@@ -489,10 +489,10 @@
             </h2>
 
             <div class="form-grid">
-                <div class="form-group">
-                    <label class="form-label">專案簡稱 <span class="required">*</span></label>
-                    <input type="text" class="form-input" id="projectSlug" placeholder="例如：xinganxi" oninput="updateURLPreview()">
-                    <small style="color: #6b7280; margin-top: 0.25rem;">用於 URL 的識別碼，只能使用英文字母、數字和連字號</small>
+                <div class="form-group" style="display: none;">
+                    <label class="form-label">URL 識別碼</label>
+                    <input type="text" class="form-input" id="projectSlug" readonly>
+                    <small style="color: #6b7280; margin-top: 0.25rem;">使用商機 ID 作為唯一識別碼</small>
                 </div>
 
                 <div class="form-group">
@@ -501,33 +501,32 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">建築棟數</label>
-                    <select class="form-select" id="buildingCount">
-                        <option value="3" selected>3棟 (A/B/C)</option>
-                        <option value="2">2棟 (A/B)</option>
-                        <option value="1">1棟 (A)</option>
-                        <option value="4">4棟 (A/B/C/D)</option>
-                    </select>
+                    <label class="form-label">建築配置</label>
+                    <div class="building-info" id="buildingInfo" style="padding: 1rem; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
+                        <div>正在載入案場資料...</div>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">總樓層數</label>
-                    <input type="number" class="form-input" id="floorCount" value="15" min="1" max="50">
+                    <label class="form-label">案場統計</label>
+                    <div class="site-statistics" id="siteStatistics" style="padding: 1rem; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px;">
+                        <div>正在分析案場資料...</div>
+                    </div>
                 </div>
             </div>
 
             <div class="form-group" style="margin-top: 1.5rem;">
                 <label class="form-label">專案描述</label>
-                <textarea class="form-textarea" id="projectDescription" placeholder="輸入專案的詳細描述...">位於興安路西側的高層住宅建案，共3棟15層樓建築</textarea>
+                <textarea class="form-textarea" id="projectDescription" placeholder="輸入專案的詳細描述..."></textarea>
             </div>
 
             <div class="form-group">
                 <label class="form-label">專案網址預覽</label>
                 <div class="url-preview">
-                    <span id="urlPreview">progress.yes-ceramics.com/xinganxi-abc123def456/</span>
+                    <span id="urlPreview">progress.yes-ceramics.com/[選擇商機後自動生成]/</span>
                     <button class="copy-btn" onclick="copyURL()">複製</button>
                 </div>
-                <small style="color: #6b7280; margin-top: 0.25rem;">系統會自動產生12位安全令牌</small>
+                <small style="color: #6b7280; margin-top: 0.25rem;">將使用商機唯一ID作為網址識別碼</small>
             </div>
         </div>
 
@@ -539,77 +538,35 @@
             </h2>
 
             <div style="margin-bottom: 1.5rem;">
-                <p style="color: #6b7280;">設定不同使用者角色的預設權限</p>
+                <p style="color: #6b7280;">設定工班成員權限</p>
             </div>
 
             <div class="permission-grid">
                 <div class="permission-row">
-                    <div class="permission-label">業主 (Owner)</div>
+                    <div class="permission-label">工班成員權限設定</div>
                     <div class="permission-options">
                         <label class="permission-option">
-                            <input type="checkbox" checked disabled>
-                            <span>查看進度</span>
-                        </label>
-                        <label class="permission-option">
-                            <input type="checkbox">
-                            <span>查看施工照片</span>
-                        </label>
-                        <label class="permission-option">
-                            <input type="checkbox">
-                            <span>查看財務資訊</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="permission-row">
-                    <div class="permission-label">工班負責人</div>
-                    <div class="permission-options">
-                        <label class="permission-option">
-                            <input type="checkbox" checked>
-                            <span>更新進度</span>
-                        </label>
-                        <label class="permission-option">
-                            <input type="checkbox" checked>
-                            <span>上傳照片</span>
-                        </label>
-                        <label class="permission-option">
-                            <input type="checkbox" checked>
-                            <span>管理工班成員</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="permission-row">
-                    <div class="permission-label">工班成員</div>
-                    <div class="permission-options">
-                        <label class="permission-option">
-                            <input type="checkbox" checked>
-                            <span>更新個人進度</span>
-                        </label>
-                        <label class="permission-option">
-                            <input type="checkbox" checked>
-                            <span>上傳施工照片</span>
-                        </label>
-                        <label class="permission-option">
-                            <input type="checkbox">
-                            <span>查看其他工班進度</span>
+                            <input type="checkbox" id="allowViewOtherTeams">
+                            <span>允許工班成員查看其他工班的進度</span>
                         </label>
                     </div>
                 </div>
             </div>
 
-            <div class="form-group" style="margin-top: 2rem;">
-                <label class="form-label">Email 認證設定</label>
-                <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-                    <label class="permission-option">
-                        <input type="radio" name="emailAuth" value="required" checked>
-                        <span>必須 Email 認證</span>
-                    </label>
-                    <label class="permission-option">
-                        <input type="radio" name="emailAuth" value="optional">
-                        <span>選擇性認證</span>
-                    </label>
+            <div id="teamsList" style="margin-top: 2rem;">
+                <h4 style="margin-bottom: 1rem; color: #374151;">關聯工班列表</h4>
+                <div id="teamsContainer" style="padding: 1rem; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
+                    <div style="text-align: center; color: #6b7280;">正在載入工班資訊...</div>
                 </div>
+            </div>
+
+            <div style="margin-top: 1.5rem; padding: 1rem; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px;">
+                <p style="color: #0369a1; font-size: 0.9rem;">
+                    <strong>預設權限：</strong><br>
+                    • 業主：查看進度、查看施工照片<br>
+                    • 工班負責人：更新進度、上傳照片、管理工班成員<br>
+                    • 工班成員：更新個人進度、上傳施工照片
+                </p>
             </div>
         </div>
 
@@ -622,12 +579,12 @@
 
             <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px;">
                 <h3 style="margin-bottom: 1rem;">請確認以下設定：</h3>
-                <div style="display: grid; gap: 0.75rem;">
-                    <div><strong>CRM 商機：</strong>勝興-興安西-2024</div>
-                    <div><strong>專案名稱：</strong>興安西工程</div>
-                    <div><strong>專案網址：</strong>progress.yes-ceramics.com/xinganxi-abc123def456/</div>
-                    <div><strong>建築配置：</strong>3棟 15層樓</div>
-                    <div><strong>Email 認證：</strong>必須認證</div>
+                <div id="confirmationDetails" style="display: grid; gap: 0.75rem;">
+                    <div><strong>CRM 商機：</strong>正在載入...</div>
+                    <div><strong>專案名稱：</strong>正在載入...</div>
+                    <div><strong>專案網址：</strong>正在載入...</div>
+                    <div><strong>建築配置：</strong>正在載入...</div>
+                    <div><strong>Email 認證：</strong>正在載入...</div>
                 </div>
             </div>
 
@@ -635,6 +592,34 @@
                 <p style="color: #92400e;">
                     <strong>注意：</strong>建立後，專案 URL 將無法更改。請確認所有設定正確。
                 </p>
+            </div>
+
+            <!-- Progress Section (hidden by default) -->
+            <div id="progressSection" style="display: none; margin-top: 2rem;">
+                <div style="background: #f0f9ff; padding: 1.5rem; border: 1px solid #0ea5e9; border-radius: 8px;">
+                    <h4 style="margin: 0 0 1rem 0; color: #0369a1;">🚀 建立專案中...</h4>
+                    
+                    <!-- Progress Bar -->
+                    <div style="background: #e0e7ff; border-radius: 8px; overflow: hidden; margin-bottom: 1rem;">
+                        <div id="progressBar" style="background: linear-gradient(90deg, #4f46e5, #06b6d4); height: 8px; width: 0%; transition: width 0.3s ease;"></div>
+                    </div>
+                    
+                    <!-- Progress Text -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span id="progressText" style="color: #0369a1; font-weight: 500;">準備建立專案...</span>
+                        <span id="progressPercent" style="color: #0369a1; font-size: 0.9rem;">0%</span>
+                    </div>
+                    
+                    <!-- Activity Log -->
+                    <div style="background: white; border: 1px solid #e0e7ff; border-radius: 6px; max-height: 200px; overflow-y: auto;">
+                        <div style="padding: 0.75rem; border-bottom: 1px solid #e0e7ff; background: #f8fafc; font-weight: 500; color: #374151;">
+                            📋 建立日誌
+                        </div>
+                        <div id="activityLog" style="padding: 0.75rem; font-family: monospace; font-size: 0.85rem; color: #374151;">
+                            <!-- Log entries will be added here -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -921,7 +906,7 @@
             return div.innerHTML;
         }
 
-        function selectCRM(id, name, customer, amount) {
+        async function selectCRM(id, name, customer, amount) {
             document.getElementById('crmId').textContent = id;
             document.getElementById('crmName').textContent = name;
             document.getElementById('crmCustomer').textContent = customer;
@@ -935,20 +920,235 @@
             const projectName = name.split('-')[1] || name;
             document.getElementById('projectName').value = projectName + '工程';
             
-            // Generate slug
-            const slug = projectName.toLowerCase().replace(/[^a-z0-9]/g, '');
-            document.getElementById('projectSlug').value = slug;
+            // 使用商機ID作為URL識別碼
+            document.getElementById('projectSlug').value = id;
             updateURLPreview();
+            
+            // 查詢相關案場資料
+            await loadSitesForOpportunity(id);
         }
 
         function updateURLPreview() {
-            const slug = document.getElementById('projectSlug').value || 'project';
-            const token = generateToken();
-            document.getElementById('urlPreview').textContent = `progress.yes-ceramics.com/${slug}-${token}/`;
+            const opportunityId = document.getElementById('projectSlug').value || 'project';
+            // 直接使用商機ID作為URL
+            document.getElementById('urlPreview').textContent = `progress.yes-ceramics.com/${opportunityId}/`;
         }
 
-        function generateToken() {
-            return 'abc123def456'; // In real implementation, generate random 12-char token
+        // 查詢商機相關的案場資料
+        async function loadSitesForOpportunity(opportunityId) {
+            console.log('🏗️ 查詢商機相關案場:', opportunityId);
+            
+            try {
+                // 查詢案場資料
+                const response = await fetch(`/api/crm/sites?opportunityId=${opportunityId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.message || '查詢案場失敗');
+                }
+                
+                const sites = result.data || [];
+                console.log(`✅ 找到 ${sites.length} 個相關案場`);
+                
+                // 分析案場資料
+                analyzeSiteData(sites);
+                
+                // 載入工班資料
+                await loadTeamsData(sites);
+                
+            } catch (error) {
+                console.error('❌ 查詢案場失敗:', error);
+                // 查詢失敗，設定為手動選擇
+                document.getElementById('buildingCount').innerHTML = `
+                    <option value="">無法自動載入，請手動選擇</option>
+                    <option value="1">1棟</option>
+                    <option value="2">2棟</option>
+                    <option value="3">3棟</option>
+                    <option value="4">4棟</option>
+                    <option value="5">5棟</option>
+                `;
+                document.getElementById('floorCount').placeholder = '無法自動載入，請手動輸入';
+            }
+        }
+        
+        // 分析案場資料，顯示實際建築配置
+        function analyzeSiteData(sites) {
+            if (!sites || sites.length === 0) {
+                console.log('⚠️ 沒有案場資料');
+                document.getElementById('buildingInfo').innerHTML = '<div style="color: #ef4444;">❌ 無法載入案場資料</div>';
+                document.getElementById('siteStatistics').innerHTML = '<div style="color: #ef4444;">❌ 無案場統計資料</div>';
+                return;
+            }
+            
+            // 統計建築棟數和樓層
+            const buildingData = {};
+            let totalUnits = 0;
+            
+            sites.forEach(site => {
+                const building = site.building || site.field_WD7k1__c; // 棟別
+                const floor = parseFloat(site.floor || site.field_Q6Svh__c);    // 樓層
+                const unit = site.unit || site.field_XuJP2__c;     // 房間號
+                
+                if (building) {
+                    if (!buildingData[building]) {
+                        buildingData[building] = {
+                            floors: new Set(),
+                            units: []
+                        };
+                    }
+                    
+                    if (floor) {
+                        buildingData[building].floors.add(floor);
+                    }
+                    
+                    if (unit) {
+                        buildingData[building].units.push(unit);
+                    }
+                    
+                    totalUnits++;
+                }
+            });
+            
+            // 生成建築配置顯示
+            const buildings = Object.keys(buildingData).sort();
+            let buildingInfoHtml = '';
+            
+            buildings.forEach(building => {
+                const floors = Array.from(buildingData[building].floors).sort((a, b) => a - b);
+                const unitCount = buildingData[building].units.length;
+                const maxFloor = Math.max(...floors);
+                const minFloor = Math.min(...floors);
+                
+                buildingInfoHtml += `
+                    <div style="margin-bottom: 0.5rem;">
+                        <strong>${building}棟</strong>: ${minFloor === maxFloor ? `${maxFloor}樓` : `${minFloor}-${maxFloor}樓`} (${unitCount}戶)
+                    </div>
+                `;
+            });
+            
+            document.getElementById('buildingInfo').innerHTML = buildingInfoHtml;
+            
+            // 生成統計資料顯示
+            const totalBuildings = buildings.length;
+            const allFloors = Object.values(buildingData).reduce((acc, data) => {
+                acc.push(...Array.from(data.floors));
+                return acc;
+            }, []);
+            const maxFloor = Math.max(...allFloors);
+            const minFloor = Math.min(...allFloors);
+            
+            const statisticsHtml = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                    <div><strong>建築棟數:</strong> ${totalBuildings}棟 (${buildings.join(', ')})</div>
+                    <div><strong>樓層範圍:</strong> ${minFloor === maxFloor ? `${maxFloor}樓` : `${minFloor}-${maxFloor}樓`}</div>
+                    <div><strong>總戶數:</strong> ${totalUnits}戶</div>
+                </div>
+            `;
+            
+            document.getElementById('siteStatistics').innerHTML = statisticsHtml;
+            
+            console.log(`🏗️ 分析結果: ${totalBuildings}棟 (${buildings.join(', ')}), ${minFloor}-${maxFloor}樓, 總計${totalUnits}戶`);
+            
+            // 更新專案描述的預設提示
+            const projectDesc = document.getElementById('projectDescription');
+            if (projectDesc) {
+                projectDesc.placeholder = `總計 ${totalBuildings} 棟建築 (${buildings.join('、')}棟)，${minFloor}-${maxFloor}樓，共 ${totalUnits} 戶`;
+            }
+            
+            // 儲存分析結果供後續使用
+            window.siteAnalysis = {
+                buildings: buildings,
+                totalBuildings: totalBuildings,
+                floorRange: `${minFloor}-${maxFloor}`,
+                totalUnits: totalUnits,
+                buildingData: buildingData
+            };
+        }
+
+        // 載入工班資料
+        async function loadTeamsData(sites) {
+            console.log('👷 開始載入工班資料');
+            
+            const teamsContainer = document.getElementById('teamsContainer');
+            
+            try {
+                // 從案場資料中提取工班資訊
+                const teams = new Set();
+                const teamDetails = {};
+                
+                sites.forEach(site => {
+                    // 檢查案場的 raw 資料中的工班欄位 shift_time__c
+                    let teamName = null;
+                    
+                    // 從 raw 資料中獲取工班名稱
+                    if (site.raw && site.raw.shift_time__c) {
+                        teamName = site.raw.shift_time__c;
+                    }
+                    
+                    if (teamName && teamName.trim() !== '') {
+                        teams.add(teamName);
+                        
+                        if (!teamDetails[teamName]) {
+                            teamDetails[teamName] = {
+                                name: teamName,
+                                sites: [],
+                                buildings: new Set(),
+                                units: 0
+                            };
+                        }
+                        
+                        teamDetails[teamName].sites.push(site);
+                        if (site.building) {
+                            teamDetails[teamName].buildings.add(site.building);
+                        }
+                        teamDetails[teamName].units++;
+                    }
+                });
+                
+                if (teams.size === 0) {
+                    teamsContainer.innerHTML = '<div style="color: #6b7280;">此專案尚未分配工班</div>';
+                    return;
+                }
+                
+                // 生成工班列表HTML
+                let teamsHtml = '<div style="display: grid; gap: 1rem;">';
+                
+                Array.from(teams).sort().forEach(teamName => {
+                    const team = teamDetails[teamName];
+                    const buildingsText = Array.from(team.buildings).join('、') + '棟';
+                    
+                    teamsHtml += `
+                        <div style="padding: 1rem; background: white; border: 1px solid #d1d5db; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong style="color: #374151;">${teamName}</strong>
+                                    <div style="color: #6b7280; font-size: 0.9rem; margin-top: 0.25rem;">
+                                        負責 ${buildingsText} • ${team.units}戶
+                                    </div>
+                                </div>
+                                <div style="background: #dbeafe; color: #1e40af; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.85rem;">
+                                    ${team.units}戶
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                teamsHtml += '</div>';
+                teamsContainer.innerHTML = teamsHtml;
+                
+                console.log(`✅ 載入 ${teams.size} 個工班資料`);
+                
+                // 儲存工班資料供後續使用
+                window.teamsData = teamDetails;
+                
+            } catch (error) {
+                console.error('❌ 載入工班資料失敗:', error);
+                teamsContainer.innerHTML = '<div style="color: #ef4444;">載入工班資料失敗</div>';
+            }
         }
 
         function copyURL() {
@@ -965,11 +1165,41 @@
                     return;
                 }
                 
+                // 在進入Step 4前更新確認資訊
+                if (currentStep === 3) {
+                    updateConfirmationInfo();
+                }
+                
                 document.getElementById(`step${currentStep}`).style.display = 'none';
                 currentStep++;
                 document.getElementById(`step${currentStep}`).style.display = 'block';
                 updateStepIndicators();
                 updateButtons();
+            }
+        }
+        
+        // 更新確認頁面的資訊
+        function updateConfirmationInfo() {
+            // 更新URL
+            const url = document.getElementById('urlPreview').textContent;
+            
+            // 更新建築配置 - 使用分析結果
+            let buildingConfigText = '未分析';
+            if (window.siteAnalysis) {
+                const { totalBuildings, buildings, floorRange, totalUnits } = window.siteAnalysis;
+                buildingConfigText = `${totalBuildings}棟 (${buildings.join('、')}棟), ${floorRange}樓, 共${totalUnits}戶`;
+            }
+            
+            // 更新確認資訊
+            const confirmSection = document.getElementById('confirmationDetails');
+            if (confirmSection) {
+                confirmSection.innerHTML = `
+                    <div><strong>CRM 商機：</strong>${document.getElementById('crmName').textContent}</div>
+                    <div><strong>專案名稱：</strong>${document.getElementById('projectName').value}</div>
+                    <div><strong>專案網址：</strong>${url}</div>
+                    <div><strong>建築配置：</strong>${buildingConfigText}</div>
+                    <div><strong>工班權限：</strong>${document.getElementById('allowViewOtherTeams').checked ? '允許查看其他工班進度' : '僅查看自己工班進度'}</div>
+                `;
             }
         }
 
@@ -1005,13 +1235,47 @@
             alert('草稿已儲存');
         }
 
+        // 進度管理函數
+        function showProgress() {
+            document.getElementById('progressSection').style.display = 'block';
+            document.getElementById('confirmationDetails').parentElement.style.display = 'none';
+        }
+
+        function updateProgress(percent, text, logMessage) {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            const progressPercent = document.getElementById('progressPercent');
+            
+            progressBar.style.width = percent + '%';
+            progressText.textContent = text;
+            progressPercent.textContent = percent + '%';
+            
+            if (logMessage) {
+                addLogEntry(logMessage);
+            }
+        }
+
+        function addLogEntry(message) {
+            const activityLog = document.getElementById('activityLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.marginBottom = '0.25rem';
+            logEntry.innerHTML = `<span style="color: #6b7280;">[${timestamp}]</span> ${message}`;
+            activityLog.appendChild(logEntry);
+            activityLog.scrollTop = activityLog.scrollHeight;
+        }
+
+        function hideProgress() {
+            document.getElementById('progressSection').style.display = 'none';
+            document.getElementById('confirmationDetails').parentElement.style.display = 'block';
+        }
+
         async function createProject() {
             // 收集表單資料
             const projectData = {
                 projectName: document.getElementById('projectName').value,
                 projectSlug: document.getElementById('projectSlug').value,
-                buildingCount: document.getElementById('buildingCount').value,
-                floorCount: document.getElementById('floorCount').value,
+                siteAnalysis: window.siteAnalysis || null,
                 projectDescription: document.getElementById('projectDescription').value,
                 crmInfo: {
                     id: document.getElementById('crmId').textContent,
@@ -1028,15 +1292,25 @@
                 return;
             }
 
-            // 顯示載入狀態
+            // 顯示進度條和隱藏按鈕
             const createBtn = document.getElementById('createBtn');
             const originalText = createBtn.textContent;
-            createBtn.textContent = '建立中...';
-            createBtn.disabled = true;
+            createBtn.style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'none';
+            
+            showProgress();
 
             try {
-                // 調用後端API
+                // 階段 1: 準備資料
+                updateProgress(10, '準備專案資料...', '🔄 開始建立專案');
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                updateProgress(20, '驗證專案資訊...', '✅ 專案資料驗證完成');
                 console.log('發送專案資料:', projectData);
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // 階段 2: 發送API請求
+                updateProgress(40, '連接到伺服器...', '🌐 正在連接到 Cloudflare Workers');
                 
                 const response = await fetch('/api/projects', {
                     method: 'POST',
@@ -1046,8 +1320,9 @@
                     body: JSON.stringify(projectData)
                 });
 
-                console.log('API響應狀態:', response.status);
-                console.log('響應頭:', response.headers);
+                updateProgress(60, '處理專案建立...', '📡 已發送專案建立請求');
+
+                updateProgress(70, '解析回應資料...', '📋 正在處理伺服器回應');
                 
                 let result;
                 const responseText = await response.text();
@@ -1057,82 +1332,98 @@
                     result = JSON.parse(responseText);
                 } catch (parseError) {
                     console.error('JSON解析錯誤:', parseError);
+                    updateProgress(70, '解析失敗', '❌ 無法解析伺服器回應');
                     throw new Error(`無法解析響應: ${responseText.substring(0, 100)}`);
                 }
 
                 console.log('解析後結果:', result);
 
                 if (response.ok && result.success) {
-                    // 建立成功
-                    setTimeout(() => {
-                        document.getElementById('successMessage').classList.add('show');
-                        document.getElementById('step4').style.display = 'none';
-                        document.querySelector('.actions').style.display = 'none';
-                        
-                        // 更新成功訊息中的URL
-                        const successMsg = document.getElementById('successMessage');
-                        successMsg.innerHTML = `
-                            ✅ 工程專案頁面已成功建立！
-                            <div style="margin: 1rem 0; padding: 1rem; background: #f3f4f6; border-radius: 8px; font-family: monospace;">
-                                ${result.url}
-                            </div>
-                            <div style="margin-top: 1rem;">
-                                <button class="btn btn-primary" onclick="copyURL('${result.url}')">
-                                    📋 複製連結
-                                </button>
-                                <button class="btn btn-primary" onclick="window.location.href='/'">
-                                    🏠 回主頁面
-                                </button>
-                            </div>
-                        `;
-                        
-                        // 複製URL到剪貼板
-                        if (navigator.clipboard) {
-                            navigator.clipboard.writeText(result.url);
-                        }
-                    }, 100);
+                    // 階段 3: 建立成功處理
+                    updateProgress(80, '儲存專案資料...', '💾 正在儲存專案到資料庫');
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    updateProgress(90, '初始化專案設定...', '⚙️ 設定專案權限和配置');
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    updateProgress(100, '專案建立完成！', '🎉 專案建立成功！');
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    
+                    // 顯示成功訊息
+                    document.getElementById('successMessage').classList.add('show');
+                    document.getElementById('step4').style.display = 'none';
+                    document.querySelector('.actions').style.display = 'none';
+                    
+                    // 更新成功訊息中的URL
+                    const successMsg = document.getElementById('successMessage');
+                    successMsg.innerHTML = `
+                        ✅ 工程專案頁面已成功建立！
+                        <div style="margin: 1rem 0; padding: 1rem; background: #f3f4f6; border-radius: 8px; font-family: monospace;">
+                            ${result.url}
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <button class="btn btn-primary" onclick="copyURL('${result.url}')">
+                                📋 複製連結
+                            </button>
+                            <button class="btn btn-primary" onclick="window.location.href='/'">
+                                🏠 回主頁面
+                            </button>
+                        </div>
+                    `;
+                    
+                    // 複製URL到剪貼板
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(result.url);
+                    }
                 } else {
                     // 建立失敗
+                    updateProgress(70, '專案建立失敗', `❌ ${result.error || '未知錯誤'}`);
                     console.error('建立專案失敗:', result.error || '未知錯誤');
-                    alert(`建立專案失敗: ${result.error || `HTTP ${response.status}`}`);
-                    createBtn.textContent = originalText;
-                    createBtn.disabled = false;
+                    
+                    setTimeout(() => {
+                        alert(`建立專案失敗: ${result.error || `HTTP ${response.status}`}`);
+                        hideProgress();
+                        createBtn.style.display = 'inline-flex';
+                        createBtn.textContent = originalText;
+                        createBtn.disabled = false;
+                        document.getElementById('prevBtn').style.display = 'inline-flex';
+                    }, 2000);
                 }
             } catch (error) {
                 console.error('API調用失敗:', error);
-                alert(`建立專案時發生錯誤: ${error.message}`);
-                createBtn.textContent = originalText;
-                createBtn.disabled = false;
+                updateProgress(0, '建立專案時發生錯誤', `❌ ${error.message}`);
+                
+                setTimeout(() => {
+                    alert(`建立專案時發生錯誤: ${error.message}`);
+                    hideProgress();
+                    createBtn.style.display = 'inline-flex';
+                    createBtn.textContent = originalText;
+                    createBtn.disabled = false;
+                    document.getElementById('prevBtn').style.display = 'inline-flex';
+                }, 2000);
             }
         }
 
         // 收集權限設定
         function collectPermissions() {
+            const allowViewOtherTeams = document.getElementById('allowViewOtherTeams').checked;
+            
             const permissions = {
-                owner: {},
-                contractorLeader: {},
-                member: {},
-                emailAuth: document.querySelector('input[name="emailAuth"]:checked').value
-            };
-
-            // 收集各角色權限
-            document.querySelectorAll('.permission-row').forEach(row => {
-                const role = row.querySelector('.permission-label').textContent.trim();
-                const options = {};
-                
-                row.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                    const optionName = checkbox.nextElementSibling.textContent.trim();
-                    options[optionName] = checkbox.checked;
-                });
-
-                if (role.includes('業主')) {
-                    permissions.owner = options;
-                } else if (role.includes('工班負責人')) {
-                    permissions.contractorLeader = options;
-                } else if (role.includes('工班成員')) {
-                    permissions.member = options;
+                owner: {
+                    viewProgress: true,        // 預設權限
+                    viewPhotos: true          // 預設權限
+                },
+                contractorLeader: {
+                    updateProgress: true,      // 預設權限
+                    uploadPhotos: true,        // 預設權限
+                    manageMembers: true        // 預設權限
+                },
+                member: {
+                    updatePersonalProgress: true,  // 預設權限
+                    uploadPhotos: true,           // 預設權限
+                    viewOtherProgress: allowViewOtherTeams  // 可設定權限
                 }
-            });
+            };
 
             return permissions;
         }

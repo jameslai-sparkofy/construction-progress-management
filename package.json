@@ -29,6 +29,7 @@
   "author": "Construction Management Team",
   "license": "MIT",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.57.0",
     "@cloudflare/workers-types": "^4.20241230.0",
     "form-data": "^4.0.4",
     "node-fetch": "^2.7.0",

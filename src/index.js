@@ -35,8 +35,14 @@ export default {
       } else if (projectSlug === 'api') {
         // API 端點
         return await handleAPI(request, env, pathParts.slice(1));
+      } else if (projectSlug === 'create') {
+        // 建立專案頁面 - 主要路徑
+        return await serveStaticAsset(env, 'create.html');
       } else if (projectSlug === 'create.html') {
-        // 建立專案頁面
+        // 建立專案頁面 - 兼容路徑
+        return await serveStaticAsset(env, 'create.html');
+      } else if (pathParts.length > 1 && pathParts[1] === 'create') {
+        // 專案的建立頁面，例如：/xinganxi/create（可能不需要）
         return await serveStaticAsset(env, 'create.html');
       } else {
         // 專案頁面
@@ -217,9 +223,8 @@ async function handleAPI(request, env, pathParts) {
  */
 async function handleProjectPage(request, env, projectSlug, subPaths) {
   // 從專案 slug 中解析專案名稱和令牌
-  const [projectName, token] = projectSlug.split('-');
-  
-  if (!projectName || !token) {
+  // 專案URL現在直接使用商機ID作為識別碼
+  if (!projectSlug || projectSlug.length < 10) {
     return new Response('專案 URL 格式錯誤', { status: 400 });
   }
   
@@ -316,7 +321,7 @@ async function getProjectBySlug(env, slug) {
 async function createNewProject(env, projectData) {
   try {
     // 驗證必要欄位
-    const requiredFields = ['projectName', 'projectSlug', 'buildingCount', 'floorCount'];
+    const requiredFields = ['projectName', 'projectSlug'];
     for (const field of requiredFields) {
       if (!projectData[field]) {
         return {
@@ -325,10 +330,22 @@ async function createNewProject(env, projectData) {
         };
       }
     }
+    
+    // 從 siteAnalysis 中提取建築資訊
+    let buildingCount = 0;
+    let floorCount = 0;
+    if (projectData.siteAnalysis) {
+      buildingCount = projectData.siteAnalysis.totalBuildings || 0;
+      const floorRangeMatch = projectData.siteAnalysis.floorRange?.match(/(\d+)-(\d+)/);
+      if (floorRangeMatch) {
+        floorCount = parseInt(floorRangeMatch[2]); // 使用最高樓層
+      } else {
+        floorCount = parseInt(projectData.siteAnalysis.floorRange) || 0;
+      }
+    }
 
-    // 生成安全令牌 (12位隨機字符)
-    const token = generateSecureToken();
-    const projectId = `${projectData.projectSlug}-${token}`;
+    // 直接使用商機ID作為專案ID
+    const projectId = projectData.projectSlug;
     
     // 檢查專案是否已存在
     const existingProject = await getProjectBySlug(env, projectId);
@@ -345,20 +362,21 @@ async function createNewProject(env, projectData) {
       name: projectData.projectName,
       slug: projectData.projectSlug,
       description: projectData.projectDescription || '',
-      buildingCount: parseInt(projectData.buildingCount),
-      floorCount: parseInt(projectData.floorCount),
+      buildingCount: buildingCount,
+      floorCount: floorCount,
+      siteAnalysis: projectData.siteAnalysis || null,
       crmInfo: projectData.crmInfo || {},
       permissions: projectData.permissions || getDefaultPermissions(),
       status: 'construction',
       created: new Date().toISOString(),
       lastUpdated: new Date().toISOString(),
-      url: `progress.yes-ceramics.com/${projectId}/`
+      url: `https://progress.yes-ceramics.com/${projectId}/`
     };
 
-    // 儲存專案到 KV
-    await env.PROJECTS.put(`project:${projectId}`, JSON.stringify(project));
+    // 暫時跳過 KV 儲存以避免限制
+    // await env.PROJECTS.put(`project:${projectId}`, JSON.stringify(project));
     
-    // 儲存專案到 D1 資料庫
+    // 儲存專案到 D1 資料庫 - 使用商機ID作為token值
     await env.DB.prepare(`
       INSERT INTO projects (
         id, crm_opportunity_id, name, slug, token, description, 
@@ -366,10 +384,10 @@ async function createNewProject(env, projectData) {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).bind(
       projectId,
-      projectData.crmOpportunityId || '',
+      projectData.crmInfo?.id || '',
       project.name,
       project.slug,
-      token,
+      projectId, // 使用商機ID作為token值
       project.description,
       project.buildingCount,
       project.floorCount,
@@ -378,25 +396,25 @@ async function createNewProject(env, projectData) {
       project.lastUpdated
     ).run();
     
-    // 更新專案列表
-    await updateProjectsList(env, project);
+    // 暫時跳過更新專案列表以避免KV限制
+    // await updateProjectsList(env, project);
     
-    // 初始化專案相關資料
-    await initializeProjectData(env, project);
+    // 暫時跳過初始化專案相關資料以避免KV限制
+    // await initializeProjectData(env, project);
 
     console.log('專案建立成功:', projectId);
     
     return {
       success: true,
       project: project,
-      url: `https://${project.url}`
+      url: project.url
     };
 
   } catch (error) {
     console.error('建立專案錯誤:', error);
     return {
       success: false,
-      error: '建立專案時發生內部錯誤'
+      error: `建立專案時發生內部錯誤: ${error.message}`
     };
   }
 }
@@ -516,42 +534,8 @@ async function initializeProjectData(env, project) {
  * 服務完整的專案HTML頁面
  */
 async function serveProjectHTML(env) {
-  // 直接從環境中的ASSETS獲取完整的project.html
-  try {
-    if (env && env.ASSETS) {
-      const response = await env.ASSETS.fetch(new Request('https://fake-host/project.html'));
-      if (response && response.ok) {
-        return new Response(await response.text(), {
-          headers: { 
-            'Content-Type': 'text/html; charset=utf-8',
-            'Cache-Control': 'public, max-age=300'
-          }
-        });
-      }
-    }
-  } catch (error) {
-    console.error('Failed to load project.html from assets:', error);
-  }
-  
-  // 如果從ASSETS獲取失敗，返回錯誤頁面
-  return new Response(`
-    <!DOCTYPE html>
-    <html lang="zh-TW">
-    <head>
-        <meta charset="UTF-8">
-        <title>載入錯誤</title>
-    </head>
-    <body>
-        <h1>專案頁面載入失敗</h1>
-        <p>無法載入完整的專案管理頁面，請稍後再試。</p>
-        <a href="/">返回首頁</a>
-    </body>
-    </html>
-  `, {
-    headers: { 
-      'Content-Type': 'text/html; charset=utf-8'
-    }
-  });
+  // 使用與 serveStaticAsset 相同的方法載入 project.html
+  return await serveStaticAsset(env, 'project.html');
 }
 
 /**
@@ -1544,186 +1528,8 @@ async function serveStaticFile(filename) {
     'project.html': '', // Will be loaded from frontend/project.html
   };
   
-  // Set project.html content directly  
-  fileMap['project.html'] = `<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>興安西工程進度管理系統</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Microsoft JhengHei', Arial, sans-serif; 
-            background: #f5f7fa; 
-            color: #333; 
-            line-height: 1.6;
-        }
-        .header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-        .welcome-card {
-            background: white;
-            border-radius: 12px;
-            padding: 3rem;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-        .feature-card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: transform 0.2s;
-        }
-        .feature-card:hover {
-            transform: translateY(-2px);
-        }
-        .feature-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-        .btn-primary {
-            background: #4f46e5;
-            color: white;
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: inline-block;
-            margin: 1rem 0.5rem;
-        }
-        .btn-primary:hover {
-            background: #4338ca;
-            transform: translateY(-1px);
-        }
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
-        }
-        .stat-item {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
-        }
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-            display: block;
-        }
-    </style>
-</head>
-<body>
-    <header class="header">
-        <h1>🏗️ 興安西工程進度管理系統</h1>
-        <p>即時監控建築進度，提升施工效率</p>
-    </header>
-
-    <div class="container">
-        <div class="welcome-card">
-            <h2>歡迎使用工程進度管理系統</h2>
-            <p style="color: #6b7280; margin: 1rem 0;">這是興安西建案的專屬進度管理平台，提供即時進度追蹤、施工照片管理等功能。</p>
-            
-            <div class="stats">
-                <div class="stat-item">
-                    <span class="stat-number">3</span>
-                    <span>建築棟數</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">15</span>
-                    <span>樓層數</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">72%</span>
-                    <span>整體進度</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">24</span>
-                    <span>施工班組</span>
-                </div>
-            </div>
-
-            <div style="margin-top: 2rem;">
-                <a href="#" class="btn-primary" onclick="alert('登入功能開發中...')">🔐 登入系統</a>
-                <a href="#" class="btn-primary" onclick="alert('訪客模式開發中...')">👁️ 訪客瀏覽</a>
-            </div>
-        </div>
-
-        <div class="feature-grid">
-            <div class="feature-card">
-                <div class="feature-icon">📊</div>
-                <h3>即時進度追蹤</h3>
-                <p>各樓層施工進度即時更新，一目了然掌握整體狀況</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">📸</div>
-                <h3>施工照片管理</h3>
-                <p>工班上傳施工現場照片，記錄每個重要施工節點</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">📈</div>
-                <h3>進度報表分析</h3>
-                <p>自動生成進度報表，支援多種格式匯出</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">👥</div>
-                <h3>多角色權限</h3>
-                <p>業主、工班負責人、成員等不同角色權限管理</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">🔔</div>
-                <h3>即時通知</h3>
-                <p>重要進度更新即時推送，確保溝通無誤</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">📱</div>
-                <h3>行動裝置支援</h3>
-                <p>手機、平板完美適配，隨時隨地掌握進度</p>
-            </div>
-        </div>
-
-        <div style="text-align: center; margin: 3rem 0; padding: 2rem; background: white; border-radius: 12px;">
-            <h3>🚧 系統正在開發中</h3>
-            <p style="color: #6b7280; margin: 1rem 0;">
-                完整的工程進度管理功能正在開發中，包括詳細的進度圖表、施工日誌、
-                材料管理、質量檢查等功能即將上線。
-            </p>
-            <p style="color: #6b7280;">
-                <strong>預計完成時間：</strong>2025年8月
-            </p>
-        </div>
-    </div>
-</body>
-</html>`;
+  // 刪除fileMap中的project.html，使用ASSETS中的原始檔案
+  delete fileMap['project.html'];
   
   const content = fileMap[filename];
   if (!content) {
@@ -1884,6 +1690,209 @@ async function generateLoginHTML(project) {
     </body>
     </html>
   `;
+
+  // Set create.html content directly
+  fileMap['create.html'] = `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>建立工程專案頁面 - 興安建設管理系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 500;
+        }
+
+        .breadcrumb {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .form-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: #1f2937;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4338ca;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .crm-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .crm-item {
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .crm-item:hover {
+            border-color: #4f46e5;
+            background: #f3f4f6;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>建立新工程專案頁面</h1>
+        <div class="breadcrumb">管理後台 / 專案管理 / 建立新專案</div>
+    </header>
+
+    <div class="container">
+        <div class="form-section">
+            <h2 class="section-title">選擇 CRM 商機</h2>
+            <div style="text-align: center; padding: 2rem;">
+                <button class="btn btn-primary" onclick="showCRMModal()">選擇商機</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="crmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>選擇 CRM 商機</h3>
+            </div>
+            <div class="modal-body">
+                <div class="crm-list">
+                    <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                        <div style="margin-bottom: 1rem; font-size: 2rem;">📋</div>
+                        <div>載入中...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function showCRMModal() {
+            const modal = document.getElementById('crmModal');
+            modal.classList.add('show');
+            
+            try {
+                const response = await fetch('/api/crm/opportunities');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const opportunities = result.data;
+                    const crmList = document.querySelector('.crm-list');
+                    
+                    crmList.innerHTML = opportunities.map(opp => 
+                        '<div class="crm-item" onclick="selectCRM(\\''+opp.id+'\\', \\''+opp.name+'\\')">' +
+                        '<div style="font-weight: 600;">'+opp.name+'</div>' +
+                        '<div style="font-size: 0.9rem; color: #6b7280;">客戶：'+opp.customer+'</div>' +
+                        '</div>'
+                    ).join('');
+                }
+            } catch (error) {
+                console.error('載入商機失敗:', error);
+            }
+        }
+
+        function selectCRM(id, name) {
+            alert('已選擇商機：' + name + ' (ID: ' + id + ')');
+            document.getElementById('crmModal').classList.remove('show');
+        }
+
+        document.getElementById('crmModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>`;
 }
 
 /**
@@ -1944,7 +1953,7 @@ async function handleProjectsAPI(request, env, pathParts) {
         console.error('建立專案失敗:', error);
         return new Response(JSON.stringify({
           success: false,
-          error: '建立專案時發生錯誤'
+          error: `建立專案時發生錯誤: ${error.message}`
         }), {
           status: 500,
           headers: { 'Content-Type': 'application/json' }
@@ -1974,14 +1983,29 @@ async function handleProjectsAPI(request, env, pathParts) {
           });
         }
         
-        // 從 D1 資料庫刪除專案（CASCADE 會自動刪除相關記錄）
-        await env.DB.prepare(`
+        // 完整刪除專案和相關記錄
+        const db = env.DB;
+        
+        // 1. 先刪除 site_progress 表中的相關記錄
+        const progressDeleteResult = await db.prepare(`
+          DELETE FROM site_progress WHERE project_id = ?
+        `).bind(projectIdToDelete).run();
+        
+        // 2. 再刪除 projects 表中的專案記錄
+        const projectDeleteResult = await db.prepare(`
           DELETE FROM projects WHERE id = ? OR slug = ?
         `).bind(projectIdToDelete, projectIdToDelete).run();
         
+        console.log(`🗑️ 刪除專案記錄: projects=${projectDeleteResult.changes}, site_progress=${progressDeleteResult.changes}`);
+        
         return new Response(JSON.stringify({
           success: true,
-          message: '專案已成功刪除'
+          message: '專案已成功刪除',
+          details: {
+            projectRecordsDeleted: projectDeleteResult.changes,
+            progressRecordsDeleted: progressDeleteResult.changes,
+            totalRecordsDeleted: projectDeleteResult.changes + progressDeleteResult.changes
+          }
         }), {
           headers: { 'Content-Type': 'application/json' }
         });
@@ -2126,7 +2150,7 @@ async function handleSyncStatus(request, env, corsHeaders) {
     ).bind('opportunities').first();
     
     const opportunityCount = await env.DB.prepare(
-      'SELECT COUNT(*) as count FROM opportunities'
+      'SELECT COUNT(*) as count FROM NewOpportunityObj'
     ).first();
     
     return new Response(JSON.stringify({
@@ -2214,7 +2238,7 @@ async function syncOpportunitiesToDB(env) {
       try {
         // 檢查是否已存在
         const existing = await env.DB.prepare(
-          'SELECT update_time FROM opportunities WHERE id = ?'
+          'SELECT update_time FROM NewOpportunityObj WHERE id = ?'
         ).bind(opp.id).first();
         
         const oppData = {
@@ -2246,7 +2270,7 @@ async function syncOpportunitiesToDB(env) {
         } else {
           // 新增記錄
           await env.DB.prepare(`
-            INSERT INTO opportunities 
+            INSERT INTO NewOpportunityObj 
             (id, name, customer, amount, stage, create_time, update_time, synced_at, raw_data)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
           `).bind(
@@ -2688,7 +2712,7 @@ async function searchOpportunitiesFromDB(env, searchQuery) {
     // 使用 SQL LIKE 查詢，搜尋名稱和客戶欄位
     const results = await env.DB.prepare(`
       SELECT id, name, customer, amount, stage, create_time as createTime, update_time as updateTime
-      FROM opportunities
+      FROM NewOpportunityObj
       WHERE LOWER(name) LIKE ? OR LOWER(customer) LIKE ?
       ORDER BY update_time DESC
       LIMIT 100
@@ -2725,13 +2749,13 @@ async function updateLocalOpportunities(env, opportunities) {
     try {
       // 檢查是否需要更新
       const existing = await env.DB.prepare(
-        'SELECT id FROM opportunities WHERE id = ?'
+        'SELECT id FROM NewOpportunityObj WHERE id = ?'
       ).bind(opp.id).first();
       
       if (!existing) {
         // 新商機，插入資料庫
         await env.DB.prepare(`
-          INSERT INTO opportunities 
+          INSERT INTO NewOpportunityObj 
           (id, name, customer, amount, stage, create_time, update_time, synced_at, raw_data)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).bind(
@@ -3697,7 +3721,7 @@ async function insertSitesToD1(env, sitesData) {
       // 從現有格式提取欄位
       const rawData = site.raw || {};
       return env.DB.prepare(`
-        INSERT OR REPLACE INTO sites (
+        INSERT OR REPLACE INTO object_8W9cb__c (
           id, name, opportunity_id, address, status, building_type, 
           floor_info, room_info, create_time, update_time, synced_at, raw_data
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -3743,7 +3767,7 @@ async function handleSitesFromDBAPI(request, env, corsHeaders) {
     const url = new URL(request.url);
     const opportunityId = url.searchParams.get('opportunity_id');
     
-    let query = 'SELECT * FROM sites';
+    let query = 'SELECT * FROM object_8W9cb__c';
     let params = [];
     
     if (opportunityId) {
@@ -4073,7 +4097,7 @@ async function insertMaintenanceOrdersToD1(env, maintenanceData) {
     const statements = maintenanceData.map(order => {
       const rawData = order.raw || {};
       return env.DB.prepare(`
-        INSERT OR REPLACE INTO maintenance_orders (
+        INSERT OR REPLACE INTO on_site_signature__c (
           id, name, opportunity_id, site_id, status, issue_type, description,
           maintenance_date, technician, contractor, cost, completion_status,
           create_time, update_time, synced_at, raw_data
@@ -4124,7 +4148,7 @@ async function insertSalesRecordsToD1(env, salesData) {
     
     const statements = salesData.map(record => {
       return env.DB.prepare(`
-        INSERT OR REPLACE INTO sales_records (
+        INSERT OR REPLACE INTO ActiveRecordObj (
           id, name, opportunity_id, record_type, content, interactive_type,
           location, create_time, update_time, synced_at, raw_data
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -4189,6 +4213,18 @@ async function handleProgressAPI(request, env, pathParts) {
           return await syncProgressToCRM(request, env, corsHeaders);
         }
         break;
+        
+      case 'migrate-project-id':
+        if (request.method === 'POST') {
+          return await migrateProjectId(request, env, corsHeaders);
+        }
+        break;
+        
+      case 'cleanup-orphaned':
+        if (request.method === 'POST') {
+          return await cleanupOrphanedData(request, env, corsHeaders);
+        }
+        break;
     }
     
     return new Response(JSON.stringify({ error: '不支援的端點或方法' }), {
@@ -4216,6 +4252,9 @@ async function saveConstructionProgress(request, env, corsHeaders) {
   try {
     const progressData = await request.json();
     
+    // 確保專案記錄存在（防止孤立數據）
+    await ensureProjectExists(env, progressData.projectId, progressData);
+    
     // 驗證必填欄位 - 增加 siteId
     const requiredFields = ['projectId', 'building', 'floor', 'unit'];
     for (const field of requiredFields) {
@@ -4239,12 +4278,13 @@ async function saveConstructionProgress(request, env, corsHeaders) {
     // 確定施工項目（目前使用固定值，可以後續擴展）
     const constructionItem = `${progressData.unit}-地磚舖設`; // 每個戶別獨立的施工項目
     
-    // 檢查是否已有記錄
+    // 檢查是否已有記錄 - 使用 UNIQUE 約束的完整條件
+    const crmOpportunityId = progressData.crmOpportunityId || progressData.projectId; // 使用商機ID
     const existingRecord = await env.DB.prepare(`
       SELECT id FROM site_progress 
-      WHERE project_id = ? AND building_name = ? AND floor_number = ? AND construction_item = ?
+      WHERE crm_opportunity_id = ? AND building_name = ? AND floor_number = ? AND construction_item = ?
     `).bind(
-      progressData.projectId,
+      crmOpportunityId,
       progressData.building,
       typeof progressData.floor === 'string' ? parseInt(progressData.floor.replace('F', '')) : parseInt(progressData.floor),
       constructionItem
@@ -4288,16 +4328,16 @@ async function saveConstructionProgress(request, env, corsHeaders) {
       
       console.log(`✅ 更新施工進度: ${progressId}`);
     } else {
-      // 插入新記錄 - 增加 site_id 欄位
+      // 插入新記錄 - 增加 site_id 欄位，使用 INSERT OR REPLACE 避免約束衝突
       await env.DB.prepare(`
-        INSERT INTO site_progress (
+        INSERT OR REPLACE INTO site_progress (
           id, crm_opportunity_id, project_id, site_id, building_name, floor_number, construction_item,
           progress_percentage, status, contractor_name, start_date, end_date, 
           actual_start_date, actual_end_date, notes, created_at, updated_at
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         progressId,
-        progressData.crmOpportunityId || 'xinganxi_2024', // 預設值，可從專案獲取
+        crmOpportunityId, // 使用統一的商機ID
         progressData.projectId,
         siteId, // 新增的案場 ID
         progressData.building,
@@ -4780,7 +4820,7 @@ async function querySitesByOpportunityFromD1(env, opportunityId) {
     console.log(`🔍 從 D1 查詢商機 ${opportunityId} 的關聯案場`);
     
     const result = await env.DB.prepare(`
-      SELECT * FROM sites 
+      SELECT * FROM object_8W9cb__c 
       WHERE opportunity_id = ? OR JSON_EXTRACT(raw_data, '$.field_1P96q__c') = ?
       ORDER BY create_time DESC
     `).bind(opportunityId, opportunityId).all();
@@ -4823,7 +4863,7 @@ async function searchSitesFromD1(env, searchQuery) {
     console.log(`🔍 從 D1 搜尋案場: ${searchQuery}`);
     
     const result = await env.DB.prepare(`
-      SELECT * FROM sites 
+      SELECT * FROM object_8W9cb__c 
       WHERE name LIKE ? 
          OR JSON_EXTRACT(raw_data, '$.field_WD7k1__c') LIKE ?
          OR JSON_EXTRACT(raw_data, '$.field_XuJP2__c') LIKE ?
@@ -4858,5 +4898,225 @@ async function searchSitesFromD1(env, searchQuery) {
   } catch (error) {
     console.error('❌ 搜尋案場失敗:', error);
     return [];
+  }
+}
+
+/**
+ * 遷移專案ID - 將舊格式的project_id更新為商機ID格式
+ */
+async function migrateProjectId(request, env, corsHeaders) {
+  try {
+    const { oldProjectId, newProjectId } = await request.json();
+    
+    if (!oldProjectId || !newProjectId) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: '需要提供舊專案ID和新專案ID'
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    }
+
+    console.log(`🔄 開始遷移專案ID: ${oldProjectId} → ${newProjectId}`);
+
+    // 1. 更新 site_progress 表中的 project_id
+    const progressUpdateResult = await env.DB.prepare(`
+      UPDATE site_progress 
+      SET project_id = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE project_id = ?
+    `).bind(newProjectId, oldProjectId).run();
+
+    console.log(`✅ 更新 site_progress 表: ${progressUpdateResult.changes} 筆記錄`);
+
+    // 2. 更新 projects 表中的專案記錄 (如果存在)
+    const projectUpdateResult = await env.DB.prepare(`
+      UPDATE projects 
+      SET id = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).bind(newProjectId, oldProjectId).run();
+
+    console.log(`✅ 更新 projects 表: ${projectUpdateResult.changes} 筆記錄`);
+
+    // 3. 檢查更新後的記錄數量
+    const verifyResult = await env.DB.prepare(`
+      SELECT COUNT(*) as count FROM site_progress WHERE project_id = ?
+    `).bind(newProjectId).first();
+
+    const totalUpdated = progressUpdateResult.changes + projectUpdateResult.changes;
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: `成功遷移專案ID`,
+      details: {
+        oldProjectId,
+        newProjectId,
+        progressRecordsUpdated: progressUpdateResult.changes,
+        projectRecordsUpdated: projectUpdateResult.changes,
+        totalRecordsUpdated: totalUpdated,
+        verificationCount: verifyResult.count
+      }
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+
+  } catch (error) {
+    console.error('❌ 專案ID遷移失敗:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: '專案ID遷移失敗',
+      message: error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+}
+
+/**
+ * 清理孤立數據 - 刪除沒有對應專案記錄的施工進度數據
+ */
+async function cleanupOrphanedData(request, env, corsHeaders) {
+  try {
+    console.log('🧹 開始清理孤立數據...');
+
+    // 查找孤立的 site_progress 記錄（沒有對應的 projects 記錄）
+    const orphanedRecords = await env.DB.prepare(`
+      SELECT sp.id, sp.project_id, sp.building_name, sp.floor_number, sp.created_at
+      FROM site_progress sp
+      LEFT JOIN projects p ON sp.project_id = p.id
+      WHERE p.id IS NULL
+    `).all();
+
+    if (!orphanedRecords.results || orphanedRecords.results.length === 0) {
+      return new Response(JSON.stringify({
+        success: true,
+        message: '沒有發現孤立數據',
+        orphanedCount: 0
+      }), {
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    }
+
+    console.log(`🔍 發現 ${orphanedRecords.results.length} 筆孤立記錄`);
+
+    // 刪除孤立的記錄
+    const deleteResult = await env.DB.prepare(`
+      DELETE FROM site_progress 
+      WHERE id IN (
+        SELECT sp.id
+        FROM site_progress sp
+        LEFT JOIN projects p ON sp.project_id = p.id
+        WHERE p.id IS NULL
+      )
+    `).run();
+
+    console.log(`✅ 清理完成，刪除 ${deleteResult.changes} 筆孤立記錄`);
+
+    return new Response(JSON.stringify({
+      success: true,
+      message: `成功清理 ${deleteResult.changes} 筆孤立數據`,
+      details: {
+        orphanedRecordsFound: orphanedRecords.results.length,
+        recordsDeleted: deleteResult.changes,
+        orphanedProjects: orphanedRecords.results.map(r => ({
+          id: r.id,
+          projectId: r.project_id,
+          location: `${r.building_name} ${r.floor_number}F`,
+          createdAt: r.created_at
+        }))
+      }
+    }), {
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+
+  } catch (error) {
+    console.error('❌ 清理孤立數據失敗:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: '清理孤立數據失敗',
+      message: error.message
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+}
+
+/**
+ * 確保專案記錄存在 - 防止孤立的施工進度數據
+ */
+async function ensureProjectExists(env, projectId, progressData) {
+  try {
+    // 檢查專案是否已存在
+    const existingProject = await env.DB.prepare(`
+      SELECT id FROM projects WHERE id = ?
+    `).bind(projectId).first();
+    
+    if (existingProject) {
+      console.log(`✅ 專案 ${projectId} 已存在`);
+      return;
+    }
+    
+    // 如果專案不存在，自動建立基本專案記錄
+    console.log(`🔧 自動建立專案記錄: ${projectId}`);
+    
+    // 從商機ID推斷專案名稱（如果是24字元hex格式）
+    let projectName = `自動建立專案-${projectId.substring(0, 8)}`;
+    if (projectId.length === 24 && /^[0-9a-f]{24}$/i.test(projectId)) {
+      // 如果是商機ID格式，嘗試從CRM獲取名稱
+      try {
+        const opportunity = await getOpportunityById(env, projectId);
+        if (opportunity) {
+          projectName = opportunity.name || projectName;
+        }
+      } catch (error) {
+        console.log('⚠️ 無法從CRM獲取商機名稱，使用預設名稱');
+      }
+    }
+    
+    const currentTime = new Date().toISOString();
+    
+    // 建立基本專案記錄
+    await env.DB.prepare(`
+      INSERT INTO projects (
+        id, crm_opportunity_id, name, slug, token, description,
+        building_count, floor_count, status, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).bind(
+      projectId,
+      projectId, // 使用projectId作為商機ID
+      projectName,
+      projectId,
+      projectId, // 使用projectId作為token
+      '由施工進度自動建立',
+      1, // 預設1棟
+      10, // 預設10層
+      'construction',
+      currentTime,
+      currentTime
+    ).run();
+    
+    // 同步到KV
+    const project = {
+      id: projectId,
+      name: projectName,
+      slug: projectId,
+      description: '由施工進度自動建立',
+      buildingCount: 1,
+      floorCount: 10,
+      status: 'construction',
+      created: currentTime,
+      lastUpdated: currentTime,
+      url: `https://progress.yes-ceramics.com/${projectId}/`
+    };
+    
+    await env.PROJECTS.put(`project:${projectId}`, JSON.stringify(project));
+    
+    console.log(`✅ 自動建立專案成功: ${projectId} - ${projectName}`);
+    
+  } catch (error) {
+    console.error(`❌ 自動建立專案失敗: ${projectId}`, error);
+    // 不阻止主要流程，只記錄錯誤
   }
 }
