@@ -636,11 +636,11 @@
                             <span>查看進度</span>
                         </label>
                         <label class="permission-option">
-                            <input type="checkbox">
+                            <input type="checkbox" checked disabled>
                             <span>查看施工照片</span>
                         </label>
                         <label class="permission-option">
-                            <input type="checkbox">
+                            <input type="checkbox" checked disabled>
                             <span>查看財務資訊</span>
                         </label>
                     </div>
@@ -650,16 +650,20 @@
                     <div class="permission-label">工班負責人</div>
                     <div class="permission-options">
                         <label class="permission-option">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" checked disabled>
                             <span>更新進度</span>
                         </label>
                         <label class="permission-option">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" checked disabled>
                             <span>上傳照片</span>
                         </label>
                         <label class="permission-option">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" checked disabled>
                             <span>管理工班成員</span>
+                        </label>
+                        <label class="permission-option">
+                            <input type="checkbox">
+                            <span>查看其他工班進度</span>
                         </label>
                     </div>
                 </div>
@@ -668,12 +672,16 @@
                     <div class="permission-label">工班成員</div>
                     <div class="permission-options">
                         <label class="permission-option">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" checked disabled>
                             <span>更新個人進度</span>
                         </label>
                         <label class="permission-option">
-                            <input type="checkbox" checked>
+                            <input type="checkbox" checked disabled>
                             <span>上傳施工照片</span>
+                        </label>
+                        <label class="permission-option">
+                            <input type="checkbox">
+                            <span>查看同工班其他成員進度</span>
                         </label>
                         <label class="permission-option">
                             <input type="checkbox">
@@ -683,19 +691,6 @@
                 </div>
             </div>
 
-            <div class="form-group" style="margin-top: 2rem;">
-                <label class="form-label">Email 認證設定</label>
-                <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
-                    <label class="permission-option">
-                        <input type="radio" name="emailAuth" value="required" checked>
-                        <span>必須 Email 認證</span>
-                    </label>
-                    <label class="permission-option">
-                        <input type="radio" name="emailAuth" value="optional">
-                        <span>選擇性認證</span>
-                    </label>
-                </div>
-            </div>
         </div>
 
         <!-- Step 4: Confirmation -->
@@ -1563,8 +1558,7 @@
             const permissions = {
                 owner: {},
                 contractorLeader: {},
-                member: {},
-                emailAuth: document.querySelector('input[name="emailAuth"]:checked').value
+                member: {}
             };
 
             // 收集各角色權限
