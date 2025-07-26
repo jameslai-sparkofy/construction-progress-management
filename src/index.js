@@ -2510,6 +2510,19 @@ async function handleCRMAPI(request, env, pathParts) {
       }
     case 'maintenance-orders':
       return await handleMaintenanceOrdersAPI(request, env, corsHeaders);
+    case 'opportunity-stats':
+      // 檢查是否為特定商機統計
+      if (pathParts[1]) {
+        return await handleOpportunityStatsAPI(request, env, corsHeaders, pathParts[1]);
+      } else {
+        return new Response(JSON.stringify({ error: '請提供商機ID' }), {
+          status: 400,
+          headers: { 
+            'Content-Type': 'application/json',
+            ...corsHeaders 
+          }
+        });
+      }
     default:
       return new Response(JSON.stringify({ error: 'CRM API 端點不存在' }), {
         status: 404,
@@ -3285,7 +3298,7 @@ async function queryOpportunities(token, corpId, userId, offset = 0, limit = 50)
     const opportunities = opportunityResult.data.dataList.map(opp => ({
       id: opp._id,
       name: opp.name || '未命名商機',
-      customer: opp.customer_name || opp.account_name || '未知客戶',
+      customer: opp.account_id__r || opp.customer_name || opp.account_name || '未知客戶',
       amount: formatAmount(opp.amount || opp.estimated_amount || 0),
       stage: opp.stage || '未知階段',
       createTime: opp.create_time,
@@ -5789,5 +5802,209 @@ async function ensureSalesRecordsTableStructure(env) {
   } catch (error) {
     console.error('❌ sales_records 表結構檢查失敗:', error);
     throw error;
+  }
+}
+
+/**
+ * 處理商機相關資料統計 API
+ */
+async function handleOpportunityStatsAPI(request, env, corsHeaders, opportunityId) {
+  if (request.method !== 'GET') {
+    return new Response(JSON.stringify({ error: '僅支援 GET 請求' }), {
+      status: 405,
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders 
+      }
+    });
+  }
+
+  try {
+    console.log(`🔍 查詢商機 ${opportunityId} 的相關資料統計...`);
+
+    // 查詢相關案場
+    const sitesQuery = await env.DB.prepare(`
+      SELECT * FROM sites 
+      WHERE opportunity_id = ? 
+      AND synced_at = (
+        SELECT MAX(synced_at) FROM sites s2 WHERE s2.id = sites.id
+      )
+      ORDER BY name
+    `).bind(opportunityId).all();
+
+    const sites = sitesQuery.results || [];
+    console.log(`✅ 找到 ${sites.length} 個相關案場`);
+
+    // 分析案場數據
+    const buildingTypes = new Set();
+    const floors = [];
+    let totalUnits = 0;
+
+    sites.forEach(site => {
+      // 棟別統計 - 從 raw_data 中讀取正確欄位
+      let rawData = {};
+      try {
+        rawData = typeof site.raw_data === 'string' ? JSON.parse(site.raw_data) : (site.raw_data || {});
+      } catch (e) {
+        console.log('解析 raw_data 失敗:', e);
+      }
+
+      // 棟別欄位: field_WD7k1__c
+      const buildingType = rawData.field_WD7k1__c || site.building_type;
+      if (buildingType) {
+        buildingTypes.add(buildingType);
+      }
+
+      // 樓層統計 - 樓層欄位: field_Q6Svh__c (數字類型)
+      const floorNumber = rawData.field_Q6Svh__c;
+      if (floorNumber && !isNaN(parseFloat(floorNumber))) {
+        floors.push(parseFloat(floorNumber));
+      }
+      // 也檢查舊的 floor_info 欄位作為備用
+      else if (site.floor_info) {
+        const floorMatch = site.floor_info.match(/(\d+(?:\.\d+)?)/);
+        if (floorMatch) {
+          floors.push(parseFloat(floorMatch[1]));
+        }
+      }
+
+      // 戶數統計 (每個案場算一戶)
+      totalUnits++;
+    });
+
+    // 計算建築棟數 - 如果沒有棟別資料，預設為1棟
+    const actualBuildingCount = buildingTypes.size > 0 ? buildingTypes.size : 1;
+
+    // 計算樓層範圍
+    const floorRange = floors.length > 0 
+      ? `${Math.min(...floors)}F - ${Math.max(...floors)}F`
+      : '無樓層資料';
+
+    // 查詢相關維修單
+    const maintenanceQuery = await env.DB.prepare(`
+      SELECT * FROM maintenance_orders 
+      WHERE opportunity_id = ?
+      AND synced_at = (
+        SELECT MAX(synced_at) FROM maintenance_orders m2 WHERE m2.id = maintenance_orders.id
+      )
+      ORDER BY create_time DESC
+    `).bind(opportunityId).all();
+
+    const maintenanceOrders = maintenanceQuery.results || [];
+    console.log(`✅ 找到 ${maintenanceOrders.length} 個相關維修單`);
+
+    // 查詢相關銷售記錄
+    const salesQuery = await env.DB.prepare(`
+      SELECT * FROM sales_records 
+      WHERE opportunity_id = ?
+      AND external_form_display = 'option_displayed__c'
+      AND synced_at = (
+        SELECT MAX(synced_at) FROM sales_records s2 WHERE s2.id = sales_records.id
+      )
+      ORDER BY create_time DESC
+    `).bind(opportunityId).all();
+
+    const salesRecords = salesQuery.results || [];
+    console.log(`✅ 找到 ${salesRecords.length} 個相關銷售記錄`);
+
+    // 構建統計資料
+    const stats = {
+      opportunity: {
+        id: opportunityId,
+        buildingCount: actualBuildingCount,
+        buildingTypes: Array.from(buildingTypes).sort(),
+        totalUnits: totalUnits,
+        floorRange: floorRange,
+        minFloor: floors.length > 0 ? Math.min(...floors) : 0,
+        maxFloor: floors.length > 0 ? Math.max(...floors) : 0
+      },
+      counts: {
+        opportunities: 1, // 當前商機
+        sites: sites.length,
+        maintenanceOrders: maintenanceOrders.length,
+        salesRecords: salesRecords.length
+      },
+      data: {
+        sites: sites.map(site => {
+          // 解析 raw_data 以獲取正確的欄位值
+          let buildingType = site.building_type;
+          let floorInfo = site.floor_info;
+          let roomInfo = site.room_info;
+          
+          if (site.raw_data) {
+            try {
+              const rawData = JSON.parse(site.raw_data);
+              // 使用正確的欄位 API 名稱
+              buildingType = rawData.field_WD7k1__c || buildingType || '';
+              floorInfo = rawData.field_Q6Svh__c || floorInfo || '';
+              roomInfo = rawData.field_XuJP2__c || roomInfo || '';
+            } catch (e) {
+              console.log('解析 raw_data 失敗:', e);
+            }
+          }
+          
+          return {
+            id: site.id,
+            name: site.name,
+            buildingType: buildingType,
+            floorInfo: floorInfo,
+            roomInfo: roomInfo,
+            status: site.status,
+            createTime: site.create_time,
+            updateTime: site.update_time
+          };
+        }),
+        maintenanceOrders: maintenanceOrders.map(order => ({
+          id: order.id,
+          name: order.name,
+          recordType: order.record_type,
+          content: order.content,
+          createTime: order.create_time,
+          updateTime: order.update_time
+        })),
+        salesRecords: salesRecords.map(record => ({
+          id: record.id,
+          name: record.name,
+          recordType: record.record_type,
+          content: record.content,
+          externalFormDisplay: record.external_form_display,
+          createTime: record.create_time,
+          updateTime: record.update_time
+        }))
+      }
+    };
+
+    console.log(`✅ 商機統計完成:`, {
+      建築棟數: stats.opportunity.buildingCount,
+      棟別: stats.opportunity.buildingTypes,
+      總戶數: stats.opportunity.totalUnits,
+      樓層範圍: stats.opportunity.floorRange,
+      案場數: stats.counts.sites,
+      維修單數: stats.counts.maintenanceOrders,
+      銷售記錄數: stats.counts.salesRecords
+    });
+
+    return new Response(JSON.stringify({
+      success: true,
+      data: stats
+    }), {
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders 
+      }
+    });
+
+  } catch (error) {
+    console.error('查詢商機統計失敗:', error);
+    return new Response(JSON.stringify({ 
+      success: false,
+      error: `查詢失敗: ${error.message}` 
+    }), {
+      status: 500,
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders 
+      }
+    });
   }
 }

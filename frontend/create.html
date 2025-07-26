@@ -475,7 +475,6 @@
                         <div><strong>商機名稱：</strong><span id="crmName">勝興-興安西-2024</span></div>
                         <div><strong>商機 ID：</strong><span id="crmId">OPP2024001</span></div>
                         <div><strong>客戶名稱：</strong><span id="crmCustomer">王先生</span></div>
-                        <div><strong>預計金額：</strong><span id="crmAmount">NT$ 15,000,000</span></div>
                     </div>
                 </div>
             </div>
@@ -490,45 +489,102 @@
 
             <div class="form-grid">
                 <div class="form-group">
-                    <label class="form-label">專案簡稱 <span class="required">*</span></label>
-                    <input type="text" class="form-input" id="projectSlug" placeholder="例如：xinganxi" oninput="updateURLPreview()">
-                    <small style="color: #6b7280; margin-top: 0.25rem;">用於 URL 的識別碼，只能使用英文字母、數字和連字號</small>
-                </div>
-
-                <div class="form-group">
                     <label class="form-label">專案顯示名稱 <span class="required">*</span></label>
                     <input type="text" class="form-input" id="projectName" value="興安西工程" placeholder="例如：興安西工程">
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">建築棟數</label>
-                    <select class="form-select" id="buildingCount">
-                        <option value="3" selected>3棟 (A/B/C)</option>
-                        <option value="2">2棟 (A/B)</option>
-                        <option value="1">1棟 (A)</option>
-                        <option value="4">4棟 (A/B/C/D)</option>
-                    </select>
+                    <div class="form-input" id="buildingCount" style="background: #f9fafb; color: #6b7280;">
+                        載入中...
+                    </div>
+                    <small style="color: #6b7280; margin-top: 0.25rem;">根據案場資料自動計算</small>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">總樓層數</label>
-                    <input type="number" class="form-input" id="floorCount" value="15" min="1" max="50">
+                    <label class="form-label">總戶數</label>
+                    <div class="form-input" id="totalUnits" style="background: #f9fafb; color: #6b7280;">
+                        載入中...
+                    </div>
+                    <small style="color: #6b7280; margin-top: 0.25rem;">根據案場資料自動計算</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">樓層範圍</label>
+                    <div class="form-input" id="floorRange" style="background: #f9fafb; color: #6b7280;">
+                        載入中...
+                    </div>
+                    <small style="color: #6b7280; margin-top: 0.25rem;">根據案場資料自動計算</small>
                 </div>
             </div>
 
             <div class="form-group" style="margin-top: 1.5rem;">
                 <label class="form-label">專案描述</label>
-                <textarea class="form-textarea" id="projectDescription" placeholder="輸入專案的詳細描述...">位於興安路西側的高層住宅建案，共3棟15層樓建築</textarea>
+                <textarea class="form-textarea" id="projectDescription" placeholder="輸入專案的詳細描述..."></textarea>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">專案網址預覽</label>
-                <div class="url-preview">
-                    <span id="urlPreview">progress.yes-ceramics.com/xinganxi-abc123def456/</span>
-                    <button class="copy-btn" onclick="copyURL()">複製</button>
+            <!-- 資料庫視圖 -->
+            <div style="margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem; color: #1f2937;">📊 相關資料統計</h3>
+                
+                <!-- 統計卡片 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                    <div style="background: #f3f4f6; padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 600; color: #4f46e5;" id="statsOpportunities">-</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">商機</div>
+                    </div>
+                    <div style="background: #f3f4f6; padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 600; color: #059669;" id="statsSites">-</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">案場</div>
+                    </div>
+                    <div style="background: #f3f4f6; padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 600; color: #dc2626;" id="statsMaintenance">-</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">維修單</div>
+                    </div>
+                    <div style="background: #f3f4f6; padding: 1rem; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: 600; color: #7c2d12;" id="statsSales">-</div>
+                        <div style="font-size: 0.9rem; color: #6b7280;">銷售記錄</div>
+                    </div>
                 </div>
-                <small style="color: #6b7280; margin-top: 0.25rem;">系統會自動產生12位安全令牌</small>
+
+                <!-- 資料表格 -->
+                <div style="background: #f9fafb; border-radius: 8px; overflow: hidden;">
+                    <div style="padding: 1rem; border-bottom: 1px solid #e5e7eb; background: white;">
+                        <h4 style="margin: 0; color: #374151;">📋 詳細資料列表</h4>
+                    </div>
+                    
+                    <!-- 案場資料 -->
+                    <div style="padding: 1rem;">
+                        <h5 style="margin: 0 0 0.5rem 0; color: #059669;">🏢 案場資料</h5>
+                        <div id="sitesTable" style="max-height: 300px; overflow-y: auto;">
+                            <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                                請先選擇商機以載入相關案場資料
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 維修單資料 -->
+                    <div style="padding: 1rem; border-top: 1px solid #e5e7eb;">
+                        <h5 style="margin: 0 0 0.5rem 0; color: #dc2626;">🔧 維修單資料</h5>
+                        <div id="maintenanceTable" style="max-height: 200px; overflow-y: auto;">
+                            <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                                請先選擇商機以載入相關維修單資料
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 銷售記錄資料 -->
+                    <div style="padding: 1rem; border-top: 1px solid #e5e7eb;">
+                        <h5 style="margin: 0 0 0.5rem 0; color: #7c2d12;">💰 銷售記錄資料</h5>
+                        <div id="salesTable" style="max-height: 200px; overflow-y: auto;">
+                            <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                                請先選擇商機以載入相關銷售記錄資料
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
         </div>
 
         <!-- Step 3: Permission Settings -->
@@ -788,10 +844,10 @@
             const crmList = document.querySelector('.crm-list');
             
             crmList.innerHTML = opportunities.map(opp => `
-                <div class="crm-item" onclick="selectCRM('${opp.id}', '${escapeHtml(opp.name)}', '${escapeHtml(opp.customer)}', '${opp.amount}')">
+                <div class="crm-item" onclick="selectCRM('${opp.id}', '${escapeHtml(opp.name)}', '${escapeHtml(opp.customer)}')">
                     <div style="font-weight: 600;">${escapeHtml(opp.name)}</div>
                     <div style="font-size: 0.9rem; color: #6b7280;">
-                        客戶：${escapeHtml(opp.customer)} | 金額：${opp.amount}
+                        客戶：${escapeHtml(opp.customer)}
                     </div>
                     ${opp.stage ? `<div style="font-size: 0.8rem; color: #8b5cf6;">階段：${escapeHtml(opp.stage)}</div>` : ''}
                 </div>
@@ -921,11 +977,10 @@
             return div.innerHTML;
         }
 
-        function selectCRM(id, name, customer, amount) {
+        async function selectCRM(id, name, customer) {
             document.getElementById('crmId').textContent = id;
             document.getElementById('crmName').textContent = name;
             document.getElementById('crmCustomer').textContent = customer;
-            document.getElementById('crmAmount').textContent = `NT$ ${parseInt(amount).toLocaleString()}`;
             
             document.getElementById('crmSelection').classList.add('selected');
             document.getElementById('selectedCRM').style.display = 'block';
@@ -935,27 +990,221 @@
             const projectName = name.split('-')[1] || name;
             document.getElementById('projectName').value = projectName + '工程';
             
-            // Generate slug
-            const slug = projectName.toLowerCase().replace(/[^a-z0-9]/g, '');
-            document.getElementById('projectSlug').value = slug;
-            updateURLPreview();
+            // 載入商機相關統計資料
+            await loadOpportunityStats(id);
         }
 
-        function updateURLPreview() {
-            const slug = document.getElementById('projectSlug').value || 'project';
-            const token = generateToken();
-            document.getElementById('urlPreview').textContent = `progress.yes-ceramics.com/${slug}-${token}/`;
+        // 載入商機相關統計資料
+        async function loadOpportunityStats(opportunityId) {
+            console.log('🔍 載入商機統計資料:', opportunityId);
+            
+            try {
+                // 顯示載入狀態
+                document.getElementById('buildingCount').textContent = '載入中...';
+                document.getElementById('totalUnits').textContent = '載入中...';
+                document.getElementById('floorRange').textContent = '載入中...';
+                
+                document.getElementById('statsOpportunities').textContent = '-';
+                document.getElementById('statsSites').textContent = '-';
+                document.getElementById('statsMaintenance').textContent = '-';
+                document.getElementById('statsSales').textContent = '-';
+                
+                // 清空表格
+                document.getElementById('sitesTable').innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280;">載入中...</div>';
+                document.getElementById('maintenanceTable').innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280;">載入中...</div>';
+                document.getElementById('salesTable').innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280;">載入中...</div>';
+                
+                // 調用 API
+                const response = await fetch(`/api/crm/opportunity-stats/${opportunityId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log('✅ 商機統計資料:', result);
+                
+                if (!result.success) {
+                    throw new Error(result.error || '載入統計失敗');
+                }
+                
+                const stats = result.data;
+                
+                // 更新基本設定欄位
+                const buildingText = stats.opportunity.buildingCount > 0 
+                    ? `${stats.opportunity.buildingCount}棟 (${stats.opportunity.buildingTypes.join('/')})`
+                    : '無建築資料';
+                document.getElementById('buildingCount').textContent = buildingText;
+                
+                document.getElementById('totalUnits').textContent = stats.opportunity.totalUnits > 0 
+                    ? `${stats.opportunity.totalUnits}戶`
+                    : '無戶數資料';
+                    
+                document.getElementById('floorRange').textContent = stats.opportunity.floorRange;
+                
+                // 更新統計卡片
+                document.getElementById('statsOpportunities').textContent = stats.counts.opportunities;
+                document.getElementById('statsSites').textContent = stats.counts.sites;
+                document.getElementById('statsMaintenance').textContent = stats.counts.maintenanceOrders;
+                document.getElementById('statsSales').textContent = stats.counts.salesRecords;
+                
+                // 更新資料表格
+                renderSitesTable(stats.data.sites);
+                renderMaintenanceTable(stats.data.maintenanceOrders);
+                renderSalesTable(stats.data.salesRecords);
+                
+                console.log('✅ 商機統計資料載入完成');
+                
+            } catch (error) {
+                console.error('❌ 載入商機統計失敗:', error);
+                
+                // 顯示錯誤狀態
+                document.getElementById('buildingCount').textContent = '載入失敗';
+                document.getElementById('totalUnits').textContent = '載入失敗';
+                document.getElementById('floorRange').textContent = '載入失敗';
+                
+                document.getElementById('sitesTable').innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #ef4444;">
+                        <div style="margin-bottom: 0.5rem;">❌ 載入失敗</div>
+                        <div style="font-size: 0.9rem;">${error.message}</div>
+                    </div>
+                `;
+                document.getElementById('maintenanceTable').innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #ef4444;">
+                        載入失敗: ${error.message}
+                    </div>
+                `;
+                document.getElementById('salesTable').innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #ef4444;">
+                        載入失敗: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // 渲染案場表格
+        function renderSitesTable(sites) {
+            const sitesTable = document.getElementById('sitesTable');
+            
+            if (sites.length === 0) {
+                sitesTable.innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280;">沒有相關案場資料</div>';
+                return;
+            }
+            
+            const table = `
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="background: #f3f4f6;">
+                            <th style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: left;">案場名稱</th>
+                            <th style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: center;">棟別</th>
+                            <th style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: center;">樓層</th>
+                            <th style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: center;">戶別</th>
+                            <th style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: center;">狀態</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${sites.map(site => `
+                            <tr>
+                                <td style="padding: 0.5rem; border: 1px solid #e5e7eb;">${escapeHtml(site.name)}</td>
+                                <td style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: center;">${escapeHtml(site.buildingType || '-')}</td>
+                                <td style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: center;">${escapeHtml(site.floorInfo || '-')}</td>
+                                <td style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: center;">${escapeHtml(site.roomInfo || '-')}</td>
+                                <td style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: center;">
+                                    <span style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; background: #d1fae5; color: #065f46;">
+                                        ${escapeHtml(site.status || '未知')}
+                                    </span>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            sitesTable.innerHTML = table;
+        }
+        
+        // 渲染維修單表格
+        function renderMaintenanceTable(maintenanceOrders) {
+            const maintenanceTable = document.getElementById('maintenanceTable');
+            
+            if (maintenanceOrders.length === 0) {
+                maintenanceTable.innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280;">沒有相關維修單資料</div>';
+                return;
+            }
+            
+            const table = `
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="background: #f3f4f6;">
+                            <th style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: left;">維修單名稱</th>
+                            <th style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: left;">類型</th>
+                            <th style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: left;">內容</th>
+                            <th style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: center;">建立時間</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${maintenanceOrders.map(order => `
+                            <tr>
+                                <td style="padding: 0.5rem; border: 1px solid #e5e7eb;">${escapeHtml(order.name || '-')}</td>
+                                <td style="padding: 0.5rem; border: 1px solid #e5e7eb;">${escapeHtml(order.recordType || '-')}</td>
+                                <td style="padding: 0.5rem; border: 1px solid #e5e7eb; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(order.content || '')}">${escapeHtml(order.content || '-')}</td>
+                                <td style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: center; font-size: 0.8rem;">${formatDate(order.createTime)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            maintenanceTable.innerHTML = table;
+        }
+        
+        // 渲染銷售記錄表格
+        function renderSalesTable(salesRecords) {
+            const salesTable = document.getElementById('salesTable');
+            
+            if (salesRecords.length === 0) {
+                salesTable.innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280;">沒有相關銷售記錄資料</div>';
+                return;
+            }
+            
+            const table = `
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="background: #f3f4f6;">
+                            <th style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: left;">記錄名稱</th>
+                            <th style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: left;">類型</th>
+                            <th style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: left;">內容</th>
+                            <th style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: center;">建立時間</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${salesRecords.map(record => `
+                            <tr>
+                                <td style="padding: 0.5rem; border: 1px solid #e5e7eb;">${escapeHtml(record.name || '-')}</td>
+                                <td style="padding: 0.5rem; border: 1px solid #e5e7eb;">${escapeHtml(record.recordType || '-')}</td>
+                                <td style="padding: 0.5rem; border: 1px solid #e5e7eb; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(record.content || '')}">${escapeHtml(record.content || '-')}</td>
+                                <td style="padding: 0.5rem; border: 1px solid #e5e7eb; text-align: center; font-size: 0.8rem;">${formatDate(record.createTime)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            salesTable.innerHTML = table;
+        }
+        
+        // 格式化日期
+        function formatDate(timestamp) {
+            if (!timestamp) return '-';
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('zh-TW') + ' ' + date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
         }
 
-        function generateToken() {
-            return 'abc123def456'; // In real implementation, generate random 12-char token
-        }
-
-        function copyURL() {
-            const url = document.getElementById('urlPreview').textContent;
-            navigator.clipboard.writeText(url);
-            alert('URL 已複製到剪貼板');
-        }
 
         function nextStep() {
             if (currentStep < totalSteps) {
@@ -1009,21 +1258,20 @@
             // 收集表單資料
             const projectData = {
                 projectName: document.getElementById('projectName').value,
-                projectSlug: document.getElementById('projectSlug').value,
-                buildingCount: document.getElementById('buildingCount').value,
-                floorCount: document.getElementById('floorCount').value,
+                buildingCount: document.getElementById('buildingCount').textContent,
+                totalUnits: document.getElementById('totalUnits').textContent,
+                floorRange: document.getElementById('floorRange').textContent,
                 projectDescription: document.getElementById('projectDescription').value,
                 crmInfo: {
                     id: document.getElementById('crmId').textContent,
                     name: document.getElementById('crmName').textContent,
-                    customer: document.getElementById('crmCustomer').textContent,
-                    amount: document.getElementById('crmAmount').textContent
+                    customer: document.getElementById('crmCustomer').textContent
                 },
                 permissions: collectPermissions()
             };
 
             // 驗證資料
-            if (!projectData.projectName || !projectData.projectSlug) {
+            if (!projectData.projectName) {
                 alert('請填寫必要欄位');
                 return;
             }
@@ -1141,6 +1389,16 @@
         document.getElementById('crmModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 this.classList.remove('show');
+            }
+        });
+
+        // 檢查 URL 參數，如果有 opportunityId 則自動載入
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const opportunityId = urlParams.get('opportunityId');
+            if (opportunityId) {
+                console.log('🔗 檢測到 URL 參數 opportunityId:', opportunityId);
+                loadOpportunityStats(opportunityId);
             }
         });
     </script>
