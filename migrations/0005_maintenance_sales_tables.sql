@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS sales_records (
     stage TEXT,
     notes TEXT,
     location TEXT, -- 定位 (field_aN2iY__c)
+    external_form_display TEXT, -- 外部表單顯示 (external_form_display__c)
     create_time INTEGER,
     update_time INTEGER,
     synced_at INTEGER,

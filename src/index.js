@@ -65,17 +65,21 @@ export default {
     console.log('🕐 開始執行定時同步任務...');
     
     try {
-      // 執行商機同步
-      const opportunitySync = await syncOpportunitiesToDB(env);
+      // 記錄商機同步開始
+      const opportunityLogId = await logSyncStart(env, 'opportunities', 'cron_trigger', 'Cloudflare-Cron', 'scheduled');
+      const opportunitySync = await syncOpportunitiesToDB(env, opportunityLogId);
       
-      // 執行案場同步
-      const siteSync = await syncSitesToDB(env);
+      // 記錄案場同步開始
+      const siteLogId = await logSyncStart(env, 'sites', 'cron_trigger', 'Cloudflare-Cron', 'scheduled');
+      const siteSync = await syncSitesToDB(env, siteLogId);
       
-      // 執行維修單同步
-      const maintenanceSync = await syncMaintenanceOrdersToDB(env);
+      // 記錄維修單同步開始
+      const maintenanceLogId = await logSyncStart(env, 'maintenance', 'cron_trigger', 'Cloudflare-Cron', 'scheduled');
+      const maintenanceSync = await syncMaintenanceOrdersToDB(env, maintenanceLogId);
       
-      // 執行銷售記錄同步
-      const salesSync = await syncSalesRecordsToDB(env);
+      // 記錄銷售記錄同步開始
+      const salesLogId = await logSyncStart(env, 'sales', 'cron_trigger', 'Cloudflare-Cron', 'scheduled');
+      const salesSync = await syncSalesRecordsToDB(env, salesLogId);
       
       console.log('✅ 定時同步完成:', {
         opportunities: {
@@ -204,6 +208,10 @@ async function handleAPI(request, env, pathParts) {
       return await handleTestCRMWrite(request, env);
     case 'test-token':
       return await handleTestToken(request, env);
+    case 'database':
+      return await handleDatabaseAPI(request, env, pathParts.slice(1));
+    case 'migration':
+      return await handleMigrationAPI(request, env, pathParts);
     default:
       return new Response(JSON.stringify({ error: 'API 端點不存在' }), {
         status: 404,
@@ -216,17 +224,17 @@ async function handleAPI(request, env, pathParts) {
  * 處理專案頁面
  */
 async function handleProjectPage(request, env, projectSlug, subPaths) {
-  // 從專案 slug 中解析專案名稱和令牌
-  const [projectName, token] = projectSlug.split('-');
+  // 直接使用專案ID，不需要解析格式
+  const projectId = projectSlug;
   
-  if (!projectName || !token) {
-    return new Response('專案 URL 格式錯誤', { status: 400 });
+  if (!projectId) {
+    return new Response('專案ID不能為空', { status: 400 });
   }
   
   // 根據子路徑決定顯示內容
   if (subPaths.length === 0) {
     // 主專案頁面 - 返回完整的興安西工程管理頁面
-    return await serveProjectHTML(env);
+    return await serveProjectHTML(env, projectId);
   } else {
     // 專案子頁面 (例如：報表、設定等)
     const subPage = subPaths[0];
@@ -515,13 +523,27 @@ async function initializeProjectData(env, project) {
 /**
  * 服務完整的專案HTML頁面
  */
-async function serveProjectHTML(env) {
+async function serveProjectHTML(env, projectId = null) {
   // 直接從環境中的ASSETS獲取完整的project.html
   try {
     if (env && env.ASSETS) {
       const response = await env.ASSETS.fetch(new Request('https://fake-host/project.html'));
       if (response && response.ok) {
-        return new Response(await response.text(), {
+        let html = await response.text();
+        
+        // 如果提供了專案ID，將其注入到HTML中
+        if (projectId) {
+          // 在HTML中注入專案ID，供前端JavaScript使用
+          html = html.replace(
+            '<head>',
+            `<head>
+            <script>
+              window.PROJECT_ID = '${projectId}';
+            </script>`
+          );
+        }
+        
+        return new Response(html, {
           headers: { 
             'Content-Type': 'text/html; charset=utf-8',
             'Cache-Control': 'public, max-age=300'
@@ -2069,8 +2091,15 @@ async function handleOpportunitiesSync(request, env, corsHeaders) {
     });
   }
   
+  const userAgent = request.headers.get('User-Agent') || '';
+  const ipAddress = request.headers.get('CF-Connecting-IP') || '';
+  let logId = null;
+  
   try {
     console.log('🔄 開始同步 Fxiaoke CRM 商機到 D1 資料庫');
+    
+    // 記錄同步開始
+    logId = await logSyncStart(env, 'opportunities', 'manual_trigger', userAgent, ipAddress);
     
     // 檢查上次同步時間，避免頻繁同步
     const lastSync = await env.DB.prepare(
@@ -2081,6 +2110,7 @@ async function handleOpportunitiesSync(request, env, corsHeaders) {
     const minInterval = 5 * 60 * 1000; // 5 分鐘最小間隔
     
     if (lastSync && (now - lastSync.last_sync_time) < minInterval) {
+      await logSyncComplete(env, logId, 'error', 0, 0, 0, '同步間隔過短，請稍後再試');
       return new Response(JSON.stringify({
         success: false,
         message: '同步間隔過短，請稍後再試',
@@ -2091,7 +2121,7 @@ async function handleOpportunitiesSync(request, env, corsHeaders) {
     }
     
     // 執行同步
-    const syncResult = await syncOpportunitiesToDB(env);
+    const syncResult = await syncOpportunitiesToDB(env, logId);
     
     return new Response(JSON.stringify(syncResult), {
       headers: { 'Content-Type': 'application/json', ...corsHeaders }
@@ -2099,6 +2129,7 @@ async function handleOpportunitiesSync(request, env, corsHeaders) {
     
   } catch (error) {
     console.error('同步失敗:', error);
+    await logSyncComplete(env, logId, 'error', 0, 0, 0, error.message);
     return new Response(JSON.stringify({
       success: false,
       error: error.message
@@ -2189,7 +2220,7 @@ async function handleForceSync(request, env, corsHeaders) {
 /**
  * 同步商機到 D1 資料庫
  */
-async function syncOpportunitiesToDB(env) {
+async function syncOpportunitiesToDB(env, logId = null) {
   const startTime = Date.now();
   
   try {
@@ -2277,6 +2308,23 @@ async function syncOpportunitiesToDB(env) {
     const duration = Date.now() - startTime;
     console.log(`✅ 同步完成，耗時 ${duration}ms`);
     
+    // 記錄同步完成LOG
+    await logSyncComplete(
+      env, 
+      logId, 
+      'success', 
+      opportunities.length,
+      insertedCount + updatedCount,
+      0,
+      '',
+      JSON.stringify({
+        insertedCount,
+        updatedCount,
+        totalCount: opportunities.length,
+        syncedTable: 'opportunities'
+      })
+    );
+    
     return {
       success: true,
       syncedCount: opportunities.length,
@@ -2288,6 +2336,21 @@ async function syncOpportunitiesToDB(env) {
     
   } catch (error) {
     console.error('同步失敗:', error);
+    
+    // 記錄同步失敗LOG
+    await logSyncComplete(
+      env, 
+      logId, 
+      'error', 
+      0,
+      0,
+      1,
+      error.message,
+      JSON.stringify({
+        errorDetails: error.stack || error.message,
+        syncedTable: 'opportunities'
+      })
+    );
     
     try {
       // 記錄失敗狀態
@@ -3929,6 +3992,10 @@ async function syncSalesRecordsToDB(env) {
   console.log('💰 開始同步銷售記錄資料到 D1...');
   
   try {
+    // 確保 sales_records 表結構正確
+    await ensureSalesRecordsTableStructure(env);
+    console.log('✅ sales_records 表結構檢查完成');
+    
     const tokenResult = await getFxiaokeToken();
     if (!tokenResult.success) {
       throw new Error(`獲取 Token 失敗: ${tokenResult.error}`);
@@ -4018,6 +4085,13 @@ async function querySalesRecords(token, corpId, userId, limit = 100, offset = 0)
           search_query_info: {
             limit: limit,
             offset: offset,
+            filters: [
+              {
+                field_name: "external_form_display__c",
+                field_values: ["option_displayed__c"],
+                operator: "EQ"
+              }
+            ],
             orders: [{ fieldName: "create_time", isAsc: "false" }]
           }
         }
@@ -4044,6 +4118,7 @@ async function querySalesRecords(token, corpId, userId, limit = 100, offset = 0)
       interactive_type: record.interactive_types || '',
       location: record.field_aN2iY__c || '',
       opportunity_id: record.related_opportunity_id || '', // 可能為空
+      external_form_display: record.external_form_display__c || '',
       create_time: record.create_time || 0,
       update_time: record.last_modified_time || 0,
       raw_data: JSON.stringify(record)
@@ -4126,8 +4201,8 @@ async function insertSalesRecordsToD1(env, salesData) {
       return env.DB.prepare(`
         INSERT OR REPLACE INTO sales_records (
           id, name, opportunity_id, record_type, content, interactive_type,
-          location, create_time, update_time, synced_at, raw_data
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          location, external_form_display, create_time, update_time, synced_at, raw_data
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `).bind(
         record.id,
         record.name,
@@ -4136,6 +4211,7 @@ async function insertSalesRecordsToD1(env, salesData) {
         record.content,
         record.interactive_type,
         record.location,
+        record.external_form_display,
         record.create_time,
         record.update_time,
         currentTime,
@@ -4858,5 +4934,768 @@ async function searchSitesFromD1(env, searchQuery) {
   } catch (error) {
     console.error('❌ 搜尋案場失敗:', error);
     return [];
+  }
+}
+
+/**
+ * 處理資料庫 API 請求
+ */
+async function handleDatabaseAPI(request, env, pathParts) {
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+
+  const endpoint = pathParts[0];
+  console.log('🗄️ 資料庫 API 請求:', { endpoint, pathParts });
+
+  try {
+    switch (endpoint) {
+      case 'stats':
+        return await handleDatabaseStats(env, corsHeaders);
+      case 'opportunities':
+        return await handleDatabaseTable(env, 'NewOpportunityObj', corsHeaders, request);
+      case 'sites':
+        return await handleDatabaseTable(env, 'object_8W9cb__c', corsHeaders, request);
+      case 'maintenance':
+        return await handleDatabaseTable(env, 'on_site_signature__c', corsHeaders, request);
+      case 'sales':
+        return await handleDatabaseTable(env, 'ActiveRecordObj', corsHeaders, request);
+      case 'logs':
+        return await handleDatabaseLogs(env, corsHeaders);
+      default:
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: '資料庫 API 端點不存在' 
+        }), {
+          status: 404,
+          headers: { 
+            'Content-Type': 'application/json',
+            ...corsHeaders 
+          }
+        });
+    }
+  } catch (error) {
+    console.error('❌ 資料庫 API 錯誤:', error);
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: error.message 
+    }), {
+      status: 500,
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders 
+      }
+    });
+  }
+}
+
+/**
+ * 取得資料庫統計資訊
+ */
+async function handleDatabaseStats(env, corsHeaders) {
+  try {
+    const stats = {};
+    
+    // 商機數量 (只統計有案場的商機)
+    const opportunitiesResult = await env.DB.prepare(
+      'SELECT COUNT(DISTINCT o.id) as count FROM NewOpportunityObj o INNER JOIN object_8W9cb__c s ON o.id = s.opportunity_id'
+    ).first();
+    stats.opportunities = opportunitiesResult?.count || 0;
+    
+    // 案場數量 (去重)
+    const sitesResult = await env.DB.prepare(
+      'SELECT COUNT(DISTINCT id) as count FROM object_8W9cb__c'
+    ).first();
+    stats.sites = sitesResult?.count || 0;
+    
+    // 維修單數量
+    const maintenanceResult = await env.DB.prepare(
+      'SELECT COUNT(*) as count FROM on_site_signature__c'
+    ).first();
+    stats.maintenance_orders = maintenanceResult?.count || 0;
+    
+    // 銷售記錄數量
+    const salesResult = await env.DB.prepare(
+      'SELECT COUNT(*) as count FROM ActiveRecordObj'
+    ).first();
+    stats.sales_records = salesResult?.count || 0;
+    
+    // 同步記錄數量 (檢查表是否存在)
+    let syncLogsCount = 0;
+    try {
+      const logsResult = await env.DB.prepare(
+        'SELECT COUNT(*) as count FROM sync_logs'
+      ).first();
+      syncLogsCount = logsResult?.count || 0;
+    } catch (e) {
+      // 表不存在時忽略錯誤
+      console.log('sync_logs表不存在');
+    }
+    stats.search_logs = syncLogsCount;
+    
+    return new Response(JSON.stringify({ 
+      success: true, 
+      stats 
+    }), {
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders 
+      }
+    });
+  } catch (error) {
+    console.error('❌ 取得統計資訊失敗:', error);
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: error.message 
+    }), {
+      status: 500,
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders 
+      }
+    });
+  }
+}
+
+/**
+ * 取得資料庫表格資料
+ */
+async function handleDatabaseTable(env, tableName, corsHeaders, request) {
+  try {
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const limit = parseInt(url.searchParams.get('limit') || '100');
+    const search = url.searchParams.get('search') || '';
+    const offset = (page - 1) * limit;
+    
+    // 不同表格可能有不同的時間欄位名稱
+    let orderBy = 'rowid DESC';
+    let selectFields = '*';
+    let whereClause = '';
+    
+    if (tableName === 'NewOpportunityObj') {
+      orderBy = 'o.create_time DESC';
+      selectFields = 'DISTINCT o.id, o.name, o.customer, o.amount, o.stage, o.create_time, o.update_time, o.synced_at, o.raw_data';
+      // 只查詢有案場的商機
+      whereClause = 'INNER JOIN object_8W9cb__c s ON o.id = s.opportunity_id';
+      if (search) {
+        whereClause += ` WHERE o.name LIKE '%${search}%' OR o.customer LIKE '%${search}%'`;
+      }
+    } else if (tableName === 'object_8W9cb__c') {
+      orderBy = 'create_time DESC';
+      selectFields = 'DISTINCT id, name, opportunity_id, address, status, building_type, floor_info, room_info, create_time, update_time, synced_at, raw_data';
+      if (search) {
+        whereClause = `WHERE name LIKE '%${search}%' OR address LIKE '%${search}%'`;
+      }
+    } else if (tableName === 'on_site_signature__c') {
+      orderBy = 'create_time DESC';
+      selectFields = 'id, name, status, create_time, update_time, synced_at, raw_data';
+      if (search) {
+        whereClause = `WHERE name LIKE '%${search}%'`;
+      }
+    } else if (tableName === 'ActiveRecordObj') {
+      orderBy = 'create_time DESC';
+      selectFields = 'id, name, create_time, update_time, synced_at, raw_data';
+      if (search) {
+        whereClause = `WHERE name LIKE '%${search}%'`;
+      }
+    } else if (tableName === 'search_logs') {
+      orderBy = 'search_time DESC';
+      if (search) {
+        whereClause = `WHERE search_term LIKE '%${search}%'`;
+      }
+    } else {
+      if (search) {
+        whereClause = `WHERE name LIKE '%${search}%'`;
+      }
+    }
+    
+    let query;
+    if (tableName === 'NewOpportunityObj') {
+      query = `SELECT ${selectFields} FROM ${tableName} o ${whereClause} ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
+    } else {
+      query = `SELECT ${selectFields} FROM ${tableName} ${whereClause} ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
+    }
+    
+    const result = await env.DB.prepare(query).all();
+    
+    return new Response(JSON.stringify({ 
+      success: true, 
+      data: result.results || [],
+      count: result.results?.length || 0
+    }), {
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders 
+      }
+    });
+  } catch (error) {
+    console.error(`❌ 取得 ${tableName} 表格資料失敗:`, error);
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: error.message 
+    }), {
+      status: 500,
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders 
+      }
+    });
+  }
+}
+
+/**
+ * 取得同步記錄
+ */
+async function handleDatabaseLogs(env, corsHeaders) {
+  try {
+    // 查詢sync_logs表
+    let result;
+    try {
+      result = await env.DB.prepare(
+        'SELECT * FROM sync_logs ORDER BY start_time DESC LIMIT 200'
+      ).all();
+    } catch (e) {
+      // 表不存在時返回空結果
+      console.log('sync_logs表不存在，可能是第一次使用');
+      result = { results: [] };
+    }
+    
+    return new Response(JSON.stringify({ 
+      success: true, 
+      data: result.results || [],
+      count: result.results?.length || 0
+    }), {
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders 
+      }
+    });
+  } catch (error) {
+    console.error('❌ 取得同步記錄失敗:', error);
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: error.message 
+    }), {
+      status: 500,
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders 
+      }
+    });
+  }
+}
+
+/**
+ * 同步LOG記錄工具函數
+ */
+
+/**
+ * 記錄同步操作開始
+ */
+async function logSyncStart(env, syncType, operation, userAgent = '', ipAddress = '') {
+  try {
+    const result = await env.DB.prepare(`
+      INSERT INTO sync_logs 
+      (sync_type, operation, status, start_time, user_agent, ip_address)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).bind(
+      syncType,
+      operation,
+      'started',
+      Date.now(),
+      userAgent,
+      ipAddress
+    ).run();
+    
+    return result.meta.last_row_id;
+  } catch (error) {
+    console.error('記錄同步開始失敗:', error);
+    return null;
+  }
+}
+
+/**
+ * 記錄同步操作完成
+ */
+async function logSyncComplete(env, logId, status, recordsProcessed = 0, recordsSuccess = 0, recordsError = 0, errorMessage = '', details = '') {
+  if (!logId) return;
+  
+  try {
+    const now = Date.now();
+    
+    // 獲取開始時間以計算持續時間
+    const startLog = await env.DB.prepare(
+      'SELECT start_time FROM sync_logs WHERE id = ?'
+    ).bind(logId).first();
+    
+    const duration = startLog ? now - startLog.start_time : 0;
+    
+    await env.DB.prepare(`
+      UPDATE sync_logs SET 
+        status = ?, 
+        end_time = ?, 
+        duration = ?,
+        records_processed = ?,
+        records_success = ?,
+        records_error = ?,
+        error_message = ?,
+        details = ?
+      WHERE id = ?
+    `).bind(
+      status,
+      now,
+      duration,
+      recordsProcessed,
+      recordsSuccess,
+      recordsError,
+      errorMessage,
+      details,
+      logId
+    ).run();
+    
+    console.log(`📝 同步LOG已記錄: ${status}, 持續時間: ${duration}ms`);
+  } catch (error) {
+    console.error('記錄同步完成失敗:', error);
+  }
+}
+
+/**
+ * 處理數據遷移 API 請求
+ */
+async function handleMigrationAPI(request, env, pathParts) {
+  // 由於我們不能使用 ES6 import，這裡需要內聯遷移 API 的邏輯
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+
+  // 處理 OPTIONS 預檢請求
+  if (request.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  const db = env.DB;
+  const url = new URL(request.url);
+  const method = request.method;
+
+  try {
+    // 解析路由
+    const segments = pathParts.filter(s => s);
+    const action = segments[1]; // /api/migration/{action}
+    const objectType = segments[2]; // /api/migration/{action}/{objectType}
+
+    console.log(`遷移 API 請求: ${method} ${url.pathname}`);
+
+    switch (method) {
+      case 'GET':
+        return await handleMigrationGet(action, objectType, url, db, corsHeaders);
+      case 'POST':
+        return await handleMigrationPost(action, objectType, request, db, corsHeaders);
+      default:
+        return new Response(JSON.stringify({
+          error: '不支援的 HTTP 方法',
+          method
+        }), {
+          status: 405,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
+
+  } catch (error) {
+    console.error('遷移 API 錯誤:', error);
+    return new Response(JSON.stringify({
+      error: '遷移 API 處理失敗',
+      message: error.message,
+      timestamp: new Date().toISOString()
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+/**
+ * 處理遷移 GET 請求
+ */
+async function handleMigrationGet(action, objectType, url, db, corsHeaders) {
+  switch (action) {
+    case 'status':
+      if (objectType) {
+        // 獲取特定對象的遷移狀態
+        try {
+          const tableMapping = {
+            opportunities: { old: 'NewOpportunityObj', new: 'opportunities' },
+            sites: { old: 'object_8W9cb__c', new: 'sites' },
+            sales_records: { old: 'ActiveRecordObj', new: 'sales_records' },
+            maintenance_orders: { old: 'field_V3d91__c', new: 'maintenance_orders' }
+          };
+
+          const mapping = tableMapping[objectType];
+          if (!mapping) {
+            return new Response(JSON.stringify({
+              error: '未知對象類型',
+              objectType
+            }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+
+          // 獲取原始和遷移後的記錄數
+          const [originalCount, migratedCount] = await Promise.all([
+            db.prepare(`SELECT COUNT(*) as count FROM ${mapping.old}`).first(),
+            db.prepare(`SELECT COUNT(*) as count FROM ${mapping.new}`).first().catch(() => ({ count: 0 }))
+          ]);
+
+          return new Response(JSON.stringify({
+            objectType,
+            status: {
+              originalCount: originalCount.count,
+              migratedCount: migratedCount.count,
+              migrationComplete: originalCount.count === migratedCount.count,
+              migrationProgress: originalCount.count > 0 ? 
+                Math.round((migratedCount.count / originalCount.count) * 100) : 0
+            },
+            timestamp: Date.now()
+          }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+
+        } catch (error) {
+          return new Response(JSON.stringify({
+            error: '獲取遷移狀態失敗',
+            objectType,
+            message: error.message
+          }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+      } else {
+        // 獲取所有對象的遷移狀態
+        try {
+          const tableMapping = {
+            opportunities: { old: 'NewOpportunityObj', new: 'opportunities' },
+            sites: { old: 'object_8W9cb__c', new: 'sites' },
+            sales_records: { old: 'ActiveRecordObj', new: 'sales_records' },
+            maintenance_orders: { old: 'field_V3d91__c', new: 'maintenance_orders' }
+          };
+
+          const allStatus = {};
+          
+          for (const [objType, mapping] of Object.entries(tableMapping)) {
+            try {
+              const [originalCount, migratedCount] = await Promise.all([
+                db.prepare(`SELECT COUNT(*) as count FROM ${mapping.old}`).first(),
+                db.prepare(`SELECT COUNT(*) as count FROM ${mapping.new}`).first().catch(() => ({ count: 0 }))
+              ]);
+
+              allStatus[objType] = {
+                originalCount: originalCount.count,
+                migratedCount: migratedCount.count,
+                migrationComplete: originalCount.count === migratedCount.count,
+                migrationProgress: originalCount.count > 0 ? 
+                  Math.round((migratedCount.count / originalCount.count) * 100) : 0
+              };
+            } catch (error) {
+              allStatus[objType] = {
+                error: error.message
+              };
+            }
+          }
+
+          return new Response(JSON.stringify({
+            migration: allStatus,
+            timestamp: Date.now()
+          }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+
+        } catch (error) {
+          return new Response(JSON.stringify({
+            error: '獲取整體遷移狀態失敗',
+            message: error.message
+          }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+      }
+
+    case 'history':
+      // 獲取遷移歷史
+      try {
+        const history = await db.prepare(`
+          SELECT * FROM migration_history 
+          ORDER BY created_at DESC 
+          LIMIT 50
+        `).all();
+
+        return new Response(JSON.stringify({
+          history,
+          count: history.length,
+          timestamp: Date.now()
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      } catch (error) {
+        return new Response(JSON.stringify({
+          error: '獲取遷移歷史失敗',
+          message: error.message
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+    case 'validation':
+      if (!objectType) {
+        return new Response(JSON.stringify({
+          error: '需要指定對象類型進行驗證'
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      try {
+        // 簡化的驗證邏輯
+        const tableMapping = {
+          opportunities: { old: 'NewOpportunityObj', new: 'opportunities' },
+          sites: { old: 'object_8W9cb__c', new: 'sites' },
+          sales_records: { old: 'ActiveRecordObj', new: 'sales_records' },
+          maintenance_orders: { old: 'field_V3d91__c', new: 'maintenance_orders' }
+        };
+
+        const mapping = tableMapping[objectType];
+        if (!mapping) {
+          return new Response(JSON.stringify({
+            error: '未知對象類型',
+            objectType
+          }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        // 檢查數據完整性
+        const [originalCount, migratedCount] = await Promise.all([
+          db.prepare(`SELECT COUNT(*) as count FROM ${mapping.old}`).first(),
+          db.prepare(`SELECT COUNT(*) as count FROM ${mapping.new}`).first().catch(() => ({ count: 0 }))
+        ]);
+
+        // 抽樣檢查前10條記錄的ID對應
+        const sampleCheck = await db.prepare(`
+          SELECT 
+            COUNT(CASE WHEN o.DataId IS NOT NULL AND n.id IS NOT NULL THEN 1 END) as matched,
+            COUNT(*) as total
+          FROM (
+            SELECT DataId FROM ${mapping.old} LIMIT 10
+          ) o
+          LEFT JOIN ${mapping.new} n ON o.DataId = n.id
+        `).first().catch(() => ({ matched: 0, total: 0 }));
+
+        const validation = {
+          objectType,
+          originalCount: originalCount.count,
+          migratedCount: migratedCount.count,
+          countMatches: originalCount.count === migratedCount.count,
+          sampleValidation: {
+            totalSamples: sampleCheck.total,
+            matchedSamples: sampleCheck.matched,
+            matchRate: sampleCheck.total > 0 ? 
+              Math.round((sampleCheck.matched / sampleCheck.total) * 100) : 0
+          },
+          overallStatus: originalCount.count === migratedCount.count ? 'success' : 'incomplete',
+          timestamp: Date.now()
+        };
+
+        return new Response(JSON.stringify({
+          objectType,
+          validation,
+          timestamp: Date.now()
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      } catch (error) {
+        return new Response(JSON.stringify({
+          error: '驗證失敗',
+          objectType,
+          message: error.message
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+    default:
+      return new Response(JSON.stringify({
+        error: '未知的 GET 操作',
+        action,
+        availableActions: ['status', 'history', 'validation']
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+  }
+}
+
+/**
+ * 處理遷移 POST 請求
+ */
+async function handleMigrationPost(action, objectType, request, db, corsHeaders) {
+  let requestData = {};
+  
+  try {
+    const contentType = request.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      requestData = await request.json();
+    }
+  } catch (error) {
+    console.warn('解析請求數據失敗:', error);
+  }
+
+  switch (action) {
+    case 'start':
+      if (!objectType) {
+        return new Response(JSON.stringify({
+          error: '需要指定對象類型進行遷移'
+        }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      try {
+        // 記錄遷移開始
+        await db.prepare(`
+          INSERT INTO migration_history (
+            migration_name, 
+            migration_version, 
+            status,
+            started_at
+          ) VALUES (?, ?, ?, ?)
+        `).bind(
+          `migrate-${objectType}`,
+          '2.0.0',
+          'started',
+          Math.floor(Date.now() / 1000)
+        ).run();
+
+        return new Response(JSON.stringify({
+          message: `${objectType} 遷移已啟動`,
+          objectType,
+          timestamp: Date.now(),
+          note: '這是一個簡化的遷移實現，完整遷移請使用專用的遷移腳本'
+        }), {
+          status: 202, // Accepted
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+
+      } catch (error) {
+        return new Response(JSON.stringify({
+          error: '啟動遷移失敗',
+          objectType,
+          message: error.message
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+    default:
+      return new Response(JSON.stringify({
+        error: '未知的 POST 操作',
+        action,
+        availableActions: ['start']
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+  }
+}
+
+/**
+ * 確保 sales_records 表結構正確
+ */
+async function ensureSalesRecordsTableStructure(env) {
+  console.log('🔍 檢查 sales_records 表結構...');
+  
+  try {
+    // 檢查表是否存在並且結構正確
+    try {
+      const checkResult = await env.DB.prepare(`
+        SELECT COUNT(*) as column_count 
+        FROM pragma_table_info('sales_records') 
+        WHERE name = 'external_form_display'
+      `).first();
+      
+      if (checkResult && checkResult.column_count === 0) {
+        console.log('⚠️  sales_records 表存在但缺少 external_form_display 欄位，重新創建表...');
+        await env.DB.prepare('DROP TABLE IF EXISTS sales_records').run();
+      }
+    } catch (error) {
+      console.log('📋 表不存在或檢查失敗，將創建新表...');
+    }
+    
+    // 創建或更新 sales_records 表結構
+    await env.DB.prepare(`
+      CREATE TABLE IF NOT EXISTS sales_records (
+        id TEXT PRIMARY KEY,
+        name TEXT,
+        opportunity_id TEXT,
+        record_type TEXT,
+        content TEXT,
+        interactive_type TEXT,
+        follow_date TEXT,
+        sales_person TEXT,
+        customer_name TEXT,
+        amount REAL DEFAULT 0,
+        stage TEXT,
+        notes TEXT,
+        location TEXT,
+        external_form_display TEXT,
+        create_time INTEGER,
+        update_time INTEGER,
+        synced_at INTEGER,
+        raw_data TEXT,
+        UNIQUE(id)
+      )
+    `).run();
+    
+    // 創建索引
+    await env.DB.prepare(`
+      CREATE INDEX IF NOT EXISTS idx_sales_records_opportunity_id ON sales_records(opportunity_id)
+    `).run();
+    
+    await env.DB.prepare(`
+      CREATE INDEX IF NOT EXISTS idx_sales_records_record_type ON sales_records(record_type)
+    `).run();
+    
+    await env.DB.prepare(`
+      CREATE INDEX IF NOT EXISTS idx_sales_records_create_time ON sales_records(create_time)
+    `).run();
+    
+    await env.DB.prepare(`
+      CREATE INDEX IF NOT EXISTS idx_sales_records_synced_at ON sales_records(synced_at)
+    `).run();
+    
+    await env.DB.prepare(`
+      CREATE INDEX IF NOT EXISTS idx_sales_records_external_form_display ON sales_records(external_form_display)
+    `).run();
+    
+    console.log('✅ sales_records 表結構和索引創建完成');
+    
+  } catch (error) {
+    console.error('❌ sales_records 表結構檢查失敗:', error);
+    throw error;
   }
 }

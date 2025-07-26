@@ -371,8 +371,8 @@
             border-color: #d1d5db;
         }
 
-        /* New Project Button */
-        .btn-new-project {
+        /* Header Buttons */
+        .btn-new-project, .btn-database {
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -386,9 +386,18 @@
             transition: all 0.2s;
         }
 
-        .btn-new-project:hover {
+        .btn-new-project:hover, .btn-database:hover {
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-database {
+            background: #f8f9ff;
+            color: #4f46e5;
+        }
+
+        .btn-database:hover {
+            background: #eef2ff;
         }
 
         /* Empty State */
@@ -575,6 +584,10 @@
                     <span>👤</span>
                     <span>管理員</span>
                 </div>
+                <button class="btn-database" onclick="window.location.href='database.html'">
+                    <span>🗄️</span>
+                    <span>資料庫</span>
+                </button>
                 <button class="btn-new-project" onclick="window.location.href='create.html'">
                     <span>➕</span>
                     <span>新增專案</span>
