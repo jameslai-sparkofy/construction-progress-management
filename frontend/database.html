@@ -560,9 +560,9 @@
         <!-- Tab Contents -->
         <div id="tab-opportunities" class="tab-content active">
             <div class="controls-section">
-                <button class="refresh-btn" onclick="loadTableData('opportunities')">
+                <button class="refresh-btn" onclick="syncFromCRM('opportunities', event)">
                     <span>🔄</span>
-                    <span>刷新數據</span>
+                    <span>從CRM同步</span>
                 </button>
                 <div class="search-controls">
                     <input type="text" id="opportunities-search" placeholder="搜尋商機名稱..." class="search-input">
@@ -592,9 +592,9 @@
 
         <div id="tab-sites" class="tab-content">
             <div class="controls-section">
-                <button class="refresh-btn" onclick="loadTableData('sites')">
+                <button class="refresh-btn" onclick="syncFromCRM('sites', event)">
                     <span>🔄</span>
-                    <span>刷新數據</span>
+                    <span>從CRM同步</span>
                 </button>
                 <div class="search-controls">
                     <input type="text" id="sites-search" placeholder="搜尋案場名稱..." class="search-input">
@@ -627,9 +627,9 @@
 
         <div id="tab-maintenance" class="tab-content">
             <div class="controls-section">
-                <button class="refresh-btn" onclick="loadTableData('maintenance')">
+                <button class="refresh-btn" onclick="syncFromCRM('maintenance', event)">
                     <span>🔄</span>
-                    <span>刷新數據</span>
+                    <span>從CRM同步</span>
                 </button>
                 <div class="search-controls">
                     <input type="text" id="maintenance-search" placeholder="搜尋維修單..." class="search-input">
@@ -646,7 +646,6 @@
                             <th>狀態</th>
                             <th>建立時間</th>
                             <th>商機名稱</th>
-                            <th>工班</th>
                             <th>原始數據</th>
                         </tr>
                     </thead>
@@ -660,9 +659,9 @@
 
         <div id="tab-sales" class="tab-content">
             <div class="controls-section">
-                <button class="refresh-btn" onclick="loadTableData('sales')">
+                <button class="refresh-btn" onclick="syncFromCRM('sales', event)">
                     <span>🔄</span>
-                    <span>刷新數據</span>
+                    <span>從CRM同步</span>
                 </button>
                 <div class="search-controls">
                     <input type="text" id="sales-search" placeholder="搜尋銷售記錄..." class="search-input">
@@ -797,6 +796,57 @@
             }
         }
 
+        // CRM同步函數
+        async function syncFromCRM(type, event) {
+            const button = event ? event.target.closest('.refresh-btn') : document.querySelector('.refresh-btn');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span>⏳</span><span>同步中...</span>';
+            button.disabled = true;
+            
+            try {
+                let endpoint;
+                switch(type) {
+                    case 'opportunities':
+                        endpoint = '/api/sync/opportunities';
+                        break;
+                    case 'sites':
+                        endpoint = '/api/sync/sites';
+                        break;
+                    case 'maintenance':
+                        endpoint = '/api/sync/maintenance-orders';
+                        break;
+                    case 'sales':
+                        endpoint = '/api/sync/sales-records';
+                        break;
+                    default:
+                        throw new Error('未知的同步類型');
+                }
+                
+                const response = await fetch(endpoint, { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    // 同步成功後重新載入數據
+                    await loadTableData(type);
+                    await loadStats(); // 更新統計數據
+                    button.innerHTML = '<span>✅</span><span>同步完成</span>';
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }, 2000);
+                } else {
+                    throw new Error(result.error || '同步失敗');
+                }
+            } catch (error) {
+                console.error('CRM同步失敗:', error);
+                button.innerHTML = '<span>❌</span><span>同步失敗</span>';
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }, 2000);
+            }
+        }
+
         // 載入表格數據
         async function loadTableData(type) {
             const tbody = document.getElementById(`${type}-tbody`);
@@ -879,7 +929,9 @@
                         </tr>
                     `).join('');
                     // 載入案場計數
-                    setTimeout(() => loadSiteCounts(data), 100);
+                    if (data && data.length > 0) {
+                        setTimeout(() => loadSiteCounts(data), 100);
+                    }
                     break;
                     
                 case 'sites':
@@ -953,20 +1005,22 @@
                             rawDataToShow = { error: '數據解析失敗', original: item };
                         }
                         
+                        // 從 raw_data 中直接讀取商機名稱
+                        const opportunityName = rawDataToShow.opportunity__c__r || '-';
+                        
                         return `
                         <tr>
                             <td>${item.id}</td>
                             <td>${item.name || '-'}</td>
                             <td>${item.status || '-'}</td>
                             <td>${formatDate(item.create_time)}</td>
-                            <td><span class="loading-count" data-maintenance-opportunity="${item.id}">計算中...</span></td>
-                            <td>${rawDataToShow.team_name || rawDataToShow.field_team_name || '-'}</td>
+                            <td class="site-count-positive">${opportunityName}</td>
                             <td><div class="json-data" onclick="toggleRawData(this)" style="cursor: pointer; color: #4f46e5;">點擊查看</div>
                                 <div class="raw-data-full" style="display: none; font-size: 0.7rem; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 0.5rem; margin-top: 0.5rem; background: #f9f9f9;">${JSON.stringify(rawDataToShow, null, 2)}</div></td>
                         </tr>
                         `;
                     }).join('');
-                    setTimeout(() => loadMaintenanceOpportunityNames(data), 100);
+                    // 商機名稱已從 raw_data 中直接讀取，不需要額外載入
                     break;
                     
                 case 'sales':
@@ -994,15 +1048,14 @@
                         <tr>
                             <td>${item.id}</td>
                             <td>${item.name || '-'}</td>
-                            <td>${rawDataToShow.status || item.status || '-'}</td>
+                            <td>${item.record_type || rawDataToShow.status || item.status || '-'}</td>
                             <td>${formatDate(item.create_time)}</td>
-                            <td><span class="loading-count" data-sales-opportunity="${item.id}">計算中...</span></td>
+                            <td>${item.opportunity_name || '-'}</td>
                             <td><div class="json-data" onclick="toggleRawData(this)" style="cursor: pointer; color: #4f46e5;">點擊查看</div>
                                 <div class="raw-data-full" style="display: none; font-size: 0.7rem; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 0.5rem; margin-top: 0.5rem; background: #f9f9f9;">${JSON.stringify(rawDataToShow, null, 2)}</div></td>
                         </tr>
                         `;
                     }).join('');
-                    setTimeout(() => loadSalesOpportunityNames(data), 100);
                     break;
                     
                 case 'logs':
@@ -1029,29 +1082,60 @@
             return date.toLocaleString('zh-TW');
         }
 
-        // 載入案場計數
+        // 載入案場計數 (添加防重複調用保護)
+        let isLoadingSiteCounts = false;
         async function loadSiteCounts(opportunities) {
-            for (const opportunity of opportunities) {
-                try {
-                    const response = await fetch(`/api/database/sites?search=${encodeURIComponent(opportunity.id)}&limit=1000`);
-                    const data = await response.json();
+            if (isLoadingSiteCounts) {
+                console.log('案場計數正在載入中，跳過重複調用');
+                return;
+            }
+            isLoadingSiteCounts = true;
+            
+            // 批量載入所有案場，然後在前端計算每個商機的案場數
+            try {
+                // 獲取所有案場數據（設定較大的限制）
+                const response = await fetch(`/api/database/sites?limit=10000`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    // 建立商機ID到案場數量的映射
+                    const siteCountMap = new Map();
                     
-                    if (data.success) {
-                        const count = data.data.filter(site => site.opportunity_id === opportunity.id).length;
+                    // 計算每個商機的唯一案場數量
+                    data.data.forEach(site => {
+                        if (site.opportunity_id && site.id) {
+                            if (!siteCountMap.has(site.opportunity_id)) {
+                                siteCountMap.set(site.opportunity_id, new Set());
+                            }
+                            siteCountMap.get(site.opportunity_id).add(site.id);
+                        }
+                    });
+                    
+                    // 更新每個商機的案場數顯示
+                    for (const opportunity of opportunities) {
                         const element = document.querySelector(`[data-opportunity-id="${opportunity.id}"]`);
                         if (element) {
+                            const sites = siteCountMap.get(opportunity.id);
+                            const count = sites ? sites.size : 0;
                             element.textContent = count;
                             element.className = count > 0 ? 'site-count-positive' : 'site-count-zero';
                         }
                     }
-                } catch (error) {
-                    console.error(`載入商機 ${opportunity.id} 案場數量失敗:`, error);
+                    
+                    console.log('案場數計算完成:', siteCountMap);
+                }
+            } catch (error) {
+                console.error('載入案場數量失敗:', error);
+                // 如果批量載入失敗，顯示錯誤
+                for (const opportunity of opportunities) {
                     const element = document.querySelector(`[data-opportunity-id="${opportunity.id}"]`);
                     if (element) {
                         element.textContent = '錯誤';
                         element.className = 'site-count-error';
                     }
                 }
+            } finally {
+                isLoadingSiteCounts = false;
             }
         }
         

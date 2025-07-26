@@ -2243,6 +2243,16 @@ async function syncOpportunitiesToDB(env, logId = null) {
     
     for (const opp of opportunities) {
       try {
+        // 過濾作廢的商機
+        if (opp.is_deleted === true) {
+          console.log(`🗑️ 跳過已刪除的商機: ${opp.name || opp.id}`);
+          continue;
+        }
+        if (opp.life_status === 'invalid' || opp.life_status === '作废') {
+          console.log(`❌ 跳過已作廢的商機: ${opp.name || opp.id}`);
+          continue;
+        }
+        
         // 檢查是否已存在
         const existing = await env.DB.prepare(
           'SELECT update_time FROM opportunities WHERE id = ?'
@@ -3755,8 +3765,29 @@ async function insertSitesToD1(env, sitesData) {
   try {
     const currentTime = Date.now();
     
+    // 過濾掉作廢的記錄
+    const validSites = sitesData.filter(site => {
+      const rawData = site.raw || {};
+      // 檢查是否已刪除或作廢
+      if (rawData.is_deleted === true) {
+        console.log(`🗑️ 跳過已刪除的案場: ${site.name || site.id}`);
+        return false;
+      }
+      if (rawData.life_status === 'invalid' || rawData.life_status === '作废') {
+        console.log(`❌ 跳過已作廢的案場: ${site.name || site.id}`);
+        return false;
+      }
+      return true;
+    });
+    
+    console.log(`✅ 過濾後有效案場數量: ${validSites.length}/${sitesData.length}`);
+    
+    if (validSites.length === 0) {
+      return 0;
+    }
+    
     // 使用事務批量插入，適應現有格式
-    const statements = sitesData.map(site => {
+    const statements = validSites.map(site => {
       // 從現有格式提取欄位
       const rawData = site.raw || {};
       return env.DB.prepare(`
@@ -3782,8 +3813,8 @@ async function insertSitesToD1(env, sitesData) {
     
     const results = await env.DB.batch(statements);
     
-    console.log(`✅ 成功插入 ${sitesData.length} 個案場到 D1`);
-    return sitesData.length;
+    console.log(`✅ 成功插入 ${validSites.length} 個有效案場到 D1`);
+    return validSites.length;
     
   } catch (error) {
     console.error('❌ D1插入失敗:', error);
@@ -4140,12 +4171,40 @@ async function insertMaintenanceOrdersToD1(env, maintenanceData) {
     return 0;
   }
   
-  console.log(`💾 準備插入 ${maintenanceData.length} 個維修單到 D1`);
+  // 過濾掉作廢的維修單
+  const validMaintenanceOrders = maintenanceData.filter(order => {
+    const rawData = order.raw || {};
+    
+    // 檢查是否已刪除
+    if (rawData.is_deleted === true) {
+      console.log(`🚫 跳過已刪除的維修單: ${order.id} (${order.name})`);
+      return false;
+    }
+    
+    // 檢查生命週期狀態
+    if (rawData.life_status === 'invalid' || rawData.life_status === '作废') {
+      console.log(`🚫 跳過作廢的維修單: ${order.id} (${order.name}) - status: ${rawData.life_status}`);
+      return false;
+    }
+    
+    return true;
+  });
+  
+  if (validMaintenanceOrders.length !== maintenanceData.length) {
+    console.log(`🔍 維修單過濾結果: ${validMaintenanceOrders.length}/${maintenanceData.length} 個有效記錄`);
+  }
+  
+  if (validMaintenanceOrders.length === 0) {
+    console.log('📝 沒有有效的維修單需要插入');
+    return 0;
+  }
+  
+  console.log(`💾 準備插入 ${validMaintenanceOrders.length} 個維修單到 D1`);
   
   try {
     const currentTime = Date.now();
     
-    const statements = maintenanceData.map(order => {
+    const statements = validMaintenanceOrders.map(order => {
       const rawData = order.raw || {};
       return env.DB.prepare(`
         INSERT OR REPLACE INTO maintenance_orders (
@@ -4175,8 +4234,8 @@ async function insertMaintenanceOrdersToD1(env, maintenanceData) {
     
     const results = await env.DB.batch(statements);
     
-    console.log(`✅ 成功插入 ${maintenanceData.length} 個維修單到 D1`);
-    return maintenanceData.length;
+    console.log(`✅ 成功插入 ${validMaintenanceOrders.length} 個維修單到 D1`);
+    return validMaintenanceOrders.length;
     
   } catch (error) {
     console.error('❌ 維修單D1插入失敗:', error);
@@ -4192,12 +4251,40 @@ async function insertSalesRecordsToD1(env, salesData) {
     return 0;
   }
   
-  console.log(`💾 準備插入 ${salesData.length} 個銷售記錄到 D1`);
+  // 過濾掉作廢的銷售記錄
+  const validSalesRecords = salesData.filter(record => {
+    const rawData = JSON.parse(record.raw_data || '{}');
+    
+    // 檢查是否已刪除
+    if (rawData.is_deleted === true) {
+      console.log(`🚫 跳過已刪除的銷售記錄: ${record.id} (${record.name})`);
+      return false;
+    }
+    
+    // 檢查生命週期狀態
+    if (rawData.life_status === 'invalid' || rawData.life_status === '作废') {
+      console.log(`🚫 跳過作廢的銷售記錄: ${record.id} (${record.name}) - status: ${rawData.life_status}`);
+      return false;
+    }
+    
+    return true;
+  });
+  
+  if (validSalesRecords.length !== salesData.length) {
+    console.log(`🔍 銷售記錄過濾結果: ${validSalesRecords.length}/${salesData.length} 個有效記錄`);
+  }
+  
+  if (validSalesRecords.length === 0) {
+    console.log('📝 沒有有效的銷售記錄需要插入');
+    return 0;
+  }
+  
+  console.log(`💾 準備插入 ${validSalesRecords.length} 個銷售記錄到 D1`);
   
   try {
     const currentTime = Date.now();
     
-    const statements = salesData.map(record => {
+    const statements = validSalesRecords.map(record => {
       return env.DB.prepare(`
         INSERT OR REPLACE INTO sales_records (
           id, name, opportunity_id, record_type, content, interactive_type,
@@ -4221,8 +4308,8 @@ async function insertSalesRecordsToD1(env, salesData) {
     
     const results = await env.DB.batch(statements);
     
-    console.log(`✅ 成功插入 ${salesData.length} 個銷售記錄到 D1`);
-    return salesData.length;
+    console.log(`✅ 成功插入 ${validSalesRecords.length} 個銷售記錄到 D1`);
+    return validSalesRecords.length;
     
   } catch (error) {
     console.error('❌ 銷售記錄D1插入失敗:', error);
@@ -4961,7 +5048,7 @@ async function handleDatabaseAPI(request, env, pathParts) {
       case 'maintenance':
         return await handleDatabaseTable(env, 'on_site_signature__c', corsHeaders, request);
       case 'sales':
-        return await handleDatabaseTable(env, 'ActiveRecordObj', corsHeaders, request);
+        return await handleDatabaseTable(env, 'sales_records', corsHeaders, request);
       case 'logs':
         return await handleDatabaseLogs(env, corsHeaders);
       default:
@@ -5016,10 +5103,10 @@ async function handleDatabaseStats(env, corsHeaders) {
     ).first();
     stats.maintenance_orders = maintenanceResult?.count || 0;
     
-    // 銷售記錄數量
+    // 銷售記錄數量 (只計算 external_form_display = "option_displayed__c" 的記錄)
     const salesResult = await env.DB.prepare(
-      'SELECT COUNT(*) as count FROM ActiveRecordObj'
-    ).first();
+      'SELECT COUNT(*) as count FROM sales_records WHERE external_form_display = ?'
+    ).bind('option_displayed__c').first();
     stats.sales_records = salesResult?.count || 0;
     
     // 同步記錄數量 (檢查表是否存在)
@@ -5087,7 +5174,7 @@ async function handleDatabaseTable(env, tableName, corsHeaders, request) {
       orderBy = 'create_time DESC';
       selectFields = 'DISTINCT id, name, opportunity_id, address, status, building_type, floor_info, room_info, create_time, update_time, synced_at, raw_data';
       if (search) {
-        whereClause = `WHERE name LIKE '%${search}%' OR address LIKE '%${search}%'`;
+        whereClause = `WHERE name LIKE '%${search}%' OR address LIKE '%${search}%' OR opportunity_id = '${search}'`;
       }
     } else if (tableName === 'on_site_signature__c') {
       orderBy = 'create_time DESC';
@@ -5095,11 +5182,14 @@ async function handleDatabaseTable(env, tableName, corsHeaders, request) {
       if (search) {
         whereClause = `WHERE name LIKE '%${search}%'`;
       }
-    } else if (tableName === 'ActiveRecordObj') {
-      orderBy = 'create_time DESC';
-      selectFields = 'id, name, create_time, update_time, synced_at, raw_data';
+    } else if (tableName === 'sales_records') {
+      orderBy = 's.create_time DESC';
+      // 包含商機名稱的關聯查詢
+      selectFields = 's.id, s.name, s.record_type, s.content, s.opportunity_id, s.external_form_display, s.create_time, s.update_time, s.synced_at, s.raw_data, o.name as opportunity_name';
+      // 只查詢 external_form_display = "option_displayed__c" 的記錄，並關聯商機
+      whereClause = 'LEFT JOIN opportunities o ON s.opportunity_id = o.id WHERE s.external_form_display = "option_displayed__c"';
       if (search) {
-        whereClause = `WHERE name LIKE '%${search}%'`;
+        whereClause += ` AND (s.name LIKE '%${search}%' OR s.content LIKE '%${search}%' OR o.name LIKE '%${search}%')`;
       }
     } else if (tableName === 'search_logs') {
       orderBy = 'search_time DESC';
@@ -5115,6 +5205,8 @@ async function handleDatabaseTable(env, tableName, corsHeaders, request) {
     let query;
     if (tableName === 'NewOpportunityObj') {
       query = `SELECT ${selectFields} FROM ${tableName} o ${whereClause} ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
+    } else if (tableName === 'sales_records') {
+      query = `SELECT ${selectFields} FROM ${tableName} s ${whereClause} ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
     } else {
       query = `SELECT ${selectFields} FROM ${tableName} ${whereClause} ORDER BY ${orderBy} LIMIT ${limit} OFFSET ${offset}`;
     }
