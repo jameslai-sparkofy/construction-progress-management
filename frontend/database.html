@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資料庫管理 - 興安建設管理系統</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 500;
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: white;
+            color: #1e3c72;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            background: white;
+            border-radius: 12px;
+            padding: 0.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            overflow-x: auto;
+            min-height: 60px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 0.75rem 1rem;
+            border: none;
+            background: transparent;
+            color: #666;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: #f8f9ff;
+            color: #4f46e5;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+            max-height: 600px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: top;
+        }
+
+        .data-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .data-table tr:hover {
+            background: #f9fafb;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .loading::before {
+            content: "";
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e5e7eb;
+            border-top-color: #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #4f46e5;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        /* JSON Viewer */
+        .json-data {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.8rem;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Refresh Button */
+        .refresh-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .refresh-btn:hover {
+            background: #059669;
+        }
+
+        /* Error State */
+        .error-message {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem;
+            border-left: 4px solid #dc2626;
+        }
+
+        /* Log Table */
+        .log-entry {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.8rem;
+        }
+
+        .log-level-info {
+            color: #3b82f6;
+        }
+
+        .log-level-error {
+            color: #dc2626;
+        }
+
+        .log-level-success {
+            color: #10b981;
+        }
+
+        /* Controls Section */
+        .controls-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .search-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .search-input {
+            padding: 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            min-width: 200px;
+        }
+
+        .search-btn, .clear-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .search-btn {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .search-btn:hover {
+            background: #4338ca;
+        }
+
+        .clear-btn {
+            background: #6b7280;
+            color: white;
+        }
+
+        .clear-btn:hover {
+            background: #525965;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            margin-top: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .pagination button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: #f3f4f6;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination button.active {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+
+        .pagination .page-info {
+            margin: 0 1rem;
+            color: #6b7280;
+        }
+
+        /* Site Count Display */
+        .loading-count {
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .site-count-positive {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .site-count-zero {
+            color: #6b7280;
+        }
+
+        .site-count-error {
+            color: #dc2626;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+
+        .close:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .field-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .field-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #4f46e5;
+        }
+
+        .field-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .field-value {
+            color: #6b7280;
+            word-break: break-word;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .image-item {
+            text-align: center;
+        }
+
+        .image-item img {
+            max-width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .image-item img:hover {
+            transform: scale(1.05);
+        }
+
+        .image-label {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+
+        .no-data {
+            color: #9ca3af;
+            font-style: italic;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .detail-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .detail-btn:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1>資料庫管理</h1>
+            <a href="/" class="back-btn">
+                <span>←</span>
+                <span>返回首頁</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="stat-opportunities">-</div>
+                <div class="stat-label">商機數量</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-sites">-</div>
+                <div class="stat-label">案場數量</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-maintenance">-</div>
+                <div class="stat-label">維修單數量</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-sales">-</div>
+                <div class="stat-label">銷售記錄數量</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-logs">-</div>
+                <div class="stat-label">同步LOG數量</div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('opportunities')">商機</button>
+            <button class="tab-btn" onclick="switchTab('sites')">案場</button>
+            <button class="tab-btn" onclick="switchTab('maintenance')">維修單</button>
+            <button class="tab-btn" onclick="switchTab('sales')">銷售記錄</button>
+            <button class="tab-btn" onclick="switchTab('logs')">同步LOG</button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div id="tab-opportunities" class="tab-content active">
+            <div class="controls-section">
+                <button class="refresh-btn" onclick="loadTableData('opportunities')">
+                    <span>🔄</span>
+                    <span>刷新數據</span>
+                </button>
+                <div class="search-controls">
+                    <input type="text" id="opportunities-search" placeholder="搜尋商機名稱..." class="search-input">
+                    <button onclick="searchTableData('opportunities')" class="search-btn">搜尋</button>
+                    <button onclick="clearSearch('opportunities')" class="clear-btn">清除</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>名稱</th>
+                            <th>關聯案場數</th>
+                            <th>階段</th>
+                            <th>建立時間</th>
+                            <th>更新時間</th>
+                        </tr>
+                    </thead>
+                    <tbody id="opportunities-tbody">
+                        <tr><td colspan="6" class="loading">載入中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="opportunities-pagination"></div>
+        </div>
+
+        <div id="tab-sites" class="tab-content">
+            <div class="controls-section">
+                <button class="refresh-btn" onclick="loadTableData('sites')">
+                    <span>🔄</span>
+                    <span>刷新數據</span>
+                </button>
+                <div class="search-controls">
+                    <input type="text" id="sites-search" placeholder="搜尋案場名稱..." class="search-input">
+                    <button onclick="searchTableData('sites')" class="search-btn">搜尋</button>
+                    <button onclick="clearSearch('sites')" class="clear-btn">清除</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>編號</th>
+                            <th>商機名稱</th>
+                            <th>棟別</th>
+                            <th>樓層</th>
+                            <th>戶別</th>
+                            <th>階段</th>
+                            <th>工班</th>
+                            <th>詳細資料</th>
+                            <th>原始數據</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sites-tbody">
+                        <tr><td colspan="9" class="loading">載入中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="sites-pagination"></div>
+        </div>
+
+        <div id="tab-maintenance" class="tab-content">
+            <div class="controls-section">
+                <button class="refresh-btn" onclick="loadTableData('maintenance')">
+                    <span>🔄</span>
+                    <span>刷新數據</span>
+                </button>
+                <div class="search-controls">
+                    <input type="text" id="maintenance-search" placeholder="搜尋維修單..." class="search-input">
+                    <button onclick="searchTableData('maintenance')" class="search-btn">搜尋</button>
+                    <button onclick="clearSearch('maintenance')" class="clear-btn">清除</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>名稱</th>
+                            <th>狀態</th>
+                            <th>建立時間</th>
+                            <th>商機名稱</th>
+                            <th>工班</th>
+                            <th>原始數據</th>
+                        </tr>
+                    </thead>
+                    <tbody id="maintenance-tbody">
+                        <tr><td colspan="7" class="loading">載入中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="maintenance-pagination"></div>
+        </div>
+
+        <div id="tab-sales" class="tab-content">
+            <div class="controls-section">
+                <button class="refresh-btn" onclick="loadTableData('sales')">
+                    <span>🔄</span>
+                    <span>刷新數據</span>
+                </button>
+                <div class="search-controls">
+                    <input type="text" id="sales-search" placeholder="搜尋銷售記錄..." class="search-input">
+                    <button onclick="searchTableData('sales')" class="search-btn">搜尋</button>
+                    <button onclick="clearSearch('sales')" class="clear-btn">清除</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>名稱</th>
+                            <th>狀態</th>
+                            <th>建立時間</th>
+                            <th>商機名稱</th>
+                            <th>原始數據</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sales-tbody">
+                        <tr><td colspan="6" class="loading">載入中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="sales-pagination"></div>
+        </div>
+
+        <div id="tab-logs" class="tab-content">
+            <div class="controls-section">
+                <button class="refresh-btn" onclick="loadTableData('logs')">
+                    <span>🔄</span>
+                    <span>刷新數據</span>
+                </button>
+                <div class="search-controls">
+                    <input type="text" id="logs-search" placeholder="搜尋同步LOG..." class="search-input">
+                    <button onclick="searchTableData('logs')" class="search-btn">搜尋</button>
+                    <button onclick="clearSearch('logs')" class="clear-btn">清除</button>
+                </div>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>時間</th>
+                            <th>同步類型</th>
+                            <th>操作類型</th>
+                            <th>成功數量</th>
+                            <th>狀態</th>
+                            <th>耗時</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-tbody">
+                        <tr><td colspan="6" class="loading">載入中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination" id="logs-pagination"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'opportunities';
+        let currentPage = {};
+        let searchTerm = {};
+
+        // 初始化頁面
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStats();
+            loadTableData('opportunities');
+        });
+
+        // 切換標籤
+        function switchTab(tabName) {
+            // 隱藏所有標籤內容
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 移除所有按鈕的 active 狀態
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // 顯示選中的標籤內容
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            // 設置按鈕的 active 狀態
+            event.target.classList.add('active');
+            
+            // 載入數據
+            currentTab = tabName;
+            if (!currentPage[tabName]) {
+                currentPage[tabName] = 1;
+            }
+            loadTableData(tabName);
+        }
+
+        // 搜尋功能
+        function searchTableData(tabName) {
+            const searchInput = document.getElementById(`${tabName}-search`);
+            searchTerm[tabName] = searchInput.value;
+            currentPage[tabName] = 1;
+            loadTableData(tabName);
+        }
+
+        // 清除搜尋
+        function clearSearch(tabName) {
+            const searchInput = document.getElementById(`${tabName}-search`);
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            searchTerm[tabName] = '';
+            currentPage[tabName] = 1;
+            loadTableData(tabName);
+        }
+
+        // 載入統計數據
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/database/stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('stat-opportunities').textContent = data.stats.opportunities || 0;
+                    document.getElementById('stat-sites').textContent = data.stats.sites || 0;
+                    document.getElementById('stat-maintenance').textContent = data.stats.maintenance_orders || 0;
+                    document.getElementById('stat-sales').textContent = data.stats.sales_records || 0;
+                    document.getElementById('stat-logs').textContent = data.stats.search_logs || 0;
+                }
+            } catch (error) {
+                console.error('載入統計數據失敗:', error);
+            }
+        }
+
+        // 載入表格數據
+        async function loadTableData(type) {
+            const tbody = document.getElementById(`${type}-tbody`);
+            const colCount = tbody.parentElement.querySelector('thead tr').children.length;
+            tbody.innerHTML = `<tr><td colspan="${colCount}" class="loading">載入中...</td></tr>`;
+            
+            try {
+                const page = currentPage[type] || 1;
+                const search = searchTerm[type] || '';
+                let url = `/api/database/${type}?page=${page}&limit=100`;
+                if (search) {
+                    url += `&search=${encodeURIComponent(search)}`;
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderTableData(type, data.data);
+                    renderPagination(type, page, data.data.length);
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="${colCount}" class="error-message">載入失敗: ${data.error}</td></tr>`;
+                }
+            } catch (error) {
+                console.error(`載入 ${type} 數據失敗:`, error);
+                const colCount = tbody.parentElement.querySelector('thead tr').children.length;
+                tbody.innerHTML = `<tr><td colspan="${colCount}" class="error-message">載入失敗: ${error.message}</td></tr>`;
+            }
+        }
+
+        // 渲染分頁
+        function renderPagination(type, currentPageNum, dataLength) {
+            const paginationContainer = document.getElementById(`${type}-pagination`);
+            if (!paginationContainer) return;
+
+            let html = '';
+            const hasMore = dataLength === 100; // 如果返回100條，可能還有更多
+            
+            // 上一頁按鈕
+            html += `<button onclick="changePage('${type}', ${currentPageNum - 1})" ${currentPageNum <= 1 ? 'disabled' : ''}>上一頁</button>`;
+            
+            // 頁面信息
+            html += `<span class="page-info">第 ${currentPageNum} 頁 (${dataLength} 項)</span>`;
+            
+            // 下一頁按鈕
+            html += `<button onclick="changePage('${type}', ${currentPageNum + 1})" ${!hasMore ? 'disabled' : ''}>下一頁</button>`;
+            
+            paginationContainer.innerHTML = html;
+        }
+
+        // 切換頁面
+        function changePage(type, page) {
+            if (page < 1) return;
+            currentPage[type] = page;
+            loadTableData(type);
+        }
+
+        // 渲染表格數據
+        function renderTableData(type, data) {
+            const tbody = document.getElementById(`${type}-tbody`);
+            const colCount = tbody.parentElement.querySelector('thead tr').children.length;
+            
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${colCount}" style="text-align: center; padding: 2rem; color: #666;">暫無數據</td></tr>`;
+                return;
+            }
+            
+            let html = '';
+            
+            switch (type) {
+                case 'opportunities':
+                    html = data.map(item => `
+                        <tr>
+                            <td>${item.id}</td>
+                            <td>${item.name || '-'}</td>
+                            <td><span class="loading-count" data-opportunity-id="${item.id}">計算中...</span></td>
+                            <td>${item.stage || '-'}</td>
+                            <td>${formatDate(item.create_time)}</td>
+                            <td>${formatDate(item.update_time)}</td>
+                        </tr>
+                    `).join('');
+                    // 載入案場計數
+                    setTimeout(() => loadSiteCounts(data), 100);
+                    break;
+                    
+                case 'sites':
+                    html = data.map(item => {
+                        // 準備要顯示的原始數據
+                        let rawDataToShow = {};
+                        let rawData = {};
+                        try {
+                            if (item.raw_data) {
+                                rawData = JSON.parse(item.raw_data);
+                                rawDataToShow = rawData;
+                            } else {
+                                // 如果沒有raw_data，顯示整個item對象
+                                rawData = {
+                                    id: item.id,
+                                    name: item.name,
+                                    opportunity_id: item.opportunity_id,
+                                    address: item.address,
+                                    status: item.status,
+                                    building_type: item.building_type,
+                                    floor_info: item.floor_info,
+                                    room_info: item.room_info,
+                                    create_time: item.create_time,
+                                    update_time: item.update_time,
+                                    synced_at: item.synced_at
+                                };
+                                rawDataToShow = rawData;
+                            }
+                        } catch (e) {
+                            rawData = { error: '數據解析失敗', original: item };
+                            rawDataToShow = rawData;
+                        }
+                        
+                        return `
+                        <tr>
+                            <td>${rawData.name || item.name || item.id}</td>
+                            <td class="site-count-positive">${rawData.field_1P96q__c__r || '-'}</td>
+                            <td>${rawData.field_WD7k1__c || '-'}</td>
+                            <td>${rawData.field_Q6Svh__c || '-'}</td>
+                            <td>${rawData.field_XuJP2__c || '-'}</td>
+                            <td>${rawData.field_z9H6O__c || item.status || '-'}</td>
+                            <td>${rawData.field_u1wpv__c || '-'}</td>
+                            <td><button class="detail-btn" onclick="showSiteDetail(${JSON.stringify(item).replace(/"/g, '&quot;')})">查看詳情</button></td>
+                            <td><div class="json-data" onclick="toggleRawData(this)" style="cursor: pointer; color: #4f46e5;">點擊查看</div>
+                                <div class="raw-data-full" style="display: none; font-size: 0.7rem; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 0.5rem; margin-top: 0.5rem; background: #f9f9f9;">${JSON.stringify(rawDataToShow, null, 2)}</div></td>
+                        </tr>
+                        `;
+                    }).join('');
+                    // 商機名稱已從 raw_data 中直接讀取，不需要額外載入
+                    break;
+                    
+                case 'maintenance':
+                    html = data.map(item => {
+                        let rawDataToShow = {};
+                        try {
+                            if (item.raw_data) {
+                                rawDataToShow = JSON.parse(item.raw_data);
+                            } else {
+                                // 如果沒有raw_data，顯示整個item對象
+                                rawDataToShow = {
+                                    id: item.id,
+                                    name: item.name,
+                                    status: item.status,
+                                    create_time: item.create_time,
+                                    update_time: item.update_time,
+                                    synced_at: item.synced_at,
+                                    all_fields: item
+                                };
+                            }
+                        } catch (e) {
+                            rawDataToShow = { error: '數據解析失敗', original: item };
+                        }
+                        
+                        return `
+                        <tr>
+                            <td>${item.id}</td>
+                            <td>${item.name || '-'}</td>
+                            <td>${item.status || '-'}</td>
+                            <td>${formatDate(item.create_time)}</td>
+                            <td><span class="loading-count" data-maintenance-opportunity="${item.id}">計算中...</span></td>
+                            <td>${rawDataToShow.team_name || rawDataToShow.field_team_name || '-'}</td>
+                            <td><div class="json-data" onclick="toggleRawData(this)" style="cursor: pointer; color: #4f46e5;">點擊查看</div>
+                                <div class="raw-data-full" style="display: none; font-size: 0.7rem; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 0.5rem; margin-top: 0.5rem; background: #f9f9f9;">${JSON.stringify(rawDataToShow, null, 2)}</div></td>
+                        </tr>
+                        `;
+                    }).join('');
+                    setTimeout(() => loadMaintenanceOpportunityNames(data), 100);
+                    break;
+                    
+                case 'sales':
+                    html = data.map(item => {
+                        let rawDataToShow = {};
+                        try {
+                            if (item.raw_data) {
+                                rawDataToShow = JSON.parse(item.raw_data);
+                            } else {
+                                // 如果沒有raw_data，顯示整個item對象
+                                rawDataToShow = {
+                                    id: item.id,
+                                    name: item.name,
+                                    create_time: item.create_time,
+                                    update_time: item.update_time,
+                                    synced_at: item.synced_at,
+                                    all_fields: item
+                                };
+                            }
+                        } catch (e) {
+                            rawDataToShow = { error: '數據解析失敗', original: item };
+                        }
+                        
+                        return `
+                        <tr>
+                            <td>${item.id}</td>
+                            <td>${item.name || '-'}</td>
+                            <td>${rawDataToShow.status || item.status || '-'}</td>
+                            <td>${formatDate(item.create_time)}</td>
+                            <td><span class="loading-count" data-sales-opportunity="${item.id}">計算中...</span></td>
+                            <td><div class="json-data" onclick="toggleRawData(this)" style="cursor: pointer; color: #4f46e5;">點擊查看</div>
+                                <div class="raw-data-full" style="display: none; font-size: 0.7rem; max-height: 200px; overflow-y: auto; border: 1px solid #ddd; padding: 0.5rem; margin-top: 0.5rem; background: #f9f9f9;">${JSON.stringify(rawDataToShow, null, 2)}</div></td>
+                        </tr>
+                        `;
+                    }).join('');
+                    setTimeout(() => loadSalesOpportunityNames(data), 100);
+                    break;
+                    
+                case 'logs':
+                    html = data.map(item => `
+                        <tr>
+                            <td>${formatDate(item.start_time)}</td>
+                            <td><span class="log-level-${item.status === 'success' ? 'success' : item.status === 'error' ? 'error' : 'info'}">${item.sync_type}</span></td>
+                            <td>${item.operation || '-'}</td>
+                            <td>${item.records_success || 0}</td>
+                            <td><span class="log-level-${item.status === 'success' ? 'success' : item.status === 'error' ? 'error' : 'info'}">${item.status}</span></td>
+                            <td>${item.duration ? Math.round(item.duration / 1000) + 's' : '-'}</td>
+                        </tr>
+                    `).join('');
+                    break;
+            }
+            
+            tbody.innerHTML = html;
+        }
+
+        // 格式化日期
+        function formatDate(timestamp) {
+            if (!timestamp) return '-';
+            const date = new Date(timestamp);
+            return date.toLocaleString('zh-TW');
+        }
+
+        // 載入案場計數
+        async function loadSiteCounts(opportunities) {
+            for (const opportunity of opportunities) {
+                try {
+                    const response = await fetch(`/api/database/sites?search=${encodeURIComponent(opportunity.id)}&limit=1000`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const count = data.data.filter(site => site.opportunity_id === opportunity.id).length;
+                        const element = document.querySelector(`[data-opportunity-id="${opportunity.id}"]`);
+                        if (element) {
+                            element.textContent = count;
+                            element.className = count > 0 ? 'site-count-positive' : 'site-count-zero';
+                        }
+                    }
+                } catch (error) {
+                    console.error(`載入商機 ${opportunity.id} 案場數量失敗:`, error);
+                    const element = document.querySelector(`[data-opportunity-id="${opportunity.id}"]`);
+                    if (element) {
+                        element.textContent = '錯誤';
+                        element.className = 'site-count-error';
+                    }
+                }
+            }
+        }
+        
+        // 載入商機名稱
+        async function loadOpportunityNames(items, tableName) {
+            // 收集所有唯一的商機ID
+            const uniqueOpportunityIds = [...new Set(items.map(item => item.opportunity_id).filter(id => id))];
+            
+            // 批量載入商機名稱
+            const opportunityNameMap = {};
+            
+            try {
+                // 先嘗試批量查詢
+                const response = await fetch(`/api/database/opportunities?limit=1000`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    // 建立ID到名稱的映射
+                    data.data.forEach(opp => {
+                        opportunityNameMap[opp.id] = opp.name;
+                    });
+                }
+            } catch (error) {
+                console.error('批量載入商機失敗:', error);
+            }
+            
+            // 更新UI顯示
+            for (const item of items) {
+                if (item.opportunity_id) {
+                    const element = document.querySelector(`[data-opportunity-id="${item.opportunity_id}"]`);
+                    if (element) {
+                        const opportunityName = opportunityNameMap[item.opportunity_id];
+                        if (opportunityName) {
+                            element.textContent = opportunityName;
+                            element.className = 'site-count-positive';
+                        } else {
+                            element.textContent = '未找到';
+                            element.className = 'site-count-zero';
+                        }
+                    }
+                }
+            }
+        }
+        
+        // 載入維修單商機名稱
+        async function loadMaintenanceOpportunityNames(items) {
+            // 批量載入商機名稱
+            const opportunityNameMap = {};
+            
+            try {
+                const response = await fetch(`/api/database/opportunities?limit=1000`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    data.data.forEach(opp => {
+                        opportunityNameMap[opp.id] = opp.name;
+                    });
+                }
+            } catch (error) {
+                console.error('批量載入商機失敗:', error);
+            }
+            
+            for (const item of items) {
+                try {
+                    let rawData = {};
+                    try {
+                        rawData = item.raw_data ? JSON.parse(item.raw_data) : {};
+                    } catch (e) {}
+                    
+                    const opportunityId = rawData.opportunity_id || rawData.field_opportunity_id;
+                    const element = document.querySelector(`[data-maintenance-opportunity="${item.id}"]`);
+                    
+                    if (element) {
+                        if (opportunityId && opportunityNameMap[opportunityId]) {
+                            element.textContent = opportunityNameMap[opportunityId];
+                            element.className = 'site-count-positive';
+                        } else {
+                            element.textContent = '-';
+                            element.className = 'site-count-zero';
+                        }
+                    }
+                } catch (error) {
+                    console.error(`載入維修單商機名稱失敗:`, error);
+                }
+            }
+        }
+        
+        // 載入銷售記錄商機名稱
+        async function loadSalesOpportunityNames(items) {
+            // 批量載入商機名稱
+            const opportunityNameMap = {};
+            
+            try {
+                const response = await fetch(`/api/database/opportunities?limit=1000`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    data.data.forEach(opp => {
+                        opportunityNameMap[opp.id] = opp.name;
+                    });
+                }
+            } catch (error) {
+                console.error('批量載入商機失敗:', error);
+            }
+            
+            for (const item of items) {
+                try {
+                    let rawData = {};
+                    try {
+                        rawData = item.raw_data ? JSON.parse(item.raw_data) : {};
+                    } catch (e) {}
+                    
+                    const opportunityId = rawData.opportunity_id || rawData.field_opportunity_id;
+                    const element = document.querySelector(`[data-sales-opportunity="${item.id}"]`);
+                    
+                    if (element) {
+                        if (opportunityId && opportunityNameMap[opportunityId]) {
+                            element.textContent = opportunityNameMap[opportunityId];
+                            element.className = 'site-count-positive';
+                        } else {
+                            element.textContent = '-';
+                            element.className = 'site-count-zero';
+                        }
+                    }
+                } catch (error) {
+                    console.error(`載入銷售記錄商機名稱失敗:`, error);
+                }
+            }
+        }
+        
+        // 切換原始数据显示
+        function toggleRawData(element) {
+            const rawDataDiv = element.nextElementSibling;
+            if (rawDataDiv.style.display === 'none') {
+                rawDataDiv.style.display = 'block';
+                element.textContent = '隱藏數據';
+            } else {
+                rawDataDiv.style.display = 'none';
+                element.textContent = '點擊查看';
+            }
+        }
+        
+        // 顯示案場詳細資料模態窗
+        function showSiteDetail(siteData) {
+            const modal = document.getElementById('siteModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            // 設定標題
+            modalTitle.textContent = `案場詳細資料 - ${siteData.name || siteData.id}`;
+            
+            // 解析原始數據
+            let rawData = {};
+            try {
+                if (siteData.raw_data) {
+                    rawData = JSON.parse(siteData.raw_data);
+                } else {
+                    rawData = siteData;
+                }
+            } catch (e) {
+                rawData = siteData;
+            }
+            
+            // 根據CSV欄位對應建立詳細資料
+            const fieldMapping = {
+                'field_V3d91__c': '施工前照片',
+                'field_sF6fn__c': '施工前備註', 
+                'construction_completed__c': '是否施作',
+                'field_23pFq__c': '施作日期',
+                'field_tXAko__c': '施作坪數',
+                'field_1P96q__c': '商機',
+                'field_WD7k1__c': '棟別',
+                'field_Q6Svh__c': '樓層',
+                'field_XuJP2__c': '戶別',
+                'field_3Fqof__c': '完工照片',
+                'field_3T38o__c': '平面圖',
+                'field_u1wpv__c': '施工師父',
+                'shift_time__c': '工班'
+            };
+            
+            // 生成詳細資料HTML
+            let html = '<div class="field-grid">';
+            
+            // 基本信息
+            html += generateFieldHTML('編號', rawData.name || siteData.name || siteData.id);
+            html += generateFieldHTML('建立時間', formatDate(rawData.create_time || siteData.create_time));
+            html += generateFieldHTML('更新時間', formatDate(rawData.last_modified_time || siteData.update_time));
+            
+            // 根據欄位對應顯示資料
+            for (const [fieldKey, fieldLabel] of Object.entries(fieldMapping)) {
+                const value = rawData[fieldKey];
+                if (value !== undefined && value !== null && value !== '') {
+                    if (fieldKey.includes('照片') || fieldKey.includes('圖')) {
+                        // 圖片欄位
+                        html += generateImageFieldHTML(fieldLabel, value);
+                    } else if (fieldKey === 'construction_completed__c') {
+                        // 布林值欄位
+                        html += generateFieldHTML(fieldLabel, value ? '是' : '否');
+                    } else {
+                        // 一般欄位
+                        html += generateFieldHTML(fieldLabel, value);
+                    }
+                }
+            }
+            
+            html += '</div>';
+            
+            // 添加圖片區域
+            const images = [];
+            if (rawData['field_V3d91__c']) images.push({url: rawData['field_V3d91__c'], label: '施工前照片'});
+            if (rawData['field_3Fqof__c']) images.push({url: rawData['field_3Fqof__c'], label: '完工照片'});
+            if (rawData['field_3T38o__c']) images.push({url: rawData['field_3T38o__c'], label: '平面圖'});
+            
+            if (images.length > 0) {
+                html += '<h3 style="margin-top: 2rem; margin-bottom: 1rem; color: #374151;">圖片資料</h3>';
+                html += '<div class="image-grid">';
+                images.forEach(img => {
+                    html += `
+                        <div class="image-item">
+                            <img src="${img.url}" alt="${img.label}" onclick="openImageModal('${img.url}')" loading="lazy">
+                            <div class="image-label">${img.label}</div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            
+            modalBody.innerHTML = html;
+            modal.style.display = 'block';
+        }
+        
+        // 生成欄位HTML
+        function generateFieldHTML(label, value) {
+            if (!value || value === '-' || value === '') {
+                return `
+                    <div class="field-item">
+                        <div class="field-label">${label}</div>
+                        <div class="field-value no-data">無資料</div>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="field-item">
+                    <div class="field-label">${label}</div>
+                    <div class="field-value">${value}</div>
+                </div>
+            `;
+        }
+        
+        // 生成圖片欄位HTML  
+        function generateImageFieldHTML(label, imageUrl) {
+            if (!imageUrl || imageUrl === '-' || imageUrl === '') {
+                return generateFieldHTML(label, '');
+            }
+            
+            return `
+                <div class="field-item">
+                    <div class="field-label">${label}</div>
+                    <div class="field-value">
+                        <img src="${imageUrl}" style="max-width: 200px; height: 100px; object-fit: cover; border-radius: 4px; cursor: pointer;" 
+                             onclick="openImageModal('${imageUrl}')" loading="lazy">
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 關閉模態窗
+        function closeSiteModal() {
+            document.getElementById('siteModal').style.display = 'none';
+        }
+        
+        // 打開圖片模態窗
+        function openImageModal(imageUrl) {
+            window.open(imageUrl, '_blank');
+        }
+        
+        // 點擊模態窗外部關閉
+        window.onclick = function(event) {
+            const modal = document.getElementById('siteModal');
+            if (event.target === modal) {
+                closeSiteModal();
+            }
+        }
+    </script>
+
+    <!-- 案場詳細資料模態窗 -->
+    <div id="siteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle" class="modal-title">案場詳細資料</h2>
+                <button class="close" onclick="closeSiteModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- 詳細資料將在這裡動態載入 -->
+            </div>
+        </div>
+    </div>
+</body>
+</html>
