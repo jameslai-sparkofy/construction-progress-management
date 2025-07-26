@@ -3,6 +3,9 @@
  * 多租戶建築工程管理平台
  */
 
+// 導入統一欄位映射工具
+import { mapFieldsToD1, mapFieldsToCRM, mapFieldsFromCRM, validateMappedFields } from './unified-field-utils.js';
+
 // 主要路由處理函數
 export default {
   async fetch(request, env, ctx) {

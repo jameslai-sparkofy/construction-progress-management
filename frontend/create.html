@@ -488,6 +488,12 @@
             </h2>
 
             <div class="form-grid">
+                <div class="form-group" style="display: none;">
+                    <label class="form-label">URL 識別碼</label>
+                    <input type="text" class="form-input" id="projectSlug" readonly>
+                    <small style="color: #6b7280; margin-top: 0.25rem;">使用商機 ID 作為唯一識別碼</small>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label">專案顯示名稱 <span class="required">*</span></label>
                     <input type="text" class="form-input" id="projectName" value="興安西工程" placeholder="例如：興安西工程">
@@ -516,11 +522,34 @@
                     </div>
                     <small style="color: #6b7280; margin-top: 0.25rem;">根據案場資料自動計算</small>
                 </div>
+
+                <div class="form-group">
+                    <label class="form-label">建築配置</label>
+                    <div class="building-info" id="buildingInfo" style="padding: 1rem; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
+                        <div>正在載入案場資料...</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">案場統計</label>
+                    <div class="site-statistics" id="siteStatistics" style="padding: 1rem; background: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 8px;">
+                        <div>正在分析案場資料...</div>
+                    </div>
+                </div>
             </div>
 
             <div class="form-group" style="margin-top: 1.5rem;">
                 <label class="form-label">專案描述</label>
                 <textarea class="form-textarea" id="projectDescription" placeholder="輸入專案的詳細描述..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">專案網址預覽</label>
+                <div class="url-preview">
+                    <span id="urlPreview">progress.yes-ceramics.com/[選擇商機後自動生成]/</span>
+                    <button class="copy-btn" onclick="copyURL()">複製</button>
+                </div>
+                <small style="color: #6b7280; margin-top: 0.25rem;">將使用商機唯一ID作為網址識別碼</small>
             </div>
 
             <!-- 資料庫視圖 -->
@@ -990,8 +1019,15 @@
             const projectName = name.split('-')[1] || name;
             document.getElementById('projectName').value = projectName + '工程';
             
+            // 使用商機ID作為URL識別碼
+            document.getElementById('projectSlug').value = id;
+            updateURLPreview();
+            
             // 載入商機相關統計資料
             await loadOpportunityStats(id);
+            
+            // 查詢相關案場資料
+            await loadSitesForOpportunity(id);
         }
 
         // 載入商機相關統計資料
@@ -1203,6 +1239,174 @@
             if (!timestamp) return '-';
             const date = new Date(timestamp);
             return date.toLocaleDateString('zh-TW') + ' ' + date.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function updateURLPreview() {
+            const opportunityId = document.getElementById('projectSlug').value || 'project';
+            // 直接使用商機ID作為URL
+            document.getElementById('urlPreview').textContent = `progress.yes-ceramics.com/${opportunityId}/`;
+        }
+
+        // 查詢商機相關的案場資料
+        async function loadSitesForOpportunity(opportunityId) {
+            console.log('🏗️ 查詢商機相關案場:', opportunityId);
+            
+            try {
+                // 查詢案場資料
+                const response = await fetch(`/api/crm/sites?opportunityId=${opportunityId}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.message || '查詢案場失敗');
+                }
+                
+                const sites = result.data || [];
+                console.log(`✅ 找到 ${sites.length} 個相關案場`);
+                
+                // 分析案場資料
+                analyzeSiteData(sites);
+                
+                // 載入工班資料
+                await loadTeamsData(sites);
+                
+            } catch (error) {
+                console.error('❌ 查詢案場失敗:', error);
+                // 查詢失敗，顯示錯誤信息
+                document.getElementById('buildingInfo').innerHTML = '<div style="color: #dc2626;">無法載入案場資料</div>';
+                document.getElementById('siteStatistics').innerHTML = '<div style="color: #dc2626;">無法分析案場統計</div>';
+            }
+        }
+        
+        // 分析案場資料，顯示實際建築配置
+        function analyzeSiteData(sites) {
+            console.log('📊 分析案場資料:', sites.length, '筆');
+            
+            // 建築統計
+            const buildingStats = {};
+            const floorStats = {};
+            let totalUnits = 0;
+            
+            sites.forEach(site => {
+                const building = site.field_2t01i__c || site.building || '未知建築';
+                const floor = site.field_w001t__c || site.floor || '未知樓層';
+                
+                if (!buildingStats[building]) {
+                    buildingStats[building] = { units: 0, floors: new Set() };
+                }
+                buildingStats[building].units++;
+                buildingStats[building].floors.add(floor);
+                totalUnits++;
+                
+                if (!floorStats[floor]) {
+                    floorStats[floor] = 0;
+                }
+                floorStats[floor]++;
+            });
+            
+            // 顯示建築配置
+            let buildingInfoHTML = '';
+            let statisticsHTML = '';
+            
+            const buildingCount = Object.keys(buildingStats).length;
+            
+            if (buildingCount > 0) {
+                buildingInfoHTML = `
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: #1f2937;">建築配置：</strong>
+                    </div>
+                `;
+                
+                Object.entries(buildingStats).forEach(([building, stats]) => {
+                    const floorList = Array.from(stats.floors).sort().join(', ');
+                    buildingInfoHTML += `
+                        <div style="margin-bottom: 0.5rem; padding: 0.5rem; background: white; border-radius: 4px; border-left: 3px solid #059669;">
+                            <div style="font-weight: 600; color: #059669;">${building}</div>
+                            <div style="font-size: 0.875rem; color: #6b7280;">${stats.units} 戶，樓層：${floorList}</div>
+                        </div>
+                    `;
+                });
+                
+                statisticsHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
+                        <div>
+                            <div style="font-size: 1.5rem; font-weight: 600; color: #059669;">${buildingCount}</div>
+                            <div style="font-size: 0.875rem; color: #6b7280;">建築棟數</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 1.5rem; font-weight: 600; color: #0ea5e9;">${totalUnits}</div>
+                            <div style="font-size: 0.875rem; color: #6b7280;">總戶數</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 1.5rem; font-weight: 600; color: #7c2d12;">${Object.keys(floorStats).length}</div>
+                            <div style="font-size: 0.875rem; color: #6b7280;">樓層數</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                buildingInfoHTML = '<div style="color: #dc2626;">未找到案場資料或資料格式異常</div>';
+                statisticsHTML = '<div style="color: #dc2626;">無法分析建築統計</div>';
+            }
+            
+            document.getElementById('buildingInfo').innerHTML = buildingInfoHTML;
+            document.getElementById('siteStatistics').innerHTML = statisticsHTML;
+        }
+        
+        // 載入工班資料
+        async function loadTeamsData(sites) {
+            console.log('👷 載入工班資料');
+            
+            // 從案場資料中提取工班信息
+            const teams = new Set();
+            sites.forEach(site => {
+                if (site.field_contractor__c) {
+                    teams.add(site.field_contractor__c);
+                }
+            });
+            
+            if (teams.size > 0) {
+                console.log(`✅ 找到 ${teams.size} 個工班:`, Array.from(teams));
+                
+                // 自動填充工班選項
+                const teamSelect = document.getElementById('teamSelection');
+                if (teamSelect) {
+                    teamSelect.innerHTML = '<option value="">選擇工班...</option>' + 
+                        Array.from(teams).map(team => `<option value="${team}">${team}</option>`).join('');
+                }
+            } else {
+                console.log('⚠️ 未找到工班資料');
+            }
+        }
+
+        function copyURL(url) {
+            const urlToCopy = url || document.getElementById('urlPreview').textContent;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(urlToCopy).then(() => {
+                    alert('網址已複製到剪貼板');
+                }).catch(err => {
+                    console.error('複製失敗:', err);
+                    fallbackCopyText(urlToCopy);
+                });
+            } else {
+                fallbackCopyText(urlToCopy);
+            }
+        }
+
+        function fallbackCopyText(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                alert('網址已複製到剪貼板');
+            } catch (err) {
+                console.error('複製失敗:', err);
+                alert('複製失敗，請手動複製網址');
+            }
+            document.body.removeChild(textArea);
         }
 
 

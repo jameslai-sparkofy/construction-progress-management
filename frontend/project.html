@@ -375,6 +375,8 @@
             overflow-x: auto;
             overflow-y: visible;
             -webkit-overflow-scrolling: touch;
+            max-width: 100%;
+            position: relative;
         }
 
         /* 美化滾動條 */
@@ -443,7 +445,7 @@
         }
 
         .status-in-progress {
-            background: #FFF3E0 !important;
+            background: white !important;
             color: #E65100;
             font-weight: 600;
         }
@@ -451,6 +453,18 @@
         .status-pending {
             background: white;
             color: #999;
+        }
+        
+        /* 固定格子大小樣式 */
+        .progress-grid td:not(.floor-cell) {
+            width: 80px;
+            min-width: 80px;
+            max-width: 80px;
+            font-size: 0.85em;
+            padding: 8px 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .status-issue {
@@ -1170,6 +1184,56 @@
             border: 2px solid #ddd;
         }
 
+        /* 照片項目容器 */
+        .photo-item {
+            position: relative;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .photo-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            cursor: pointer;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            transition: all 0.3s ease;
+        }
+
+        .photo-item:hover img {
+            border-color: #1976D2;
+            transform: scale(1.05);
+        }
+
+        /* 刪除按鈕 */
+        .delete-photo-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            display: none;
+            z-index: 10;
+            transition: all 0.2s ease;
+            line-height: 1;
+        }
+
+        .delete-photo-btn:hover {
+            background: #ff0000;
+            transform: scale(1.1);
+        }
+
+        .photo-item:hover .delete-photo-btn {
+            display: block;
+        }
+
         /* 響應式調整 */
         @media (max-width: 600px) {
             .construction-modal-content {
@@ -1422,16 +1486,20 @@
                             <span>已完成</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-color" style="background: #FFF3E0;"></div>
-                            <span>施工中</span>
-                        </div>
-                        <div class="legend-item">
                             <div class="legend-color" style="background: white;"></div>
                             <span>待施工</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-color" style="background: #FFEBEE;"></div>
-                            <span>有問題</span>
+                            <span>需維修</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #e0e0e0;"></div>
+                            <span>無此戶別</span>
+                        </div>
+                        <div class="legend-item">
+                            <span style="color: #ff69b4; font-size: 1.2em;">📌</span>
+                            <span>有備註</span>
                         </div>
                     </div>
 
@@ -1655,7 +1723,6 @@
                     <div class="form-group">
                         <label for="constructionContractor">施工師父</label>
                         <input type="text" id="constructionContractor" placeholder="工班名|用戶名" disabled>
-                        <small style="color: #666;">對應欄位：field_u1wpv__c</small>
                     </div>
                 </div>
             </div>
@@ -1682,6 +1749,21 @@
     </div>
 
     <script>
+        // 🚨 緊急修復：確保基本功能正常運作
+        console.log('🚀 腳本開始載入...');
+        
+        // 立即初始化 PROJECT_DATA 以防後續函數失效
+        try {
+            window.PROJECT_DATA = {
+                id: 'xinganxi-abc123def456',
+                name: 'xinganxi',
+                token: 'abc123def456'
+            };
+            console.log('🎯 PROJECT_DATA 已緊急初始化:', window.PROJECT_DATA);
+        } catch (e) {
+            console.error('❌ PROJECT_DATA 初始化失敗:', e);
+        }
+        
         // 用戶數據 - 包含多層級結構
         const users = {
             // 管理層
@@ -1911,18 +1993,31 @@
         // 登入功能
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
+            console.log('🔐 登入表單提交');
+            
             const phone = document.getElementById('phone').value;
             const password = document.getElementById('password').value;
+            console.log('📱 手機號碼:', phone);
+            console.log('🔑 密碼:', password);
             
             const user = users[phone];
+            console.log('👤 找到用戶:', user);
+            
             if (user && user.password === password) {
+                console.log('✅ 登入驗證成功');
                 currentUser = { phone, ...user };
                 saveUserSession(currentUser);
+                console.log('💾 用戶會話已保存:', currentUser);
+                
                 document.getElementById('loginContainer').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
+                console.log('🎨 界面已切換到主頁面');
+                
                 updateUserInterface();
+                console.log('🔄 開始載入數據...');
                 loadData();
             } else {
+                console.log('❌ 登入驗證失敗');
                 document.getElementById('loginError').textContent = '手機號碼或密碼錯誤';
             }
         });
@@ -2175,29 +2270,57 @@
             // 生成表格內容
             const bodyRows = building.floors.map(floor => {
                 const units = building.units.map(unit => {
-                    const status = building.progress[floor] ? building.progress[floor][unit] || 'pending' : 'pending';
+                    // 檢查此戶別是否真正存在
+                    const unitExists = building.progress[floor] && building.progress[floor].hasOwnProperty(unit);
+                    
+                    if (!unitExists) {
+                        // 不存在的戶別顯示為灰色不可點擊
+                        return `<td class="status-nonexistent" style="cursor: not-allowed; background-color: #e0e0e0; color: #999;"></td>`;
+                    }
+                    
+                    const status = building.progress[floor][unit] || 'pending';
                     const key = `${currentBuilding}_${floor}_${unit}`;
                     const details = constructionDetails[key];
                     
                     let statusText = '';
                     let statusClass = '';
                     
+                    // 檢查是否有備註
+                    const hasNote = details && details.preConstructionNote && details.preConstructionNote.trim() !== '' && details.preConstructionNote !== '無';
+                    
                     // 檢查是否有施工記錄
-                    if (details && details.area) {
-                        // 有施工記錄
-                        const isOwnBuilding = !currentUser.buildings || currentUser.buildings.includes(currentBuilding + '棟');
-                        const canSeeDetails = currentUser.role === 'admin' || currentUser.role === 'owner' || isOwnBuilding;
+                    if (details && details.contractor) {
+                        // 有施工記錄，顯示簡稱和日期
+                        const contractorName = details.contractor || '';
+                        let shortName = '';
                         
-                        if (canSeeDetails) {
-                            // 可以看到詳細資訊：簡稱+坪數+打勾
-                            const contractorShortName = details.contractorShortName || details.contractor.slice(-1);
-                            statusText = `${contractorShortName}${details.area}✓`;
-                            statusClass = 'status-completed';
-                        } else {
-                            // 其他工班只能看到打勾
-                            statusText = '✓';
-                            statusClass = 'status-completed';
+                        // 根據已知工班獲取簡稱
+                        const knownContractors = {
+                            '王大誠': '誠',
+                            '築愛家有限公司': '築',
+                            '築愛家': '築',
+                            '塔塔家建材有限公司': '塔',
+                            '塔塔家': '塔'
+                        };
+                        
+                        // 優先使用已知簡稱，否則取最後一個字
+                        shortName = knownContractors[contractorName] || contractorName.slice(-1);
+                        
+                        // 格式化日期
+                        const dateStr = details.date ? new Date(details.date).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit' }).replace(/\//g, '/') : '';
+                        
+                        statusText = `${shortName}|${dateStr}`;
+                        if (hasNote) {
+                            statusText = `📌${statusText}`;
                         }
+                        statusClass = 'status-completed';
+                    } else if (status === 'completed' && constructionDetails[key]) {
+                        // 舊的完成狀態
+                        statusText = '✓';
+                        if (hasNote) {
+                            statusText = `📌${statusText}`;
+                        }
+                        statusClass = 'status-completed';
                     } else {
                         // 沒有施工記錄，根據狀態顯示
                         switch(status) {
@@ -2206,7 +2329,7 @@
                                 statusClass = 'status-completed';
                                 break;
                             case 'in-progress':
-                                statusText = '施工中';
+                                statusText = '';
                                 statusClass = 'status-in-progress';
                                 break;
                             case 'issue':
@@ -2214,8 +2337,13 @@
                                 statusClass = 'status-issue';
                                 break;
                             default:
-                                statusText = '—';
+                                statusText = '';
                                 statusClass = 'status-pending';
+                        }
+                        
+                        // 如果有備註，加上圖示
+                        if (hasNote) {
+                            statusText = `📌${statusText}`;
                         }
                     }
                     
@@ -2756,28 +2884,84 @@
                     if (areaEl) areaEl.value = '0.00';
                 });
 
-                // 清空其他欄位
-                if (currentUser.role === 'admin' || currentUser.role === 'owner') {
-                    const preNoteEl = document.getElementById('preConstructionNote');
-                    if (preNoteEl) preNoteEl.value = '';
-                } else {
-                    // 非管理員保持"無"
-                    const preNoteEl = document.getElementById('preConstructionNote');
-                    if (preNoteEl) preNoteEl.value = '無';
-                }
+                // 先清空所有欄位和照片預覽
+                const dateEl = document.getElementById('constructionDate');
+                const contractorEl = document.getElementById('constructionContractor');
+                if (dateEl) dateEl.value = '';
+                if (contractorEl) contractorEl.value = '';
+                
                 clearPhotoPreview('prePhotoPreview');
                 clearPhotoPreview('completionPhotoPreview');
                 
-                // 初始化施工完成狀態
+                // 從已載入的 progressData 中獲取數據
                 const key = `${building}_${floor}_${unit}`;
-                const isCompleted = constructionDetails[key] && constructionDetails[key].construction_completed;
+                let existingData = null;
                 
-                // 安全地設定單選按鈕狀態
-                const falseRadio = document.querySelector('input[name="constructionCompleted"][value="false"]');
-                const trueRadio = document.querySelector('input[name="constructionCompleted"][value="true"]');
+                // 首先檢查從 D1 載入的數據
+                if (progressData[building] && progressData[building][floor] && progressData[building][floor][unit]) {
+                    existingData = progressData[building][floor][unit];
+                    console.log('📋 從 D1 載入的數據:', existingData);
+                }
                 
-                if (falseRadio) falseRadio.checked = !isCompleted;
-                if (trueRadio) trueRadio.checked = isCompleted;
+                // 如果沒有從 D1 載入的數據，檢查本地 constructionDetails
+                if (!existingData && constructionDetails[key]) {
+                    existingData = constructionDetails[key];
+                    console.log('📋 從本地載入的數據:', existingData);
+                }
+                
+                // 填充表單數據
+                if (existingData) {
+                    // 填充施工前備註
+                    const preNoteEl = document.getElementById('preConstructionNote');
+                    if (preNoteEl && existingData.preConstructionNote) {
+                        preNoteEl.value = existingData.preConstructionNote;
+                    }
+                    
+                    // 填充施工日期
+                    const dateEl = document.getElementById('constructionDate');
+                    if (dateEl && existingData.date) {
+                        dateEl.value = existingData.date;
+                    }
+                    
+                    // 填充舖設坪數
+                    const areaEl = document.getElementById('constructionArea');
+                    if (areaEl && existingData.area) {
+                        areaEl.value = existingData.area;
+                    }
+                    
+                    // 填充施工師父
+                    const contractorEl = document.getElementById('constructionContractor');
+                    if (contractorEl && existingData.contractor) {
+                        contractorEl.value = existingData.contractor;
+                    }
+                    
+                    // 設置施工完成狀態
+                    const isCompleted = existingData.construction_completed === true;
+                    const falseRadio = document.querySelector('input[name="constructionCompleted"][value="false"]');
+                    const trueRadio = document.querySelector('input[name="constructionCompleted"][value="true"]');
+                    
+                    if (falseRadio) falseRadio.checked = !isCompleted;
+                    if (trueRadio) trueRadio.checked = isCompleted;
+                    
+                    // TODO: 載入已存在的照片預覽
+                    if (existingData.prePhotos && typeof existingData.prePhotos === 'number' && existingData.prePhotos > 0) {
+                        const prePhotoPreview = document.getElementById('prePhotoPreview');
+                        if (prePhotoPreview) {
+                            prePhotoPreview.innerHTML = `<div style="color: #666; font-size: 0.9em;">已上傳 ${existingData.prePhotos} 張照片</div>`;
+                        }
+                    }
+                    
+                    if (existingData.completionPhotos && typeof existingData.completionPhotos === 'number' && existingData.completionPhotos > 0) {
+                        const completionPhotoPreview = document.getElementById('completionPhotoPreview');
+                        if (completionPhotoPreview) {
+                            completionPhotoPreview.innerHTML = `<div style="color: #666; font-size: 0.9em;">已上傳 ${existingData.completionPhotos} 張照片</div>`;
+                        }
+                    }
+                } else {
+                    // 沒有現有數據，設置預設值
+                    const falseRadio = document.querySelector('input[name="constructionCompleted"][value="false"]');
+                    if (falseRadio) falseRadio.checked = true;
+                }
                 
                 // 根據狀態啟用/禁用欄位
                 toggleConstructionFields();
@@ -2920,6 +3104,9 @@ ${details.note ? `備註：${details.note}` : ''}
                 constructionData.area = parseFloat(area);
                 constructionData.date = date;
                 constructionData.contractor = contractor; // field_u1wpv__c
+                
+                // 從 contractor 中提取簡稱
+                const contractorShortName = contractor.split('|')[0];
                 constructionData.contractorShortName = currentUser.shortName || contractor.split('|')[1] || contractor.slice(-1);
                 constructionData.status = 'completed';
             }
@@ -3094,6 +3281,19 @@ ${details.note ? `備註：${details.note}` : ''}
             if (preview) {
                 preview.innerHTML = '';
             }
+            
+            // 同時清除對應的 input files
+            if (previewId === 'prePhotoPreview') {
+                const prePhotos = document.getElementById('prePhotos');
+                if (prePhotos) {
+                    prePhotos.value = '';
+                }
+            } else if (previewId === 'completionPhotoPreview') {
+                const completionPhotos = document.getElementById('completionPhotos');
+                if (completionPhotos) {
+                    completionPhotos.value = '';
+                }
+            }
         }
 
         // 處理照片上傳預覽
@@ -3101,21 +3301,99 @@ ${details.note ? `備註：${details.note}` : ''}
             const files = inputElement.files;
             const preview = document.getElementById(previewId);
             
+            // 為每個新上傳的照片建立預覽
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = function(e) {
+                        // 創建照片容器
+                        const photoContainer = document.createElement('div');
+                        photoContainer.className = 'photo-item';
+                        
+                        // 創建圖片元素
                         const img = document.createElement('img');
                         img.src = e.target.result;
-                        img.onclick = function() {
-                            window.open(e.target.result, '_blank');
+                        img.onclick = function(event) {
+                            if (!event.target.classList.contains('delete-photo-btn')) {
+                                window.open(e.target.result, '_blank');
+                            }
                         };
-                        preview.appendChild(img);
+                        
+                        // 創建刪除按鈕
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.innerHTML = '✕';
+                        deleteBtn.className = 'delete-photo-btn';
+                        deleteBtn.onclick = function(event) {
+                            event.stopPropagation();
+                            removePhoto(photoContainer, inputElement, file.name, previewId);
+                        };
+                        
+                        // 組裝容器
+                        photoContainer.appendChild(img);
+                        photoContainer.appendChild(deleteBtn);
+                        photoContainer.dataset.fileName = file.name;
+                        photoContainer.dataset.fileData = e.target.result;
+                        preview.appendChild(photoContainer);
                     };
                     reader.readAsDataURL(file);
                 }
             }
+        }
+
+        // 移除照片函數
+        function removePhoto(photoContainer, inputElement, fileName, previewId) {
+            // 移除預覽
+            photoContainer.remove();
+            
+            // 獲取當前所有照片容器
+            const preview = document.getElementById(previewId);
+            const remainingPhotos = preview.querySelectorAll('.photo-item');
+            
+            // 收集剩餘的照片數據
+            const remainingFiles = [];
+            remainingPhotos.forEach(photo => {
+                const fileData = photo.dataset.fileData;
+                const fileName = photo.dataset.fileName;
+                if (fileData && fileName) {
+                    // 將 base64 轉回 File 對象
+                    const file = base64ToFile(fileData, fileName);
+                    remainingFiles.push(file);
+                }
+            });
+            
+            // 更新 input 的 files
+            updateFileInput(inputElement, remainingFiles);
+        }
+        
+        // Base64 轉 File 對象
+        function base64ToFile(base64Data, fileName) {
+            // 移除 data:image/xxx;base64, 前綴
+            const arr = base64Data.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            
+            return new File([u8arr], fileName, { type: mime });
+        }
+        
+        // 更新 file input 的文件列表
+        function updateFileInput(inputElement, files) {
+            // 創建新的 DataTransfer 對象
+            const dataTransfer = new DataTransfer();
+            
+            // 添加文件到 DataTransfer
+            files.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+            
+            // 更新 input 的 files
+            inputElement.files = dataTransfer.files;
         }
 
         // 綁定照片上傳事件
@@ -3212,16 +3490,7 @@ ${details.note ? `備註：${details.note}` : ''}
                 
                 if (result.success) {
                     console.log('✅ 資料庫儲存成功:', result);
-                    
-                    // 如果需要，可以在這裡觸發CRM同步
-                    if (constructionData.construction_completed && result.shouldSync) {
-                        try {
-                            await syncToCRM(requestData);
-                        } catch (syncError) {
-                            console.warn('⚠️ CRM同步失敗（不影響本地儲存）:', syncError);
-                        }
-                    }
-                    
+                    // 後端已經自動同步到CRM，不需要前端再次呼叫
                     return result;
                 } else {
                     throw new Error(result.message || '儲存失敗');
@@ -3361,8 +3630,9 @@ ${details.note ? `備註：${details.note}` : ''}
                     newProgressData[building].progress[floorStr][unit] = 'pending';
                 });
                 
-                // 排序樓層和戶別
+                // 為每棟建築建立完整的樓層範圍，但戶別只顯示該棟實際存在的戶別
                 Object.keys(newProgressData).forEach(building => {
+                    // 排序現有的樓層和戶別
                     newProgressData[building].floors.sort((a, b) => {
                         const aNum = parseInt(a.replace('F', ''));
                         const bNum = parseInt(b.replace('F', ''));
@@ -3370,6 +3640,29 @@ ${details.note ? `備註：${details.note}` : ''}
                     });
                     
                     newProgressData[building].units.sort();
+                    
+                    // 建立完整的樓層範圍（從最小到最大樓層）
+                    const minFloor = Math.min(...newProgressData[building].floors.map(f => parseInt(f.replace('F', ''))));
+                    const maxFloor = Math.max(...newProgressData[building].floors.map(f => parseInt(f.replace('F', ''))));
+                    const completeFloors = [];
+                    for (let f = minFloor; f <= maxFloor; f++) {
+                        completeFloors.push(`${f}F`);
+                    }
+                    
+                    // 戶別只保留該棟實際存在的戶別，不做範圍推斷
+                    // 這樣A棟只會顯示A1-A4，B棟只會顯示B1-B7等實際存在的戶別
+                    const actualUnits = [...newProgressData[building].units].sort();
+                    
+                    // 更新建築資料
+                    newProgressData[building].floors = completeFloors;
+                    newProgressData[building].units = actualUnits;
+                    
+                    // 確保每個樓層都有progress對象（但只對實際存在的戶別有數據）
+                    completeFloors.forEach(floor => {
+                        if (!newProgressData[building].progress[floor]) {
+                            newProgressData[building].progress[floor] = {};
+                        }
+                    });
                 });
                 
                 // 安全地更新 progressData，避免遞迴問題
@@ -3509,12 +3802,20 @@ ${details.note ? `備註：${details.note}` : ''}
         // 初始化項目數據
         function initializeProjectData() {
             try {
+                console.log('🔍 開始初始化項目數據，當前 URL:', window.location.href);
+                console.log('🔍 URL pathname:', window.location.pathname);
+                
                 // 從 URL 路徑獲取項目 ID (格式: /{projectId}/)
                 const pathParts = window.location.pathname.split('/').filter(Boolean);
+                console.log('🔍 路徑分段:', pathParts);
+                
                 if (pathParts.length > 0) {
                     const projectSlug = pathParts[0];
+                    console.log('🔍 項目 slug:', projectSlug);
+                    
                     // 解析項目 slug (格式: projectName-token)
                     const [projectName, token] = projectSlug.split('-');
+                    console.log('🔍 解析結果 - 項目名稱:', projectName, '令牌:', token);
                     
                     if (projectName && token) {
                         // 設置全域項目數據
@@ -3529,15 +3830,17 @@ ${details.note ? `備註：${details.note}` : ''}
                     }
                 }
                 
-                console.error('❌ 無法從 URL 獲取項目 ID');
+                console.warn('⚠️ 無法從 URL 獲取有效的項目 ID，嘗試使用預設設置');
+                console.log('🔍 URL 格式應該是: https://domain.com/projectName-token/');
+                
                 // 設置預設項目數據用於測試
                 window.PROJECT_DATA = {
                     id: 'xinganxi-abc123def456',
                     name: 'xinganxi',
                     token: 'abc123def456'
                 };
-                console.log('⚠️ 使用預設項目數據:', window.PROJECT_DATA);
-                return false;
+                console.log('✅ 使用預設項目數據:', window.PROJECT_DATA);
+                return true; // 改為 true，讓系統繼續運行
                 
             } catch (error) {
                 console.error('❌ 初始化項目數據失敗:', error);
@@ -3547,7 +3850,8 @@ ${details.note ? `備註：${details.note}` : ''}
                     name: 'xinganxi', 
                     token: 'abc123def456'
                 };
-                return false;
+                console.log('✅ 錯誤恢復，使用預設項目數據:', window.PROJECT_DATA);
+                return true; // 改為 true，讓系統繼續運行
             }
         }
 
@@ -3623,14 +3927,21 @@ ${details.note ? `備註：${details.note}` : ''}
 
         // 初始化
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 DOM 已載入，開始初始化...');
+            
             // 從 URL 獲取項目 ID 並設置到全域變數
-            initializeProjectData();
+            const projectInitialized = initializeProjectData();
+            console.log('📋 項目初始化結果:', projectInitialized);
+            console.log('🎯 最終 PROJECT_DATA:', window.PROJECT_DATA);
             
             // 檢查是否有已儲存的登入狀態
             if (!checkStoredLogin()) {
                 // 如果沒有儲存的登入狀態，顯示登入頁面
+                console.log('👤 沒有儲存的登入狀態，顯示登入頁面');
                 document.getElementById('loginContainer').style.display = 'flex';
                 document.getElementById('mainContent').style.display = 'none';
+            } else {
+                console.log('✅ 找到儲存的登入狀態');
             }
             document.getElementById('userSwitcher').style.display = 'block';
             
